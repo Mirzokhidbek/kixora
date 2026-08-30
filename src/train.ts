@@ -29,8 +29,7 @@
               - Build: `npm run build`
               - Start: `npm run serve`
               - Variables: `VITE_API_URL` (Backend Railway domeni).
-      2. Cloud Resilience & Crash Prevention:
-         - `store.on("error")` orqali session store ulanish xatolari sababli jarayon to'xtab qolishining oldi olindi.
-         - `uncaughtException` va `unhandledRejection` tutuvchilari qo'yildi.
-         - Server `app.listen()` orqali zudlik bilan portni egallab, Railway Health Check tekshiruvlaridan muvaffaqiyatli o'tadi.
+      2. Production Static Assets & Health Check:
+         - `src/public` va `public` papkalari to'liq sinxronlashtirilib, Express orqali `/css/main.css`, `/js/main.js` va `/js/products.js` fayllarining 200 OK bilan yuklanishi ta'minlandi.
+         - Bosh sahifa `GET /` so'roviga API sog'lomligi (*Status: HEALTHY*) haqida JSON xabar beruvchi endpoint qo'shildi.
 */
