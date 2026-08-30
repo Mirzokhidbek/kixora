@@ -19,10 +19,11 @@ const store = new MongoDBStore({
 /** 1-ENTRANCE **/
 const app = express();
 app.use(express.static(path.join(__dirname, "public")));
+app.use(express.static(path.resolve("public")));
 app.use(express.static("public"));
-app.use("/uploads", express.static("./public/uploads"));
-app.use("/uploads", express.static("./uploads"));
-app.use("/public/uploads", express.static("./public/uploads"));
+app.use("/uploads", express.static(path.resolve("public/uploads")));
+app.use("/uploads", express.static(path.resolve("uploads")));
+app.use("/public/uploads", express.static(path.resolve("public/uploads")));
 
 app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
@@ -54,7 +55,7 @@ app.use((req, res, next) => {
 });
 
 /** 3-VIEWS **/
-app.set("views", path.join(__dirname, "views"));
+app.set("views", [path.resolve("src/views"), path.resolve("views"), path.join(__dirname, "views")]);
 app.set("view engine", "ejs");
 
 /** 4-ROUTERS **/
