@@ -26,7 +26,15 @@ const memberSchema = new Schema(
     memberPassword: {
       type: String,
       select: false,
-      required: true,
+      required: false,
+    },
+    googleId: {
+      type: String,
+      index: { unique: true, sparse: true },
+    },
+    memberEmail: {
+      type: String,
+      index: { unique: true, sparse: true },
     },
     memberAddress: {
       type: String,
@@ -39,7 +47,7 @@ const memberSchema = new Schema(
     },
     memberPoints: {
       type: Number,
-      default: 0,
+      default: 50,
     },
   },
   { timestamps: true }

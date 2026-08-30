@@ -69,6 +69,21 @@ class MemberService {
     }
   }
 
+  public async googleLogin(credential: string, userData?: any): Promise<Member> {
+    try {
+      const url = `${this.path}/member/google-login`;
+      const result = await axios.post(
+        url,
+        { credential, userData },
+        { withCredentials: true }
+      );
+      return result.data.member;
+    } catch (err) {
+      console.log("Error, googleLogin:", err);
+      throw err;
+    }
+  }
+
   public async signup(input: MemberInput): Promise<Member> {
     try {
       const url = `${this.path}/member/signup`;

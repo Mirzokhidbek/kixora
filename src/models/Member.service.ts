@@ -64,7 +64,7 @@ class MemberService {
 
     const isMatch = await bcrypt.compare(
       input.memberPassword,
-      member.memberPassword
+      member.memberPassword || ""
     );
     if (!isMatch) {
       throw new Errors(HTTPCode.UNAUTHORIZED, Message.WRONG_PASSWORD);
@@ -72,6 +72,58 @@ class MemberService {
 
     const result = await this.memberModel.findById(member._id).exec();
     return (result as any).toJSON() as Member;
+  }
+
+  /** SPA: GOOGLE OAUTH LOGIN / SIGNUP **/
+  public async googleLogin(googleData: {
+    googleId: string;
+    email: string;
+    name: string;
+    picture?: string;
+  }): Promise<Member> {
+    let member = await this.memberModel
+      .findOne({
+        $or: [
+          { googleId: googleData.googleId },
+          { memberEmail: googleData.email },
+        ],
+        memberStatus: { $ne: MemberStatus.DELETE },
+      })
+      .exec();
+
+    if (member) {
+      if (member.memberStatus === MemberStatus.BLOCK) {
+        throw new Errors(HTTPCode.FORBIDDEN, Message.BLOCKED_USER);
+      }
+      if (googleData.picture && !member.memberImage) {
+        member.memberImage = googleData.picture;
+        await member.save();
+      }
+      return member.toJSON() as unknown as Member;
+    }
+
+    // Generate unique nick
+    const cleanName = googleData.name ? googleData.name.replace(/[^a-zA-Z0-9_]/g, "_") : googleData.email.split("@")[0];
+    let uniqueNick = cleanName;
+    let counter = 1;
+    while (await this.memberModel.findOne({ memberNick: uniqueNick })) {
+      uniqueNick = `${cleanName}_${counter++}`;
+    }
+
+    const uniquePhone = `G_${googleData.googleId.slice(0, 10)}`;
+
+    const newMember = await this.memberModel.create({
+      memberType: MemberType.USER,
+      memberStatus: MemberStatus.ACTIVE,
+      memberNick: uniqueNick,
+      memberPhone: uniquePhone,
+      memberEmail: googleData.email,
+      googleId: googleData.googleId,
+      memberImage: googleData.picture || "",
+      memberPoints: 100, // 100 Welcome points
+    });
+
+    return newMember.toJSON() as unknown as Member;
   }
 
   /** SPA: Get Authenticated Member Detail **/
@@ -146,7 +198,7 @@ class MemberService {
 
     const isMatch = await bcrypt.compare(
       input.memberPassword,
-      member.memberPassword
+      member.memberPassword || ""
     );
     if (!isMatch) {
       throw new Errors(HTTPCode.UNAUTHORIZED, Message.WRONG_PASSWORD);

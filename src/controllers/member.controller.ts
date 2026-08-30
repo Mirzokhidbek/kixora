@@ -5,7 +5,9 @@ import MemberService from "../models/Member.service";
 import AuthService from "../models/Auth.service";
 import { LoginInput, MemberInput, MemberUpdateInput } from "../libs/types/member";
 import { AUTH_TIMER } from "../libs/config";
+import { OAuth2Client } from "google-auth-library";
 
+const googleClient = new OAuth2Client();
 const memberService = new MemberService();
 const authService = new AuthService();
 const memberController: T = {};
@@ -81,6 +83,61 @@ memberController.login = async (req: Request, res: Response) => {
     res.status(HTTPCode.OK).json({ member: result, accessToken: token });
   } catch (err) {
     console.log("Error, login:", err);
+    if (err instanceof Errors) res.status(err.code).json(err);
+    else res.status(Errors.standard.code).json(Errors.standard);
+  }
+};
+
+/** SPA: Google OAuth 1-Click Login **/
+memberController.googleLogin = async (req: Request, res: Response) => {
+  try {
+    console.log("googleLogin");
+    const { credential, userData } = req.body;
+
+    let googleData = userData;
+
+    if (credential) {
+      try {
+        const ticket = await googleClient.verifyIdToken({ idToken: credential });
+        const payload = ticket.getPayload();
+        if (payload) {
+          googleData = {
+            googleId: payload.sub,
+            email: payload.email,
+            name: payload.name || payload.given_name || "Google User",
+            picture: payload.picture,
+          };
+        }
+      } catch {
+        const decoded = JSON.parse(
+          Buffer.from(credential.split(".")[1], "base64").toString()
+        );
+        googleData = {
+          googleId: decoded.sub,
+          email: decoded.email,
+          name: decoded.name || "Google User",
+          picture: decoded.picture,
+        };
+      }
+    }
+
+    if (!googleData || !googleData.email) {
+      throw new Errors(HTTPCode.BAD_REQUEST, Message.NO_DATA_FOUND);
+    }
+
+    const result = await memberService.googleLogin(googleData);
+    const token = await authService.createToken(result);
+
+    res.cookie("accessToken", token, {
+      maxAge: AUTH_TIMER * 3600 * 1000,
+      httpOnly: false,
+      sameSite: isProduction ? "none" : "lax",
+      secure: isProduction,
+    });
+
+    res.status(HTTPCode.OK).json({ member: result, accessToken: token });
+  } catch (err) {
+    console.log("Error, googleLogin:", err);
     if (err instanceof Errors) res.status(err.code).json(err);
     else res.status(Errors.standard.code).json(Errors.standard);
   }

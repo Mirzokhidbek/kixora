@@ -11,6 +11,7 @@ import {
   IconButton,
   InputAdornment,
   Alert,
+  Divider,
 } from "@mui/material";
 import CloseIcon from "@mui/icons-material/Close";
 import Visibility from "@mui/icons-material/Visibility";
@@ -18,6 +19,7 @@ import VisibilityOff from "@mui/icons-material/VisibilityOff";
 import LockIcon from "@mui/icons-material/Lock";
 import PersonIcon from "@mui/icons-material/Person";
 import PhoneIcon from "@mui/icons-material/Phone";
+import { GoogleLogin } from "@react-oauth/google";
 
 import MemberService from "../../services/MemberService";
 import type { Member, LoginInput, MemberInput } from "../../../lib/types/member";
@@ -42,6 +44,24 @@ export function AuthModal({ open, onClose, onSuccess }: AuthModalProps) {
   const [signupPhone, setSignupPhone] = useState<string>("");
   const [signupPassword, setSignupPassword] = useState<string>("");
   const [signupConfirm, setSignupConfirm] = useState<string>("");
+
+  const handleGoogleSuccess = async (credentialResponse: any) => {
+    setErrorMsg("");
+    try {
+      if (!credentialResponse.credential) {
+        throw new Error("No Google credential returned");
+      }
+      const memberService = new MemberService();
+      const member = await memberService.googleLogin(credentialResponse.credential);
+      onSuccess(member);
+      onClose();
+    } catch (err: any) {
+      console.error("Google Auth error:", err);
+      setErrorMsg(
+        err.response?.data?.message || "Google Authentication failed. Please try standard sign in."
+      );
+    }
+  };
 
   const handleLogin = async () => {
     setErrorMsg("");
@@ -89,7 +109,7 @@ export function AuthModal({ open, onClose, onSuccess }: AuthModalProps) {
       onClose();
     } catch (err: any) {
       setErrorMsg(
-        err.response?.data?.message || "Registration failed. Try another nickname/phone."
+        err.response?.data?.message || "This nickname or phone is already registered. Try another or Sign In."
       );
     }
   };
@@ -104,20 +124,21 @@ export function AuthModal({ open, onClose, onSuccess }: AuthModalProps) {
         paper: {
           sx: {
             borderRadius: 4,
-            bgcolor: "#0f172a",
-            color: "#fff",
-            border: "1px solid rgba(245, 158, 11, 0.3)",
-            boxShadow: "0 25px 60px rgba(0,0,0,0.6)",
+            bgcolor: "#ffffff",
+            color: "#0f172a",
+            border: "1px solid #f1f5f9",
+            boxShadow: "0 25px 60px rgba(0,0,0,0.15)",
             p: 1,
           },
         },
       }}
     >
+      {/* Modal Header */}
       <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "center", px: 2, pt: 1 }}>
         <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
           <Box sx={{ width: 8, height: 8, borderRadius: "50%", bgcolor: "#f59e0b" }} />
-          <Typography variant="overline" sx={{ color: "#f59e0b", fontWeight: 800, letterSpacing: 1.5 }}>
-            BURAK RESTAURANT VIP
+          <Typography variant="overline" sx={{ color: "#f59e0b", fontWeight: 900, letterSpacing: 1.5 }}>
+            BURAKFOOD AUTHENTICATION
           </Typography>
         </Box>
         <IconButton onClick={onClose} sx={{ color: "#94a3b8" }}>
@@ -126,6 +147,23 @@ export function AuthModal({ open, onClose, onSuccess }: AuthModalProps) {
       </Box>
 
       <DialogContent sx={{ px: 3, pt: 1, pb: 3 }}>
+        {/* 1-Click Google Login Button */}
+        <Box sx={{ my: 2, display: "flex", flexDirection: "column", alignItems: "center", gap: 1 }}>
+          <GoogleLogin
+            onSuccess={handleGoogleSuccess}
+            onError={() => setErrorMsg("Google Sign-In failed or was closed.")}
+            theme="outline"
+            size="large"
+            shape="pill"
+            text="continue_with"
+            width="320"
+          />
+        </Box>
+
+        <Divider sx={{ my: 2.5, color: "#94a3b8", fontSize: "0.8rem", fontWeight: 700 }}>
+          OR WITH PASSWORD
+        </Divider>
+
         <Tabs
           value={tabIndex}
           onChange={(_, val) => {
@@ -135,11 +173,12 @@ export function AuthModal({ open, onClose, onSuccess }: AuthModalProps) {
           variant="fullWidth"
           sx={{
             mb: 3,
-            borderBottom: "1px solid rgba(255,255,255,0.1)",
-            "& .MuiTabs-indicator": { backgroundColor: "#f59e0b", height: 3 },
+            borderBottom: "1px solid #f1f5f9",
+            "& .MuiTabs-indicator": { backgroundColor: "#f59e0b", height: 3, borderRadius: 2 },
             "& .MuiTab-root": {
-              color: "#94a3b8",
-              fontWeight: 700,
+              color: "#64748b",
+              fontWeight: 800,
+              fontSize: "0.9rem",
               "&.Mui-selected": { color: "#f59e0b" },
             },
           }}
@@ -149,20 +188,21 @@ export function AuthModal({ open, onClose, onSuccess }: AuthModalProps) {
         </Tabs>
 
         {errorMsg && (
-          <Alert severity="error" sx={{ mb: 2.5, borderRadius: 2, fontSize: "0.82rem" }}>
+          <Alert severity="error" sx={{ mb: 2.5, borderRadius: 2.5, fontSize: "0.82rem", fontWeight: 600 }}>
             {errorMsg}
           </Alert>
         )}
 
         {/* Tab 0: Sign In */}
         {tabIndex === 0 && (
-          <Box sx={{ display: "flex", flexDirection: "column", gap: 2.5 }}>
+          <Box sx={{ display: "flex", flexDirection: "column", gap: 2.2 }}>
             <TextField
               fullWidth
               size="small"
               label="Nickname"
               value={loginNick}
               onChange={(e) => setLoginNick(e.target.value)}
+              sx={{ "& .MuiOutlinedInput-root": { borderRadius: 3 } }}
               slotProps={{
                 input: {
                   startAdornment: (
@@ -171,12 +211,6 @@ export function AuthModal({ open, onClose, onSuccess }: AuthModalProps) {
                     </InputAdornment>
                   ),
                 },
-              }}
-              sx={{
-                bgcolor: "rgba(255,255,255,0.05)",
-                borderRadius: 2,
-                "& .MuiInputBase-input": { color: "#fff" },
-                "& .MuiInputLabel-root": { color: "#94a3b8" },
               }}
             />
 
@@ -187,6 +221,7 @@ export function AuthModal({ open, onClose, onSuccess }: AuthModalProps) {
               label="Password"
               value={loginPassword}
               onChange={(e) => setLoginPassword(e.target.value)}
+              sx={{ "& .MuiOutlinedInput-root": { borderRadius: 3 } }}
               slotProps={{
                 input: {
                   startAdornment: (
@@ -203,25 +238,21 @@ export function AuthModal({ open, onClose, onSuccess }: AuthModalProps) {
                   ),
                 },
               }}
-              sx={{
-                bgcolor: "rgba(255,255,255,0.05)",
-                borderRadius: 2,
-                "& .MuiInputBase-input": { color: "#fff" },
-                "& .MuiInputLabel-root": { color: "#94a3b8" },
-              }}
             />
 
             <Button
               variant="contained"
-              color="primary"
               size="large"
               onClick={handleLogin}
               sx={{
                 py: 1.3,
-                borderRadius: 2.5,
+                borderRadius: 3,
                 fontWeight: 800,
                 fontSize: "0.95rem",
-                boxShadow: "0 8px 20px rgba(245, 158, 11, 0.3)",
+                bgcolor: "#eab308",
+                color: "#fff",
+                boxShadow: "0 8px 20px rgba(234, 179, 8, 0.35)",
+                "&:hover": { bgcolor: "#ca8a04" },
                 mt: 1,
               }}
             >
@@ -239,6 +270,7 @@ export function AuthModal({ open, onClose, onSuccess }: AuthModalProps) {
               label="Nickname"
               value={signupNick}
               onChange={(e) => setSignupNick(e.target.value)}
+              sx={{ "& .MuiOutlinedInput-root": { borderRadius: 3 } }}
               slotProps={{
                 input: {
                   startAdornment: (
@@ -247,12 +279,6 @@ export function AuthModal({ open, onClose, onSuccess }: AuthModalProps) {
                     </InputAdornment>
                   ),
                 },
-              }}
-              sx={{
-                bgcolor: "rgba(255,255,255,0.05)",
-                borderRadius: 2,
-                "& .MuiInputBase-input": { color: "#fff" },
-                "& .MuiInputLabel-root": { color: "#94a3b8" },
               }}
             />
 
@@ -263,6 +289,7 @@ export function AuthModal({ open, onClose, onSuccess }: AuthModalProps) {
               placeholder="+998901234567"
               value={signupPhone}
               onChange={(e) => setSignupPhone(e.target.value)}
+              sx={{ "& .MuiOutlinedInput-root": { borderRadius: 3 } }}
               slotProps={{
                 input: {
                   startAdornment: (
@@ -271,12 +298,6 @@ export function AuthModal({ open, onClose, onSuccess }: AuthModalProps) {
                     </InputAdornment>
                   ),
                 },
-              }}
-              sx={{
-                bgcolor: "rgba(255,255,255,0.05)",
-                borderRadius: 2,
-                "& .MuiInputBase-input": { color: "#fff" },
-                "& .MuiInputLabel-root": { color: "#94a3b8" },
               }}
             />
 
@@ -287,6 +308,7 @@ export function AuthModal({ open, onClose, onSuccess }: AuthModalProps) {
               label="Password"
               value={signupPassword}
               onChange={(e) => setSignupPassword(e.target.value)}
+              sx={{ "& .MuiOutlinedInput-root": { borderRadius: 3 } }}
               slotProps={{
                 input: {
                   startAdornment: (
@@ -295,12 +317,6 @@ export function AuthModal({ open, onClose, onSuccess }: AuthModalProps) {
                     </InputAdornment>
                   ),
                 },
-              }}
-              sx={{
-                bgcolor: "rgba(255,255,255,0.05)",
-                borderRadius: 2,
-                "& .MuiInputBase-input": { color: "#fff" },
-                "& .MuiInputLabel-root": { color: "#94a3b8" },
               }}
             />
 
@@ -311,6 +327,7 @@ export function AuthModal({ open, onClose, onSuccess }: AuthModalProps) {
               label="Confirm Password"
               value={signupConfirm}
               onChange={(e) => setSignupConfirm(e.target.value)}
+              sx={{ "& .MuiOutlinedInput-root": { borderRadius: 3 } }}
               slotProps={{
                 input: {
                   startAdornment: (
@@ -320,25 +337,21 @@ export function AuthModal({ open, onClose, onSuccess }: AuthModalProps) {
                   ),
                 },
               }}
-              sx={{
-                bgcolor: "rgba(255,255,255,0.05)",
-                borderRadius: 2,
-                "& .MuiInputBase-input": { color: "#fff" },
-                "& .MuiInputLabel-root": { color: "#94a3b8" },
-              }}
             />
 
             <Button
               variant="contained"
-              color="primary"
               size="large"
               onClick={handleSignup}
               sx={{
                 py: 1.3,
-                borderRadius: 2.5,
+                borderRadius: 3,
                 fontWeight: 800,
                 fontSize: "0.95rem",
-                boxShadow: "0 8px 20px rgba(245, 158, 11, 0.3)",
+                bgcolor: "#eab308",
+                color: "#fff",
+                boxShadow: "0 8px 20px rgba(234, 179, 8, 0.35)",
+                "&:hover": { bgcolor: "#ca8a04" },
                 mt: 1,
               }}
             >

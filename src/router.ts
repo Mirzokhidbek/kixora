@@ -15,6 +15,9 @@ router.post("/signup", memberController.signup);
 router.post("/member/login", memberController.login);
 router.post("/login", memberController.login);
 
+router.post("/member/google-login", memberController.googleLogin);
+router.post("/google-login", memberController.googleLogin);
+
 router.post(
   "/member/logout",
   memberController.verifyAuth,
