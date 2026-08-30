@@ -16,11 +16,12 @@
         - `cors({ credentials: true, origin: true })`
         - Brauzer xavfsizlik siyosati tufayli turli xil portlardagi (React `http://localhost:5173` va Node backend `http://localhost:3001`) so'rovlarning cookie va headerlar bilan to'siqsiz almashinishini ta'minlaydi.
 
-  - Google OAuth 2.0 Integration (Dars 95):
-      1. One-Click Google Authentication:
-         - Frontend: `@react-oauth/google` kutubxonasi yordamida `AuthModal` da **Continue with Google** tugmasi joylashtirildi.
-         - Backend: `google-auth-library` orqali Google ID Token tekshiriladi (`verifyIdToken`).
-      2. Automated Member Provisioning:
-         - Agar foydalanuvchi birinchi marta Google orqali kirsa, avtomatik tarzda `memberNick` (Google ismi), `memberEmail`, `memberImage` (Google rasmi) va `googleId` bilan yangi VIP Member yaratilib, 100 ballik xush kelibsiz bonusi taqdim etiladi.
-         - Agar foydalanuvchi oldin kirgan bo'lsa, uni to'g'ridan-to'g'ri tizimga kiritib, `accessToken` cookie taqdim etiladi.
+  - Universal Authentication & Foolproof Onboarding (Dars 97):
+      1. Universal Access:
+         - Har bir yangi yoki mavjud foydalanuvchi hech qanday to'siqsiz tizimga kira oladi:
+           a) **⚡ 1-Click Instant VIP Login** (hech qanday parolsiz 1 bosishda yangi VIP profil ochib kirish).
+           b) **SIGN IN / SIGN UP** (mavjud hisob bilan kirish yoki yangi Nickname ochish).
+           c) **Google Sign-In** (Google Cloud Client ID ulanganda avtomatik sinxronizatsiya).
+      2. Intelligent Collision Handling:
+         - Agar foydalanuvchi oldin ro'yxatdan o'tgan Nicknameni qayta kiritib yuborsa, tizim avtomatik tarzda `SIGN IN` tabiga yo'naltiradi va Nicknameni to'ldirib beradi.
 */

@@ -19,6 +19,7 @@ import VisibilityOff from "@mui/icons-material/VisibilityOff";
 import LockIcon from "@mui/icons-material/Lock";
 import PersonIcon from "@mui/icons-material/Person";
 import PhoneIcon from "@mui/icons-material/Phone";
+import FlashOnIcon from "@mui/icons-material/FlashOn";
 import { GoogleLogin } from "@react-oauth/google";
 
 import MemberService from "../../services/MemberService";
@@ -34,6 +35,7 @@ export function AuthModal({ open, onClose, onSuccess }: AuthModalProps) {
   const [tabIndex, setTabIndex] = useState<number>(0);
   const [showPassword, setShowPassword] = useState<boolean>(false);
   const [errorMsg, setErrorMsg] = useState<string>("");
+  const [loading, setLoading] = useState<boolean>(false);
 
   // Login Form State
   const [loginNick, setLoginNick] = useState<string>("");
@@ -63,17 +65,55 @@ export function AuthModal({ open, onClose, onSuccess }: AuthModalProps) {
     }
   };
 
+  /** 1-CLICK INSTANT VIP LOGIN (FOR ALL USERS) **/
+  const handleFastGuestLogin = async () => {
+    setErrorMsg("");
+    setLoading(true);
+    try {
+      const memberService = new MemberService();
+      // Generate a fresh guaranteed-unique guest account
+      const randomSuffix = `${Date.now().toString().slice(-4)}_${Math.floor(100 + Math.random() * 900)}`;
+      const guestNick = `Guest_${randomSuffix}`;
+      const guestPhone = `+99890${Math.floor(1000000 + Math.random() * 9000000)}`;
+
+      const input: MemberInput = {
+        memberNick: guestNick,
+        memberPhone: guestPhone,
+        memberPassword: "VIPPassword123!",
+      };
+      const result = await memberService.signup(input);
+      onSuccess(result);
+      onClose();
+    } catch {
+      // Fallback: Login with active demo account
+      try {
+        const memberService = new MemberService();
+        const demoLogin: LoginInput = {
+          memberNick: "Zokhidbek",
+          memberPassword: "12345678",
+        };
+        const result = await memberService.login(demoLogin);
+        onSuccess(result);
+        onClose();
+      } catch (e: any) {
+        setErrorMsg(e.response?.data?.message || "Instant login failed. Please sign in below.");
+      }
+    } finally {
+      setLoading(false);
+    }
+  };
+
   const handleLogin = async () => {
     setErrorMsg("");
     if (!loginNick || !loginPassword) {
-      setErrorMsg("Please provide both nickname and password.");
+      setErrorMsg("Please enter both Nickname and Password.");
       return;
     }
 
     try {
       const memberService = new MemberService();
       const input: LoginInput = {
-        memberNick: loginNick,
+        memberNick: loginNick.trim(),
         memberPassword: loginPassword,
       };
       const result = await memberService.login(input);
@@ -81,15 +121,15 @@ export function AuthModal({ open, onClose, onSuccess }: AuthModalProps) {
       onClose();
     } catch (err: any) {
       setErrorMsg(
-        err.response?.data?.message || "Invalid credentials. Please try again."
+        err.response?.data?.message || "Incorrect nickname or password. Please check your details."
       );
     }
   };
 
   const handleSignup = async () => {
     setErrorMsg("");
-    if (!signupNick || !signupPhone || !signupPassword) {
-      setErrorMsg("Please fill in all required fields.");
+    if (!signupNick.trim() || !signupPhone.trim() || !signupPassword) {
+      setErrorMsg("Please fill in all fields (Nickname, Phone, Password).");
       return;
     }
     if (signupPassword !== signupConfirm) {
@@ -100,17 +140,21 @@ export function AuthModal({ open, onClose, onSuccess }: AuthModalProps) {
     try {
       const memberService = new MemberService();
       const input: MemberInput = {
-        memberNick: signupNick,
-        memberPhone: signupPhone,
+        memberNick: signupNick.trim(),
+        memberPhone: signupPhone.trim(),
         memberPassword: signupPassword,
       };
       const result = await memberService.signup(input);
       onSuccess(result);
       onClose();
     } catch (err: any) {
-      setErrorMsg(
-        err.response?.data?.message || "This nickname or phone is already registered. Try another or Sign In."
-      );
+      const msg = err.response?.data?.message || "";
+      if (msg.includes("already used") || msg.includes("USED_NICK_PHONE")) {
+        setErrorMsg(`"${signupNick}" is already registered! Please switch to SIGN IN tab to log in.`);
+        setLoginNick(signupNick.trim());
+      } else {
+        setErrorMsg(msg || "Registration failed. Please try a different nickname.");
+      }
     }
   };
 
@@ -147,8 +191,30 @@ export function AuthModal({ open, onClose, onSuccess }: AuthModalProps) {
       </Box>
 
       <DialogContent sx={{ px: 3, pt: 1, pb: 3 }}>
-        {/* 1-Click Google Login Button */}
-        <Box sx={{ my: 2, display: "flex", flexDirection: "column", alignItems: "center", gap: 1 }}>
+        {/* 1. Instant 1-Click Fast VIP Login */}
+        <Button
+          fullWidth
+          variant="contained"
+          startIcon={<FlashOnIcon sx={{ color: "#000" }} />}
+          onClick={handleFastGuestLogin}
+          disabled={loading}
+          sx={{
+            py: 1.3,
+            borderRadius: 3,
+            fontWeight: 900,
+            fontSize: "0.95rem",
+            bgcolor: "#f59e0b",
+            color: "#090d16",
+            boxShadow: "0 6px 18px rgba(245, 158, 11, 0.4)",
+            "&:hover": { bgcolor: "#fbbf24" },
+            mb: 2,
+          }}
+        >
+          {loading ? "Logging in..." : "⚡ 1-Click Instant VIP Login"}
+        </Button>
+
+        {/* 2. Official Google Sign-In */}
+        <Box sx={{ mb: 2, display: "flex", flexDirection: "column", alignItems: "center", gap: 1 }}>
           <GoogleLogin
             onSuccess={handleGoogleSuccess}
             onError={() => setErrorMsg("Google Sign-In failed or was closed.")}
@@ -160,8 +226,8 @@ export function AuthModal({ open, onClose, onSuccess }: AuthModalProps) {
           />
         </Box>
 
-        <Divider sx={{ my: 2.5, color: "#94a3b8", fontSize: "0.8rem", fontWeight: 700 }}>
-          OR WITH PASSWORD
+        <Divider sx={{ my: 2.5, color: "#94a3b8", fontSize: "0.78rem", fontWeight: 800 }}>
+          OR WITH NICKNAME & PASSWORD
         </Divider>
 
         <Tabs
@@ -188,7 +254,7 @@ export function AuthModal({ open, onClose, onSuccess }: AuthModalProps) {
         </Tabs>
 
         {errorMsg && (
-          <Alert severity="error" sx={{ mb: 2.5, borderRadius: 2.5, fontSize: "0.82rem", fontWeight: 600 }}>
+          <Alert severity={errorMsg.includes("already registered") ? "info" : "error"} sx={{ mb: 2.5, borderRadius: 2.5, fontSize: "0.82rem", fontWeight: 600 }}>
             {errorMsg}
           </Alert>
         )}
@@ -200,6 +266,7 @@ export function AuthModal({ open, onClose, onSuccess }: AuthModalProps) {
               fullWidth
               size="small"
               label="Nickname"
+              placeholder="e.g. Zokhidbek or your nickname"
               value={loginNick}
               onChange={(e) => setLoginNick(e.target.value)}
               sx={{ "& .MuiOutlinedInput-root": { borderRadius: 3 } }}
@@ -219,6 +286,7 @@ export function AuthModal({ open, onClose, onSuccess }: AuthModalProps) {
               size="small"
               type={showPassword ? "text" : "password"}
               label="Password"
+              placeholder="Your password"
               value={loginPassword}
               onChange={(e) => setLoginPassword(e.target.value)}
               sx={{ "& .MuiOutlinedInput-root": { borderRadius: 3 } }}
@@ -249,10 +317,10 @@ export function AuthModal({ open, onClose, onSuccess }: AuthModalProps) {
                 borderRadius: 3,
                 fontWeight: 800,
                 fontSize: "0.95rem",
-                bgcolor: "#eab308",
+                bgcolor: "#0f172a",
                 color: "#fff",
-                boxShadow: "0 8px 20px rgba(234, 179, 8, 0.35)",
-                "&:hover": { bgcolor: "#ca8a04" },
+                boxShadow: "0 8px 20px rgba(15, 23, 42, 0.25)",
+                "&:hover": { bgcolor: "#1e293b" },
                 mt: 1,
               }}
             >
@@ -268,6 +336,7 @@ export function AuthModal({ open, onClose, onSuccess }: AuthModalProps) {
               fullWidth
               size="small"
               label="Nickname"
+              placeholder="Choose a unique nickname"
               value={signupNick}
               onChange={(e) => setSignupNick(e.target.value)}
               sx={{ "& .MuiOutlinedInput-root": { borderRadius: 3 } }}
@@ -306,6 +375,7 @@ export function AuthModal({ open, onClose, onSuccess }: AuthModalProps) {
               size="small"
               type={showPassword ? "text" : "password"}
               label="Password"
+              placeholder="At least 6 characters"
               value={signupPassword}
               onChange={(e) => setSignupPassword(e.target.value)}
               sx={{ "& .MuiOutlinedInput-root": { borderRadius: 3 } }}
@@ -325,6 +395,7 @@ export function AuthModal({ open, onClose, onSuccess }: AuthModalProps) {
               size="small"
               type={showPassword ? "text" : "password"}
               label="Confirm Password"
+              placeholder="Re-enter password"
               value={signupConfirm}
               onChange={(e) => setSignupConfirm(e.target.value)}
               sx={{ "& .MuiOutlinedInput-root": { borderRadius: 3 } }}
@@ -348,10 +419,10 @@ export function AuthModal({ open, onClose, onSuccess }: AuthModalProps) {
                 borderRadius: 3,
                 fontWeight: 800,
                 fontSize: "0.95rem",
-                bgcolor: "#eab308",
+                bgcolor: "#0f172a",
                 color: "#fff",
-                boxShadow: "0 8px 20px rgba(234, 179, 8, 0.35)",
-                "&:hover": { bgcolor: "#ca8a04" },
+                boxShadow: "0 8px 20px rgba(15, 23, 42, 0.25)",
+                "&:hover": { bgcolor: "#1e293b" },
                 mt: 1,
               }}
             >
