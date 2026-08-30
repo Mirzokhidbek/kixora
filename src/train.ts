@@ -16,12 +16,9 @@
         - `cors({ credentials: true, origin: true })`
         - Brauzer xavfsizlik siyosati tufayli turli xil portlardagi (React `http://localhost:5173` va Node backend `http://localhost:3001`) so'rovlarning cookie va headerlar bilan to'siqsiz almashinishini ta'minlaydi.
 
-  - Universal Authentication & Foolproof Onboarding (Dars 97):
-      1. Universal Access:
-         - Har bir yangi yoki mavjud foydalanuvchi hech qanday to'siqsiz tizimga kira oladi:
-           a) **⚡ 1-Click Instant VIP Login** (hech qanday parolsiz 1 bosishda yangi VIP profil ochib kirish).
-           b) **SIGN IN / SIGN UP** (mavjud hisob bilan kirish yoki yangi Nickname ochish).
-           c) **Google Sign-In** (Google Cloud Client ID ulanganda avtomatik sinxronizatsiya).
-      2. Intelligent Collision Handling:
-         - Agar foydalanuvchi oldin ro'yxatdan o'tgan Nicknameni qayta kiritib yuborsa, tizim avtomatik tarzda `SIGN IN` tabiga yo'naltiradi va Nicknameni to'ldirib beradi.
+  - Cross-Device Authentication & Bearer Header Token Persistence (Dars 98):
+      1. Nega boshqa qurilmalarda avval login qilinishi kerak?
+         - Har bir yangi telefon yoki kompyuter o'zining mustaqil brauzer xotirasiga (`LocalStorage` va `Cookie`) ega. Shuning uchun yangi qurilmadan ilk bor kirilganda `Guest` bo'ladi, 1 marta kirgach (yoki `⚡ 1-Click Instant VIP Login` ni bosgach) doimiy saqlanib qoladi.
+      2. Dual Token Auth (Cookie + Authorization Bearer Header):
+         - iOS Safari va Android brauzerlarida uchinchi tomon cookie-fayllari cheklangan holatda ham login holati uzilib qolmasligi uchun `access_token` `LocalStorage` da saqlanib, Axios Interceptor orqali har bir so'rovga `Authorization: Bearer <token>` sifatida biriktirildi.
 */

@@ -14,6 +14,18 @@ const memberController: T = {};
 
 const isProduction = process.env.NODE_ENV === "production";
 
+/** Helper: Extract JWT Token from Cookie or Bearer Header **/
+const extractToken = (req: Request): string | undefined => {
+  if (req.cookies && req.cookies["accessToken"]) {
+    return req.cookies["accessToken"];
+  }
+  const authHeader = req.headers["authorization"];
+  if (authHeader && authHeader.startsWith("Bearer ")) {
+    return authHeader.slice(7).trim();
+  }
+  return undefined;
+};
+
 /** SPA: Get Restaurant Details **/
 memberController.getRestaurant = async (req: Request, res: Response) => {
   try {
@@ -200,7 +212,7 @@ memberController.verifyAuth = async (
   next: NextFunction
 ) => {
   try {
-    const token = req.cookies["accessToken"];
+    const token = extractToken(req);
     if (token) req.member = await authService.checkAuth(token);
 
     if (!req.member) {
@@ -221,7 +233,7 @@ memberController.retrieveAuth = async (
   next: NextFunction
 ) => {
   try {
-    const token = req.cookies["accessToken"];
+    const token = extractToken(req);
     if (token) req.member = await authService.checkAuth(token);
     next();
   } catch (err) {

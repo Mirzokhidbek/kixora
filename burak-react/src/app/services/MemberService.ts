@@ -2,6 +2,15 @@ import axios from "axios";
 import { serverApi } from "../../lib/config";
 import type { Member, LoginInput, MemberInput } from "../../lib/types/member";
 
+// Setup global Axios interceptor for Bearer token authorization
+axios.interceptors.request.use((config) => {
+  const token = localStorage.getItem("access_token");
+  if (token && config.headers) {
+    config.headers.Authorization = `Bearer ${token}`;
+  }
+  return config;
+});
+
 class MemberService {
   private readonly path: string;
 
@@ -62,6 +71,9 @@ class MemberService {
     try {
       const url = `${this.path}/member/login`;
       const result = await axios.post(url, input, { withCredentials: true });
+      if (result.data.accessToken) {
+        localStorage.setItem("access_token", result.data.accessToken);
+      }
       return result.data.member;
     } catch (err) {
       console.log("Error, login:", err);
@@ -77,6 +89,9 @@ class MemberService {
         { credential, userData },
         { withCredentials: true }
       );
+      if (result.data.accessToken) {
+        localStorage.setItem("access_token", result.data.accessToken);
+      }
       return result.data.member;
     } catch (err) {
       console.log("Error, googleLogin:", err);
@@ -88,6 +103,9 @@ class MemberService {
     try {
       const url = `${this.path}/member/signup`;
       const result = await axios.post(url, input, { withCredentials: true });
+      if (result.data.accessToken) {
+        localStorage.setItem("access_token", result.data.accessToken);
+      }
       return result.data.member;
     } catch (err) {
       console.log("Error, signup:", err);
@@ -97,10 +115,12 @@ class MemberService {
 
   public async logout(): Promise<boolean> {
     try {
+      localStorage.removeItem("access_token");
       const url = `${this.path}/member/logout`;
       const result = await axios.post(url, {}, { withCredentials: true });
       return result.data.logout;
     } catch (err) {
+      localStorage.removeItem("access_token");
       console.log("Error, logout:", err);
       throw err;
     }
