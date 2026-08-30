@@ -29,8 +29,7 @@
               - Build: `npm run build`
               - Start: `npm run serve`
               - Variables: `VITE_API_URL` (Backend Railway domeni).
-      2. Cloud CORS & Cross-Domain Cookies:
-         - `app.set("trust proxy", 1)`: Cloud proksi (Railway/Cloudflare) orqasida HTTPS so'rovlarini to'g'ri qabul qilish.
-         - CORS middleware eng yuqori 1-o'ringa qo'yildi (barcha preflight va GET/POST so'rovlariga zudlik bilan javob berish uchun).
-         - `sameSite: "none"` va `secure: true`: Turli xil domenlar (masalan, `burakfrontend-production.up.railway.app` &rarr; `burak-backend-production.up.railway.app`) o'rtasida `accessToken` cookie-larining uzatilishini ta'minlaydi.
+      2. Cloud Domain & Health Checks:
+         - `server.ts` da server `app.listen()` orqali zudlik bilan ishga tushadi, bu esa Railway Cloud Health Check tekshiruvlaridan muvaffaqiyatli o'tishini ta'minlaydi.
+         - Backend domeni Railway tomonidan berilgan haqiqiy domen bilan frontend `VITE_API_URL` o'zgaruvchisiga to'g'ri ulanishi shart.
 */
