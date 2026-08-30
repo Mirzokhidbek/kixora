@@ -37,15 +37,19 @@ app.use(
   })
 );
 
-// Serve static assets
-app.use(express.static(path.join(__dirname, "public")));
+// Serve static assets from both src/public and root public
+app.use(express.static(path.resolve("src/public")));
 app.use(express.static(path.resolve("public")));
-app.use(express.static("public"));
+app.use(express.static(path.join(__dirname, "public")));
+app.use(express.static(path.join(__dirname, "../src/public")));
+app.use(express.static(path.join(__dirname, "../public")));
 
 // Serve static uploads
 app.use("/uploads", express.static(path.resolve("public/uploads")));
+app.use("/uploads", express.static(path.resolve("src/public/uploads")));
 app.use("/uploads", express.static(path.resolve("uploads")));
 app.use("/public/uploads", express.static(path.resolve("public/uploads")));
+app.use("/public/uploads", express.static(path.resolve("src/public/uploads")));
 
 // Fallback for missing uploaded images in production
 app.use("/uploads/products", (req, res) => {
@@ -85,10 +89,25 @@ app.use((req, res, next) => {
 });
 
 /** 3-VIEWS **/
-app.set("views", [path.resolve("src/views"), path.resolve("views"), path.join(__dirname, "views")]);
+app.set("views", [
+  path.resolve("src/views"),
+  path.resolve("views"),
+  path.join(__dirname, "views"),
+  path.join(__dirname, "../src/views"),
+]);
 app.set("view engine", "ejs");
 
 /** 4-ROUTERS **/
+// Root health check endpoint
+app.get("/", (req, res) => {
+  res.json({
+    message: "Burak Luxury Restaurant API is Running 🚀",
+    adminPanel: "/admin",
+    docs: "SPA REST API",
+    status: "HEALTHY",
+  });
+});
+
 app.use("/admin", routerAdmin); // BSSR: EJS (Admin/Restaurant)
 app.use("/", router);           // SPA: REST API (Users)
 
