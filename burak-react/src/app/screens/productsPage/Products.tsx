@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import {
   Container,
   Typography,
@@ -47,7 +47,8 @@ const actionDispatch = (dispatch: Dispatch) => ({
 
 export function Products({ onAdd }: ProductsProps) {
   const navigate = useNavigate();
-  const { setProducts } = actionDispatch(useDispatch());
+  const dispatch = useDispatch();
+  const { setProducts } = useMemo(() => actionDispatch(dispatch), [dispatch]);
   const products = useSelector(retrieveProducts);
   const restaurant = useSelector(retrieveRestaurant);
 
@@ -70,7 +71,7 @@ export function Products({ onAdd }: ProductsProps) {
       .getProducts(productsSearch)
       .then((data) => setProducts(data))
       .catch((err) => console.log("Products fetch error:", err));
-  }, [productsSearch]);
+  }, [productsSearch, setProducts]);
 
   /** HANDLERS **/
   const searchHandler = (val: string) => {

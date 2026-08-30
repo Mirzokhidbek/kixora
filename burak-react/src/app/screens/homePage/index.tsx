@@ -1,4 +1,4 @@
-import { useEffect } from "react";
+import { useEffect, useMemo } from "react";
 import { Box } from "@mui/material";
 import { useDispatch } from "react-redux";
 import type { Dispatch } from "@reduxjs/toolkit";
@@ -27,8 +27,11 @@ const actionDispatch = (dispatch: Dispatch) => ({
 });
 
 export function HomePage({ onAdd }: HomePageProps) {
-  const { setPopularDishes, setNewDishes, setTopUsers } =
-    actionDispatch(useDispatch());
+  const dispatch = useDispatch();
+  const { setPopularDishes, setNewDishes, setTopUsers } = useMemo(
+    () => actionDispatch(dispatch),
+    [dispatch]
+  );
 
   useEffect(() => {
     const productService = new ProductService();
@@ -60,7 +63,7 @@ export function HomePage({ onAdd }: HomePageProps) {
       .getTopUsers()
       .then((data) => setTopUsers(data))
       .catch((err) => console.log("Top users fetch error:", err));
-  }, []);
+  }, [setPopularDishes, setNewDishes, setTopUsers]);
 
   return (
     <Box sx={{ width: "100%", overflowX: "hidden" }}>

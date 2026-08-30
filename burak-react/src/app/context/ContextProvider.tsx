@@ -1,16 +1,6 @@
-import { createContext, useContext, useState, ReactNode } from "react";
+import { useState, ReactNode } from "react";
 import type { Member } from "../../lib/types/member";
-
-interface GlobalContextType {
-  authMember: Member | null;
-  setAuthMember: (member: Member | null) => void;
-  orderBuilder: Date;
-  setOrderBuilder: (time: Date) => void;
-}
-
-export const GlobalContext = createContext<GlobalContextType | undefined>(
-  undefined
-);
+import { GlobalContext } from "./GlobalContext";
 
 interface ContextProviderProps {
   children: ReactNode;
@@ -44,13 +34,4 @@ export function ContextProvider({ children }: ContextProviderProps) {
       {children}
     </GlobalContext.Provider>
   );
-}
-
-/** CUSTOM HOOK: useGlobals **/
-export function useGlobals(): GlobalContextType {
-  const context = useContext(GlobalContext);
-  if (!context) {
-    throw new Error("useGlobals must be used within a ContextProvider");
-  }
-  return context;
 }

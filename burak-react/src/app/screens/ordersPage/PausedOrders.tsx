@@ -9,7 +9,7 @@ import { serverApi } from "../../../lib/config";
 import type { Order, OrderItem } from "../../../lib/types/order";
 import { OrderStatus } from "../../../lib/enums/common.enum";
 import OrderService from "../../services/OrderService";
-import { useGlobals } from "../../context/ContextProvider";
+import { useGlobals } from "../../hooks/useGlobals";
 
 export function PausedOrders() {
   const pausedOrders = useSelector(retrievePausedOrders);

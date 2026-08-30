@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { Container, Typography, Box, Tabs, Tab, Button, Card } from "@mui/material";
 import ReceiptLongIcon from "@mui/icons-material/ReceiptLong";
 import LockOutlinedIcon from "@mui/icons-material/LockOutlined";
@@ -13,7 +13,7 @@ import OrderService from "../../services/OrderService";
 import { setPausedOrders, setProcessOrders, setFinishedOrders } from "./slice";
 import { retrievePausedOrders, retrieveProcessOrders, retrieveFinishedOrders } from "./selector";
 import { OrderStatus } from "../../../lib/enums/common.enum";
-import { useGlobals } from "../../context/ContextProvider";
+import { useGlobals } from "../../hooks/useGlobals";
 
 interface TabPanelProps {
   children?: React.ReactNode;
@@ -42,8 +42,11 @@ export function OrdersPage() {
   const [tabIndex, setTabIndex] = useState(0);
   const { authMember, orderBuilder } = useGlobals();
 
-  const { setPausedOrders, setProcessOrders, setFinishedOrders } =
-    actionDispatch(useDispatch());
+  const dispatch = useDispatch();
+  const { setPausedOrders, setProcessOrders, setFinishedOrders } = useMemo(
+    () => actionDispatch(dispatch),
+    [dispatch]
+  );
 
   const pausedOrders = useSelector(retrievePausedOrders);
   const processOrders = useSelector(retrieveProcessOrders);
@@ -71,7 +74,7 @@ export function OrdersPage() {
         .then((data) => setFinishedOrders(data))
         .catch((err) => console.log("Finished orders error:", err));
     }
-  }, [authMember, orderBuilder]);
+  }, [authMember, orderBuilder, setPausedOrders, setProcessOrders, setFinishedOrders]);
 
   return (
     <Box sx={{ py: 6, minHeight: "85vh" }}>

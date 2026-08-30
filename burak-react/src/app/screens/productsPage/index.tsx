@@ -1,4 +1,4 @@
-import { useEffect } from "react";
+import { useEffect, useMemo } from "react";
 import { Routes, Route } from "react-router-dom";
 import { useDispatch } from "react-redux";
 import type { Dispatch } from "@reduxjs/toolkit";
@@ -18,7 +18,8 @@ const actionDispatch = (dispatch: Dispatch) => ({
 });
 
 export function ProductsPage({ onAdd }: ProductsPageProps) {
-  const { setRestaurant } = actionDispatch(useDispatch());
+  const dispatch = useDispatch();
+  const { setRestaurant } = useMemo(() => actionDispatch(dispatch), [dispatch]);
 
   useEffect(() => {
     const memberService = new MemberService();
@@ -26,7 +27,7 @@ export function ProductsPage({ onAdd }: ProductsPageProps) {
       .getRestaurant()
       .then((data) => setRestaurant(data))
       .catch((err) => console.log("Get restaurant error:", err));
-  }, []);
+  }, [setRestaurant]);
 
   return (
     <Routes>

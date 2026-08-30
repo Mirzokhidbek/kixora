@@ -16,19 +16,14 @@
         - `cors({ credentials: true, origin: true })`
         - Brauzer xavfsizlik siyosati tufayli turli xil portlardagi (React `http://localhost:5173` va Node backend `http://localhost:3001`) so'rovlarning cookie va headerlar bilan to'siqsiz almashinishini ta'minlaydi.
 
-  - Production & Railway Deployment (Dars 86):
-      1. Railway.app Cloud Architecture:
-         - Bitta GitHub repositoriyasidan Railway loyihasi ichida 2 ta alohida xizmat (Service) yaratiladi:
-           a) **Backend Service (Node.js/Express)**:
-              - Root: `/`
-              - Build: `npm run build`
-              - Start: `npm run start:prod`
-              - Variables: `MONGO_URL`, `SESSION_SECRET`, `JWT_SECRET`, `NODE_ENV=production`.
-           b) **Frontend Service (React Vite SPA)**:
-              - Root: `burak-react`
-              - Build: `npm run build`
-              - Start: `npm run serve` (yoki `serve -s dist -l $PORT`)
-              - Variables: `VITE_API_URL` (Backend Railway domeni).
-      2. Production URL Sanitization:
-         - `serverApi` dagi oxirgi qiya chiziqlar (`/`) avtomatik tozalanishi (`.replace(/\/+$/, "")`) ta'minlandi. Bu `//member/restaurant` kabi qo'sh chiziq sababli 404 xatolarining oldini oladi.
+  - Clean Code Architecture (Backend & Frontend):
+      1. Backend Architecture:
+         - MVC Model: Router &rarr; Controller &rarr; Service &rarr; Schema &rarr; Error Handling.
+         - Server & DB Resilience: `store.on("error")`, `uncaughtException`, `unhandledRejection`, cloud health check `GET /`.
+      2. Frontend Architecture:
+         - Pure Type Imports: `import type { Member, Product, Order }` runtime xatoliklarning oldini oladi.
+         - React Hooks & Fast Refresh: Action dispatchers `useMemo` bilan o'raldi, `useGlobals` alohida hook fayliga ajratildi, barcha `useEffect` dependency massivlari to'liq qanoatlantirildi.
+         - Linting: `oxlint` orqali 0 warning va 0 error standartiga yetkazildi.
+         - URL Sanitization: `serverApi` oxiridagi ortiqcha qiya chiziqlar tozalanishi (`.replace(/\/+$/, "")`) orqali `//route` 404 xatolarining oldi olindi.
+         - Production Serving: React SPA uchun `serve -s dist -l $PORT` qo'llandi.
 */

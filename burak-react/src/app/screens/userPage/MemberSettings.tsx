@@ -29,7 +29,7 @@ import AddIcon from "@mui/icons-material/Add";
 
 import type { Member } from "../../../lib/types/member";
 import MemberService from "../../services/MemberService";
-import { useGlobals } from "../../context/ContextProvider";
+import { useGlobals } from "../../hooks/useGlobals";
 
 interface MemberSettingsProps {
   member?: Member | null;

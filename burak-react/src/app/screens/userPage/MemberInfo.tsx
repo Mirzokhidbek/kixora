@@ -18,7 +18,7 @@ import VerifiedUserIcon from "@mui/icons-material/VerifiedUser";
 import type { Member } from "../../../lib/types/member";
 import { serverApi } from "../../../lib/config";
 import MemberService from "../../services/MemberService";
-import { useGlobals } from "../../context/ContextProvider";
+import { useGlobals } from "../../hooks/useGlobals";
 
 interface MemberInfoProps {
   member?: Member | null;

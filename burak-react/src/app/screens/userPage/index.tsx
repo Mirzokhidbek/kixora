@@ -3,7 +3,7 @@ import LockOutlinedIcon from "@mui/icons-material/LockOutlined";
 import { MemberInfo } from "./MemberInfo";
 import { MemberSettings } from "./MemberSettings";
 import type { Member } from "../../../lib/types/member";
-import { useGlobals } from "../../context/ContextProvider";
+import { useGlobals } from "../../hooks/useGlobals";
 
 interface UserPageProps {
   member?: Member | null;

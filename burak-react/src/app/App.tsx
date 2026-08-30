@@ -14,7 +14,7 @@ import { UserPage } from "./screens/userPage";
 import { HelpPage } from "./screens/helpPage";
 
 import { useBasket } from "./hooks/useBasket";
-import { useGlobals } from "./context/ContextProvider";
+import { useGlobals } from "./hooks/useGlobals";
 import MemberService from "./services/MemberService";
 import OrderService from "./services/OrderService";
 
@@ -34,7 +34,7 @@ export default function App() {
       .catch(() => {
         // If cookie/token invalid, keep localStorage or reset
       });
-  }, []);
+  }, [setAuthMember]);
 
   const handleLogout = async () => {
     try {
@@ -43,7 +43,7 @@ export default function App() {
       setAuthMember(null);
       setToastMsg("Successfully logged out!");
       setToastOpen(true);
-    } catch (err) {
+    } catch {
       setAuthMember(null);
     }
   };
