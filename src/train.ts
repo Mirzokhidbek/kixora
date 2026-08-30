@@ -29,7 +29,8 @@
               - Build: `npm run build`
               - Start: `npm run serve`
               - Variables: `VITE_API_URL` (Backend Railway domeni).
-      2. Cloud Domain & Health Checks:
-         - `server.ts` da server `app.listen()` orqali zudlik bilan ishga tushadi, bu esa Railway Cloud Health Check tekshiruvlaridan muvaffaqiyatli o'tishini ta'minlaydi.
-         - Backend domeni Railway tomonidan berilgan haqiqiy domen bilan frontend `VITE_API_URL` o'zgaruvchisiga to'g'ri ulanishi shart.
+      2. Cloud Resilience & Crash Prevention:
+         - `store.on("error")` orqali session store ulanish xatolari sababli jarayon to'xtab qolishining oldi olindi.
+         - `uncaughtException` va `unhandledRejection` tutuvchilari qo'yildi.
+         - Server `app.listen()` orqali zudlik bilan portni egallab, Railway Health Check tekshiruvlaridan muvaffaqiyatli o'tadi.
 */

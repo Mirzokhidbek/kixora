@@ -11,6 +11,15 @@ const mongoUrl =
 
 const PORT = Number(process.env.PORT) || 3001;
 
+// Global process error handlers to keep cloud container alive and log issues
+process.on("uncaughtException", (err) => {
+  console.log("⚠️ Uncaught Exception:", err.message);
+});
+
+process.on("unhandledRejection", (reason: any) => {
+  console.log("⚠️ Unhandled Rejection:", reason?.message || reason);
+});
+
 // Start Express server immediately for cloud health checks
 app.listen(PORT, "0.0.0.0", () => {
   console.log(`========================================`);
@@ -21,12 +30,16 @@ app.listen(PORT, "0.0.0.0", () => {
 });
 
 // Connect to MongoDB Database
-mongoose
-  .connect(mongoUrl, {})
-  .then(() => {
-    console.log("✅ MongoDB Atlas connection succeed!");
-  })
-  .catch((err) => {
-    console.log("❌ ERROR on connection MongoDB:", err.message);
-    console.log("💡 Check your MONGO_URL in Railway Variables and MongoDB Atlas Network Access (0.0.0.0/0).");
-  });
+if (process.env.MONGO_URL) {
+  mongoose
+    .connect(mongoUrl, {})
+    .then(() => {
+      console.log("✅ MongoDB Atlas connection succeed!");
+    })
+    .catch((err) => {
+      console.log("❌ ERROR on connection MongoDB:", err.message);
+      console.log("💡 Tip: Ensure MongoDB Atlas has Network Access set to 0.0.0.0/0 (Allow from anywhere).");
+    });
+} else {
+  console.log("⚠️ WARNING: MONGO_URL environment variable is not defined in Railway Variables!");
+}

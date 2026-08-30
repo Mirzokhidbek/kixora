@@ -10,17 +10,24 @@ import { MORGAN_FORMAT } from "./libs/config";
 import session from "express-session";
 import ConnectMongoDB from "connect-mongodb-session";
 
+const mongoUri = process.env.MONGO_URL || "mongodb://127.0.0.1:27017/burak";
+
 const MongoDBStore = ConnectMongoDB(session);
 const store = new MongoDBStore({
-  uri: String(process.env.MONGO_URL),
+  uri: mongoUri,
   collection: "sessions",
+});
+
+// Catch session store connection errors to prevent process crashing
+store.on("error", (error) => {
+  console.log("⚠️ Session store connection warning:", error?.message || error);
 });
 
 /** 1-ENTRANCE **/
 const app = express();
 app.set("trust proxy", 1);
 
-// Configure CORS at top priority
+// Configure CORS at top priority for all incoming requests
 app.use(
   cors({
     credentials: true,
@@ -30,12 +37,26 @@ app.use(
   })
 );
 
+// Serve static assets
 app.use(express.static(path.join(__dirname, "public")));
 app.use(express.static(path.resolve("public")));
 app.use(express.static("public"));
+
+// Serve static uploads
 app.use("/uploads", express.static(path.resolve("public/uploads")));
 app.use("/uploads", express.static(path.resolve("uploads")));
 app.use("/public/uploads", express.static(path.resolve("public/uploads")));
+
+// Fallback for missing uploaded images in production
+app.use("/uploads/products", (req, res) => {
+  res.redirect("https://images.unsplash.com/photo-1544025162-d76694265947?auto=format&fit=crop&w=800&q=80");
+});
+app.use("/uploads/members", (req, res) => {
+  res.redirect("https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=400&q=80");
+});
+app.use("/uploads", (req, res) => {
+  res.redirect("https://images.unsplash.com/photo-1558030006-450675393462?auto=format&fit=crop&w=800&q=80");
+});
 
 app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
