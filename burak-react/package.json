@@ -8,7 +8,8 @@
     "build": "tsc -b && vite build",
     "lint": "oxlint",
     "preview": "vite preview --host 0.0.0.0",
-    "serve": "vite preview --host 0.0.0.0 --port ${PORT:-5173}"
+    "serve": "serve -s dist -l $PORT",
+    "start": "serve -s dist -l $PORT"
   },
   "dependencies": {
     "@emotion/react": "^11.14.0",
@@ -20,7 +21,8 @@
     "react": "^19.2.8",
     "react-dom": "^19.2.8",
     "react-redux": "^9.3.0",
-    "react-router-dom": "^7.18.3"
+    "react-router-dom": "^7.18.3",
+    "serve": "^14.2.4"
   },
   "devDependencies": {
     "@types/node": "^24.13.3",

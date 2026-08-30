@@ -27,9 +27,8 @@
            b) **Frontend Service (React Vite SPA)**:
               - Root: `burak-react`
               - Build: `npm run build`
-              - Start: `npm run serve`
+              - Start: `npm run serve` (yoki `serve -s dist -l $PORT`)
               - Variables: `VITE_API_URL` (Backend Railway domeni).
-      2. Production Static Assets & Health Check:
-         - `src/public` va `public` papkalari to'liq sinxronlashtirilib, Express orqali `/css/main.css`, `/js/main.js` va `/js/products.js` fayllarining 200 OK bilan yuklanishi ta'minlandi.
-         - Bosh sahifa `GET /` so'roviga API sog'lomligi (*Status: HEALTHY*) haqida JSON xabar beruvchi endpoint qo'shildi.
+      2. Production SPA Static Server (`serve`):
+         - Frontend uchun `serve -s dist -l $PORT` o'rnatildi. Bu SPA routing (`/products`, `/orders`, `/user`, `/help`) to'g'ridan-to'g'ri ochilganda 404 bermasdan, cloud portida to'xtovsiz ishlashini ta'minlaydi.
 */
