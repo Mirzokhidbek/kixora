@@ -23,7 +23,6 @@ import SearchIcon from "@mui/icons-material/Search";
 import AddShoppingCartIcon from "@mui/icons-material/AddShoppingCart";
 import FavoriteBorderIcon from "@mui/icons-material/FavoriteBorder";
 import FavoriteIcon from "@mui/icons-material/Favorite";
-import LocalFireDepartmentIcon from "@mui/icons-material/LocalFireDepartment";
 import VisibilityIcon from "@mui/icons-material/Visibility";
 import { useNavigate } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
@@ -173,7 +172,7 @@ export function Products({ onAdd }: ProductsProps) {
     },
     {
       _id: "5",
-      productName: "Traditional Ottoman Foamy Ayran",
+      productName: "Traditional Foamy Ayran",
       productPrice: 5.0,
       productLeftCount: 50,
       productCollection: ProductCollection.DRINK,
@@ -211,29 +210,34 @@ export function Products({ onAdd }: ProductsProps) {
   };
 
   return (
-    <Box sx={{ py: 6, minHeight: "85vh", bgcolor: "#f8fafc" }}>
+    <Box sx={{ py: 6, minHeight: "85vh", bgcolor: "#ffffff" }}>
       <Container maxWidth="lg">
         {/* Restaurant Header Badge */}
         {restaurant && (
           <Box sx={{ mb: 2, display: "flex", alignItems: "center", gap: 1 }}>
             <Chip
               label={`Official Restaurant: ${restaurant.memberNick}`}
-              sx={{ bgcolor: "#0f172a", color: "#f59e0b", fontWeight: 800 }}
+              sx={{ bgcolor: "#fffbeb", color: "#d97706", fontWeight: 800, border: "1px solid #fef3c7" }}
               size="small"
             />
           </Box>
         )}
 
         {/* Page Header */}
-        <Box sx={{ mb: 5 }}>
-          <Box sx={{ display: "flex", alignItems: "center", gap: 1.5, mb: 1 }}>
-            <LocalFireDepartmentIcon sx={{ fontSize: 32, color: "primary.main" }} />
-            <Typography variant="h3" sx={{ fontWeight: 800 }}>
-              Burak Culinary Menu
-            </Typography>
-          </Box>
-          <Typography variant="body1" color="text.secondary">
-            Authentic Ottoman recipes, fire-roasted prime meats, and handcrafted desserts prepared fresh daily.
+        <Box sx={{ mb: 4, textAlign: "center" }}>
+          <Typography
+            variant="h2"
+            sx={{
+              fontWeight: 900,
+              color: "#0f172a",
+              mb: 1,
+              fontSize: { xs: "2.2rem", md: "2.8rem" },
+            }}
+          >
+            Explore Our <span style={{ color: "#f59e0b" }}>Delicious</span> Menu
+          </Typography>
+          <Typography variant="body1" color="text.secondary" sx={{ maxWidth: 600, mx: "auto" }}>
+            Authentic Ottoman recipes, fire-roasted prime meats, and handcrafted delicacies prepared fresh daily.
           </Typography>
         </Box>
 
@@ -244,8 +248,12 @@ export function Products({ onAdd }: ProductsProps) {
             flexDirection: { xs: "column", md: "row" },
             justifyContent: "space-between",
             alignItems: { xs: "stretch", md: "center" },
-            gap: 2,
-            mb: 4,
+            gap: 2.5,
+            mb: 4.5,
+            bgcolor: "#fbfbfe",
+            p: 2,
+            borderRadius: 4,
+            border: "1px solid #f1f5f9",
           }}
         >
           {/* Category Tabs */}
@@ -255,12 +263,12 @@ export function Products({ onAdd }: ProductsProps) {
             variant="scrollable"
             scrollButtons="auto"
             sx={{
-              "& .MuiTabs-indicator": { backgroundColor: "#f59e0b", height: 3 },
+              "& .MuiTabs-indicator": { backgroundColor: "#f59e0b", height: 3, borderRadius: 2 },
               "& .MuiTab-root": {
-                fontWeight: 700,
+                fontWeight: 800,
                 fontSize: "0.95rem",
                 color: "#64748b",
-                "&.Mui-selected": { color: "#0f172a" },
+                "&.Mui-selected": { color: "#f59e0b" },
               },
             }}
           >
@@ -274,19 +282,20 @@ export function Products({ onAdd }: ProductsProps) {
           {/* Search Input */}
           <TextField
             size="small"
-            placeholder="Search our menu..."
+            placeholder="Search our dishes..."
             value={productsSearch.search || ""}
             onChange={(e) => searchHandler(e.target.value)}
             sx={{
               minWidth: { xs: "100%", md: 280 },
               bgcolor: "#fff",
-              borderRadius: 2,
+              borderRadius: 3,
+              "& .MuiOutlinedInput-root": { borderRadius: 3 },
             }}
             slotProps={{
               input: {
                 startAdornment: (
                   <InputAdornment position="start">
-                    <SearchIcon sx={{ color: "primary.main" }} />
+                    <SearchIcon sx={{ color: "#f59e0b" }} />
                   </InputAdornment>
                 ),
               },
@@ -294,200 +303,197 @@ export function Products({ onAdd }: ProductsProps) {
           />
         </Box>
 
-        {/* Sort Filter Buttons */}
-        <Box sx={{ display: "flex", gap: 1, mb: 4, flexWrap: "wrap" }}>
-          <Chip
-            label="Latest Added"
-            clickable
-            color={productsSearch.order === "createdAt" ? "primary" : "default"}
-            onClick={() => orderHandler("createdAt")}
-            sx={{ fontWeight: 700 }}
-          />
-          <Chip
-            label="Most Popular (Views)"
-            clickable
-            color={productsSearch.order === "productViews" ? "primary" : "default"}
-            onClick={() => orderHandler("productViews")}
-            sx={{ fontWeight: 700 }}
-          />
-          <Chip
-            label="Price: Low to High"
-            clickable
-            color={productsSearch.order === "productPrice" ? "primary" : "default"}
-            onClick={() => orderHandler("productPrice")}
-            sx={{ fontWeight: 700 }}
-          />
+        {/* Sorting Chips */}
+        <Box sx={{ display: "flex", gap: 1.5, mb: 4, flexWrap: "wrap", alignItems: "center" }}>
+          <Typography variant="body2" sx={{ fontWeight: 800, color: "#64748b", mr: 1 }}>
+            Sort By:
+          </Typography>
+          {[
+            { label: "Latest Added", value: "createdAt" },
+            { label: "Most Popular", value: "productViews" },
+            { label: "Price: Low to High", value: "productPrice" },
+          ].map((item) => (
+            <Chip
+              key={item.value}
+              label={item.label}
+              onClick={() => orderHandler(item.value)}
+              sx={{
+                fontWeight: 700,
+                cursor: "pointer",
+                bgcolor: productsSearch.order === item.value ? "#f59e0b" : "#ffffff",
+                color: productsSearch.order === item.value ? "#ffffff" : "#475569",
+                border: productsSearch.order === item.value ? "none" : "1px solid #e2e8f0",
+                "&:hover": { bgcolor: productsSearch.order === item.value ? "#d97706" : "#f8fafc" },
+              }}
+            />
+          ))}
         </Box>
 
-        {/* Product Cards Grid */}
+        {/* Products Grid */}
         <Grid container spacing={3.5}>
-          {displayList.map((product) => (
-            <Grid key={product._id} size={{ xs: 12, sm: 6, md: 4, lg: 3 }}>
-              <Card
-                sx={{
-                  borderRadius: 4,
-                  height: "100%",
-                  display: "flex",
-                  flexDirection: "column",
-                  transition: "all 0.3s cubic-bezier(0.4, 0, 0.2, 1)",
-                  border: "1px solid #e2e8f0",
-                  cursor: "pointer",
-                  "&:hover": {
-                    transform: "translateY(-8px)",
-                    boxShadow: "0 20px 35px rgba(15, 23, 42, 0.12)",
-                    borderColor: "primary.light",
-                  },
-                }}
-                onClick={() => chosenProductHandler(product._id)}
-              >
-                <Box sx={{ position: "relative", overflow: "hidden" }}>
-                  <CardMedia
-                    component="img"
-                    height="200"
-                    image={getImageSrc(product.productImages?.[0])}
-                    alt={product.productName}
-                    sx={{
-                      transition: "transform 0.5s ease",
-                      "&:hover": { transform: "scale(1.06)" },
-                    }}
-                  />
-                  <IconButton
-                    sx={{
-                      position: "absolute",
-                      top: 10,
-                      right: 10,
-                      bgcolor: "rgba(255, 255, 255, 0.9)",
-                      "&:hover": { bgcolor: "#fff" },
-                      color: favorites.includes(product._id) ? "#ef4444" : "#64748b",
-                    }}
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      toggleFavorite(product._id);
-                    }}
-                  >
-                    {favorites.includes(product._id) ? (
-                      <FavoriteIcon sx={{ fontSize: 20 }} />
-                    ) : (
-                      <FavoriteBorderIcon sx={{ fontSize: 20 }} />
-                    )}
-                  </IconButton>
-
-                  <Chip
-                    label={product.productCollection}
-                    size="small"
-                    sx={{
-                      position: "absolute",
-                      top: 12,
-                      left: 12,
-                      bgcolor: "#0f172a",
-                      color: "#f59e0b",
-                      fontWeight: 800,
-                      fontSize: "0.7rem",
-                    }}
-                  />
-
-                  <Box
-                    sx={{
-                      position: "absolute",
-                      bottom: 8,
-                      right: 8,
-                      bgcolor: "rgba(0,0,0,0.65)",
-                      color: "#fff",
-                      px: 1,
-                      py: 0.2,
-                      borderRadius: 2,
-                      display: "flex",
-                      alignItems: "center",
-                      gap: 0.5,
-                      fontSize: "0.72rem",
-                    }}
-                  >
-                    <VisibilityIcon sx={{ fontSize: 13, color: "#f59e0b" }} />
-                    <span>{product.productViews || 0}</span>
-                  </Box>
-                </Box>
-
-                <CardContent
+          {displayList.map((product) => {
+            const isFav = favorites.includes(product._id);
+            return (
+              <Grid key={product._id} size={{ xs: 12, sm: 6, md: 3 }}>
+                <Card
                   sx={{
-                    flexGrow: 1,
-                    p: 2.5,
+                    borderRadius: 5,
+                    height: "100%",
                     display: "flex",
                     flexDirection: "column",
+                    position: "relative",
+                    transition: "all 0.35s cubic-bezier(0.4, 0, 0.2, 1)",
+                    border: "1px solid #f1f5f9",
+                    bgcolor: "#ffffff",
+                    boxShadow: "0 10px 30px rgba(0,0,0,0.03)",
+                    cursor: "pointer",
+                    overflow: "hidden",
+                    "&:hover": {
+                      transform: "translateY(-8px)",
+                      boxShadow: "0 20px 40px rgba(245, 158, 11, 0.14)",
+                      borderColor: "#fef3c7",
+                    },
                   }}
+                  onClick={() => chosenProductHandler(product._id)}
                 >
-                  <Typography
-                    variant="h6"
-                    sx={{
-                      fontWeight: 800,
-                      fontSize: "1.05rem",
-                      mb: 1,
-                      lineHeight: 1.3,
-                    }}
-                  >
-                    {product.productName}
-                  </Typography>
-                  <Typography
-                    variant="body2"
-                    color="text.secondary"
-                    sx={{
-                      mb: 2,
-                      flexGrow: 1,
-                      fontSize: "0.85rem",
-                      lineHeight: 1.5,
-                    }}
-                  >
-                    {product.productDesc || "Traditional Burak culinary creation."}
-                  </Typography>
+                  {/* Image Presentation */}
+                  <Box sx={{ position: "relative", overflow: "hidden", pt: "70%" }}>
+                    <CardMedia
+                      component="img"
+                      image={getImageSrc(product.productImages?.[0])}
+                      alt={product.productName}
+                      sx={{
+                        position: "absolute",
+                        top: 0,
+                        left: 0,
+                        width: "100%",
+                        height: "100%",
+                        objectFit: "cover",
+                        transition: "transform 0.5s ease",
+                        "&:hover": { transform: "scale(1.08)" },
+                      }}
+                    />
 
-                  <Box sx={{ display: "flex", alignItems: "center", gap: 1, mb: 2 }}>
-                    <Rating value={5} readOnly size="small" sx={{ color: "#f59e0b" }} />
-                    <Typography variant="caption" sx={{ color: "#64748b", fontWeight: 700 }}>
-                      5.0
-                    </Typography>
-                  </Box>
-
-                  <Box
-                    sx={{
-                      display: "flex",
-                      justifyContent: "space-between",
-                      alignItems: "center",
-                      mt: "auto",
-                      pt: 1,
-                      borderTop: "1px solid #f1f5f9",
-                    }}
-                  >
-                    <div>
-                      <Typography variant="caption" color="text.secondary" sx={{ display: "block" }}>
-                        Price
-                      </Typography>
-                      <Typography variant="h6" sx={{ fontWeight: 800, color: "#0f172a" }}>
-                        ${product.productPrice.toFixed(2)}
-                      </Typography>
-                    </div>
-
-                    <Button
-                      variant="contained"
-                      color="primary"
+                    {/* Favorite Heart Button */}
+                    <IconButton
                       size="small"
-                      startIcon={<AddShoppingCartIcon sx={{ fontSize: 16 }} />}
-                      sx={{ borderRadius: 2.5, px: 2, fontWeight: 700, fontSize: "0.8rem" }}
                       onClick={(e) => {
                         e.stopPropagation();
-                        if (onAdd) onAdd(product);
-                        setToastMsg(`Added "${product.productName}" to Cart!`);
-                        setToastOpen(true);
+                        toggleFavorite(product._id);
+                      }}
+                      sx={{
+                        position: "absolute",
+                        top: 12,
+                        right: 12,
+                        bgcolor: "rgba(255, 255, 255, 0.9)",
+                        backdropFilter: "blur(4px)",
+                        color: isFav ? "#ef4444" : "#94a3b8",
+                        "&:hover": { bgcolor: "#fff" },
                       }}
                     >
-                      Add
-                    </Button>
+                      {isFav ? <FavoriteIcon fontSize="small" /> : <FavoriteBorderIcon fontSize="small" />}
+                    </IconButton>
+
+                    {/* Category Chip */}
+                    <Chip
+                      label={product.productCollection || "DISH"}
+                      size="small"
+                      sx={{
+                        position: "absolute",
+                        top: 12,
+                        left: 12,
+                        bgcolor: "#fffbeb",
+                        color: "#d97706",
+                        border: "1px solid #fef3c7",
+                        fontWeight: 800,
+                        fontSize: "0.7rem",
+                      }}
+                    />
+
+                    {/* Views Count */}
+                    <Box
+                      sx={{
+                        position: "absolute",
+                        bottom: 12,
+                        right: 12,
+                        bgcolor: "rgba(15, 23, 42, 0.75)",
+                        backdropFilter: "blur(6px)",
+                        color: "#fff",
+                        px: 1.2,
+                        py: 0.4,
+                        borderRadius: 2,
+                        display: "flex",
+                        alignItems: "center",
+                        gap: 0.5,
+                        fontSize: "0.75rem",
+                        fontWeight: 700,
+                      }}
+                    >
+                      <VisibilityIcon sx={{ fontSize: 14, color: "#f59e0b" }} />
+                      <span>{product.productViews || 0}</span>
+                    </Box>
                   </Box>
-                </CardContent>
-              </Card>
-            </Grid>
-          ))}
+
+                  {/* Details */}
+                  <CardContent sx={{ flexGrow: 1, p: 2.8, display: "flex", flexDirection: "column" }}>
+                    <Typography variant="h6" sx={{ fontWeight: 800, fontSize: "1.1rem", mb: 1, lineHeight: 1.3, color: "#0f172a" }}>
+                      {product.productName}
+                    </Typography>
+                    <Typography variant="body2" color="text.secondary" sx={{ mb: 2, flexGrow: 1, fontSize: "0.85rem", lineHeight: 1.6 }}>
+                      {product.productDesc || "Traditional Ottoman delicacy crafted by Chef Burak."}
+                    </Typography>
+
+                    {/* Rating & In-stock */}
+                    <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "center", mb: 2 }}>
+                      <Box sx={{ display: "flex", alignItems: "center", gap: 0.8 }}>
+                        <Rating value={5} readOnly size="small" sx={{ color: "#f59e0b" }} />
+                        <Typography variant="caption" sx={{ color: "#64748b", fontWeight: 800 }}>
+                          5.0
+                        </Typography>
+                      </Box>
+                      <Typography variant="caption" sx={{ color: "#10b981", fontWeight: 800, bgcolor: "#ecfdf5", px: 1, py: 0.3, borderRadius: 1.5 }}>
+                        In Stock
+                      </Typography>
+                    </Box>
+
+                    {/* Price & Action Button */}
+                    <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "center", mt: "auto", pt: 1.5, borderTop: "1px solid #f8fafc" }}>
+                      <Typography variant="h5" sx={{ fontWeight: 900, color: "#0f172a" }}>
+                        ${product.productPrice?.toFixed(2)}
+                      </Typography>
+                      <Button
+                        variant="contained"
+                        size="small"
+                        startIcon={<AddShoppingCartIcon sx={{ fontSize: 16 }} />}
+                        sx={{
+                          borderRadius: 3,
+                          px: 2.5,
+                          py: 0.8,
+                          fontWeight: 800,
+                          fontSize: "0.85rem",
+                          bgcolor: "#eab308",
+                          color: "#fff",
+                          boxShadow: "0 4px 12px rgba(234, 179, 8, 0.3)",
+                          "&:hover": { bgcolor: "#ca8a04" },
+                        }}
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          if (onAdd) onAdd(product);
+                          setToastMsg(`Added "${product.productName}" to cart!`);
+                          setToastOpen(true);
+                        }}
+                      >
+                        Add
+                      </Button>
+                    </Box>
+                  </CardContent>
+                </Card>
+              </Grid>
+            );
+          })}
         </Grid>
 
-        {/* Pagination Controls */}
+        {/* Pagination */}
         <Box sx={{ display: "flex", justifyContent: "center", mt: 6 }}>
           <Pagination
             count={3}
@@ -496,13 +502,12 @@ export function Products({ onAdd }: ProductsProps) {
             color="primary"
             size="large"
             sx={{
-              "& .MuiPaginationItem-root": { fontWeight: 700 },
-              "& .Mui-selected": { bgcolor: "#f59e0b !important", color: "#000", fontWeight: 800 },
+              "& .MuiPaginationItem-root": { fontWeight: 800, borderRadius: 2 },
             }}
           />
         </Box>
 
-        {/* VIP Toast Notification */}
+        {/* Global Toast */}
         <Snackbar
           open={toastOpen}
           autoHideDuration={3000}

@@ -11,34 +11,24 @@ class OrderService {
   }
 
   public async createOrder(cartItems: CartItem[]): Promise<Order> {
-    try {
-      const orderItems: OrderItemInput[] = cartItems.map((item) => ({
-        productId: item._id,
-        itemQuantity: item.quantity,
-        itemPrice: item.price,
-      }));
+    const orderItems: OrderItemInput[] = cartItems.map((item) => ({
+      productId: item._id,
+      itemQuantity: item.quantity,
+      itemPrice: item.price,
+    }));
 
-      const url = `${this.path}/order/create`;
-      const result = await axios.post(url, orderItems, {
-        withCredentials: true,
-      });
+    const url = `${this.path}/order/create`;
+    const result = await axios.post(url, orderItems, {
+      withCredentials: true,
+    });
 
-      return result.data;
-    } catch (err) {
-      console.log("Error, createOrder:", err);
-      throw err;
-    }
+    return result.data;
   }
 
   public async getMyOrders(inquiry: OrderInquiry): Promise<Order[]> {
-    try {
-      const url = `${this.path}/order/all?orderStatus=${inquiry.orderStatus}&page=${inquiry.page}&limit=${inquiry.limit}`;
-      const result = await axios.get(url, { withCredentials: true });
-      return result.data;
-    } catch (err) {
-      console.log("Error, getMyOrders:", err);
-      throw err;
-    }
+    const url = `${this.path}/order/all?orderStatus=${inquiry.orderStatus}&page=${inquiry.page}&limit=${inquiry.limit}`;
+    const result = await axios.get(url, { withCredentials: true });
+    return result.data;
   }
 
   public async updateOrder(input: OrderUpdateInput): Promise<Order> {

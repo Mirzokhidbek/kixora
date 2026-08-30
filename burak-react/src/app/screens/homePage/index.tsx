@@ -3,6 +3,7 @@ import { Box } from "@mui/material";
 import { useDispatch } from "react-redux";
 import type { Dispatch } from "@reduxjs/toolkit";
 
+import { HeroBanner } from "./HeroBanner";
 import { Statistics } from "./Statistics";
 import { PopularDishes } from "./PopularDishes";
 import { NewDishes } from "./NewDishes";
@@ -66,9 +67,9 @@ export function HomePage({ onAdd }: HomePageProps) {
   }, [setPopularDishes, setNewDishes, setTopUsers]);
 
   return (
-    <Box sx={{ width: "100%", overflowX: "hidden" }}>
-      {/* 1. Brand Statistics & Excellence Metrics */}
-      <Statistics />
+    <Box sx={{ width: "100%", overflowX: "hidden", bgcolor: "#ffffff" }}>
+      {/* 1. Primary Hero Section (Orbiting Dishes, Clean Typography, Dual CTA) */}
+      <HeroBanner />
 
       {/* 2. Most Popular Signature Dishes */}
       <PopularDishes onAdd={onAdd} />
@@ -76,13 +77,16 @@ export function HomePage({ onAdd }: HomePageProps) {
       {/* 3. New Culinary Arrivals */}
       <NewDishes onAdd={onAdd} />
 
-      {/* 4. Live CZN Burak Show Banner */}
+      {/* 4. Brand Statistics & Excellence Metrics */}
+      <Statistics />
+
+      {/* 5. Live CZN Burak Show Banner */}
       <Advertisement />
 
-      {/* 5. Active VIP Foodies & Top Community Reviews */}
+      {/* 6. Active VIP Foodies & Top Community Reviews */}
       <ActiveUsers />
 
-      {/* 6. Upcoming Gastro Events & Masterclasses */}
+      {/* 7. Upcoming Gastro Events & Masterclasses */}
       <Events />
     </Box>
   );

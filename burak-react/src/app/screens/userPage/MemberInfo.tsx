@@ -6,15 +6,12 @@ import {
   Typography,
   Chip,
   IconButton,
-  LinearProgress,
   Grid,
 } from "@mui/material";
-import EmojiEventsIcon from "@mui/icons-material/EmojiEvents";
 import PhotoCameraIcon from "@mui/icons-material/PhotoCamera";
-import ShoppingBagIcon from "@mui/icons-material/ShoppingBag";
-import FavoriteIcon from "@mui/icons-material/Favorite";
-import LocationOnIcon from "@mui/icons-material/LocationOn";
-import VerifiedUserIcon from "@mui/icons-material/VerifiedUser";
+import ShoppingBagOutlinedIcon from "@mui/icons-material/ShoppingBagOutlined";
+import EmojiEventsOutlinedIcon from "@mui/icons-material/EmojiEventsOutlined";
+import VerifiedOutlinedIcon from "@mui/icons-material/VerifiedOutlined";
 import type { Member } from "../../../lib/types/member";
 import { serverApi } from "../../../lib/config";
 import MemberService from "../../services/MemberService";
@@ -29,8 +26,6 @@ export function MemberInfo({ member }: MemberInfoProps) {
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const currentPoints = member?.memberPoints || 0;
-  const targetPoints = 500;
-  const progress = Math.min(100, (currentPoints / targetPoints) * 100);
 
   const getImageSrc = (img?: string) => {
     if (!img) return "";
@@ -51,7 +46,7 @@ export function MemberInfo({ member }: MemberInfoProps) {
   };
 
   return (
-    <Box sx={{ mb: 4 }}>
+    <Box sx={{ mb: 4, width: "100%" }}>
       {/* Hidden File Input */}
       <input
         type="file"
@@ -61,182 +56,161 @@ export function MemberInfo({ member }: MemberInfoProps) {
         style={{ display: "none" }}
       />
 
-      {/* Profile Header Card */}
+      {/* Simplified Modern Profile Header Card */}
       <Card
         sx={{
-          background: "linear-gradient(135deg, #090d16 0%, #1e293b 100%)",
-          color: "#fff",
-          p: { xs: 3, md: 5 },
-          borderRadius: 4,
-          mb: 4,
-          border: "1px solid rgba(245, 158, 11, 0.2)",
-          boxShadow: "0 20px 50px rgba(0, 0, 0, 0.4)",
-          position: "relative",
-          overflow: "hidden",
+          bgcolor: "#ffffff",
+          p: { xs: 3, md: 4 },
+          borderRadius: 5,
+          border: "1px solid #f1f5f9",
+          boxShadow: "0 10px 30px rgba(0, 0, 0, 0.04)",
+          mb: 3,
         }}
       >
         <Box
           sx={{
             display: "flex",
-            flexDirection: { xs: "column", md: "row" },
-            alignItems: { xs: "flex-start", md: "center" },
-            justifyContent: "space-between",
-            gap: 3,
+            flexDirection: { xs: "column", sm: "row" },
+            alignItems: { xs: "center", sm: "flex-start", md: "center" },
+            gap: { xs: 2.5, sm: 3.5 },
+            textAlign: { xs: "center", sm: "left" },
           }}
         >
-          <Box sx={{ display: "flex", alignItems: "center", gap: 3, flexWrap: "wrap" }}>
-            {/* Avatar with Camera Overlay */}
-            <Box sx={{ position: "relative" }}>
-              <Avatar
-                src={getImageSrc(member?.memberImage)}
-                sx={{
-                  width: { xs: 80, md: 100 },
-                  height: { xs: 80, md: 100 },
-                  bgcolor: "#f59e0b",
-                  color: "#000",
-                  fontSize: "2.5rem",
-                  fontWeight: 800,
-                  boxShadow: "0 0 25px rgba(245, 158, 11, 0.4)",
-                  border: "4px solid rgba(255,255,255,0.15)",
-                }}
-              >
-                {member?.memberNick?.charAt(0)?.toUpperCase() || "U"}
-              </Avatar>
+          {/* Avatar with Camera Icon */}
+          <Box sx={{ position: "relative" }}>
+            <Avatar
+              src={getImageSrc(member?.memberImage)}
+              sx={{
+                width: { xs: 85, md: 95 },
+                height: { xs: 85, md: 95 },
+                bgcolor: "#f59e0b",
+                color: "#fff",
+                fontSize: "2.2rem",
+                fontWeight: 900,
+                boxShadow: "0 8px 25px rgba(245, 158, 11, 0.3)",
+                border: "4px solid #ffffff",
+              }}
+            >
+              {member?.memberNick?.charAt(0)?.toUpperCase() || "U"}
+            </Avatar>
 
-              <IconButton
+            <IconButton
+              size="small"
+              onClick={() => fileInputRef.current?.click()}
+              sx={{
+                position: "absolute",
+                bottom: 0,
+                right: 0,
+                bgcolor: "#f59e0b",
+                color: "#ffffff",
+                boxShadow: "0 4px 10px rgba(0,0,0,0.15)",
+                "&:hover": { bgcolor: "#d97706" },
+              }}
+            >
+              <PhotoCameraIcon sx={{ fontSize: 16 }} />
+            </IconButton>
+          </Box>
+
+          {/* User Details */}
+          <Box sx={{ flexGrow: 1 }}>
+            <Box
+              sx={{
+                display: "flex",
+                alignItems: "center",
+                gap: 1.5,
+                mb: 0.8,
+                flexWrap: "wrap",
+                justifyContent: { xs: "center", sm: "flex-start" },
+              }}
+            >
+              <Typography variant="h4" sx={{ fontWeight: 900, color: "#0f172a", fontSize: { xs: "1.6rem", md: "1.9rem" } }}>
+                {member?.memberNick || "Member"}
+              </Typography>
+              <Chip
+                label="VIP MEMBER"
                 size="small"
-                onClick={() => fileInputRef.current?.click()}
                 sx={{
-                  position: "absolute",
-                  bottom: -4,
-                  right: -4,
-                  bgcolor: "#f59e0b",
-                  color: "#000",
-                  "&:hover": { bgcolor: "#d97706" },
-                  boxShadow: "0 2px 8px rgba(0,0,0,0.5)",
+                  bgcolor: "#fffbeb",
+                  color: "#d97706",
+                  border: "1px solid #fef3c7",
+                  fontWeight: 800,
+                  fontSize: "0.72rem",
                 }}
-              >
-                <PhotoCameraIcon sx={{ fontSize: 16 }} />
-              </IconButton>
+              />
             </Box>
 
-            <div>
-              <Box sx={{ display: "flex", alignItems: "center", gap: 1.5, mb: 0.5, flexWrap: "wrap" }}>
-                <Typography variant="h4" sx={{ fontWeight: 800 }}>
-                  {member?.memberNick || "VIP Member"}
-                </Typography>
-                <Chip
-                  icon={<EmojiEventsIcon sx={{ color: "#000 !important", fontSize: 16 }} />}
-                  label={currentPoints >= 300 ? "PLATINUM VIP" : "GOLD VIP MEMBER"}
-                  size="small"
-                  sx={{
-                    bgcolor: "#f59e0b",
-                    color: "#000",
-                    fontWeight: 800,
-                    fontSize: "0.75rem",
-                  }}
-                />
-                <Chip
-                  icon={<VerifiedUserIcon sx={{ color: "#10b981 !important", fontSize: 14 }} />}
-                  label="VERIFIED"
-                  size="small"
-                  sx={{
-                    bgcolor: "rgba(16, 185, 129, 0.15)",
-                    color: "#10b981",
-                    fontWeight: 700,
-                    fontSize: "0.72rem",
-                  }}
-                />
-              </Box>
-
-              <Typography variant="body2" sx={{ color: "#94a3b8", mb: 0.5 }}>
-                {member?.memberPhone || "+998 90 123 45 67"} &bull; {member?.memberAddress || "Tashkent, Uzbekistan"}
-              </Typography>
-              <Typography variant="caption" sx={{ color: "#cbd5e1" }}>
-                {member?.memberDesc || "Valued Burak VIP Gourmet Club Member"}
-              </Typography>
-            </div>
-          </Box>
-        </Box>
-
-        {/* Loyalty Points Bar */}
-        <Box sx={{ mt: 4, pt: 3, borderTop: "1px solid rgba(255,255,255,0.1)" }}>
-          <Box sx={{ display: "flex", justifyContent: "space-between", mb: 1, flexWrap: "wrap", gap: 1 }}>
-            <Typography variant="subtitle2" sx={{ color: "#cbd5e1" }}>
-              Loyalty Tier Progress: <strong style={{ color: "#f59e0b" }}>{currentPoints} pts</strong> / {targetPoints} pts
+            <Typography variant="body2" sx={{ color: "#64748b", mb: 0.5, fontWeight: 500 }}>
+              📞 {member?.memberPhone || "+998 90 123 45 67"}
             </Typography>
-            <Typography variant="subtitle2" sx={{ color: "#f59e0b", fontWeight: 700 }}>
-              {Math.max(0, targetPoints - currentPoints)} pts to {currentPoints >= 300 ? "DIAMOND VIP" : "PLATINUM VIP"}
+            <Typography variant="body2" sx={{ color: "#64748b", fontWeight: 500 }}>
+              📍 {member?.memberAddress || "Tashkent, Uzbekistan"}
             </Typography>
           </Box>
-          <LinearProgress
-            variant="determinate"
-            value={progress}
-            sx={{
-              height: 10,
-              borderRadius: 5,
-              bgcolor: "rgba(255,255,255,0.1)",
-              "& .MuiLinearProgress-bar": {
-                background: "linear-gradient(90deg, #f59e0b, #fbbf24)",
-                borderRadius: 5,
-              },
-            }}
-          />
         </Box>
       </Card>
 
-      {/* Stats Metrics */}
-      <Grid container spacing={3}>
-        <Grid size={{ xs: 6, md: 3 }}>
-          <Card sx={{ p: 2.5, borderRadius: 3, border: "1px solid #e2e8f0" }}>
-            <Box sx={{ display: "flex", alignItems: "center", gap: 2 }}>
-              <Box sx={{ width: 48, height: 48, borderRadius: 2.5, bgcolor: "rgba(245, 158, 11, 0.12)", color: "#d97706", display: "flex", alignItems: "center", justifyContent: "center" }}>
-                <ShoppingBagIcon />
-              </Box>
-              <div>
-                <Typography variant="caption" color="text.secondary" sx={{ fontWeight: 600 }}>TOTAL ORDERS</Typography>
-                <Typography variant="h5" sx={{ fontWeight: 800 }}>12</Typography>
-              </div>
-            </Box>
+      {/* 3 Simple Metrics Cards */}
+      <Grid container spacing={2.5}>
+        <Grid size={{ xs: 4, sm: 4, md: 4 }}>
+          <Card
+            sx={{
+              p: { xs: 2, md: 2.5 },
+              textAlign: "center",
+              borderRadius: 4,
+              border: "1px solid #f1f5f9",
+              bgcolor: "#ffffff",
+              boxShadow: "0 6px 20px rgba(0,0,0,0.02)",
+            }}
+          >
+            <ShoppingBagOutlinedIcon sx={{ color: "#f59e0b", fontSize: { xs: 26, md: 30 }, mb: 0.5 }} />
+            <Typography variant="h5" sx={{ fontWeight: 900, color: "#0f172a", fontSize: { xs: "1.2rem", md: "1.5rem" } }}>
+              12
+            </Typography>
+            <Typography variant="caption" sx={{ color: "#64748b", fontWeight: 700, fontSize: { xs: "0.7rem", md: "0.8rem" } }}>
+              Total Orders
+            </Typography>
           </Card>
         </Grid>
-        <Grid size={{ xs: 6, md: 3 }}>
-          <Card sx={{ p: 2.5, borderRadius: 3, border: "1px solid #e2e8f0" }}>
-            <Box sx={{ display: "flex", alignItems: "center", gap: 2 }}>
-              <Box sx={{ width: 48, height: 48, borderRadius: 2.5, bgcolor: "rgba(16, 185, 129, 0.12)", color: "#059669", display: "flex", alignItems: "center", justifyContent: "center" }}>
-                <EmojiEventsIcon />
-              </Box>
-              <div>
-                <Typography variant="caption" color="text.secondary" sx={{ fontWeight: 600 }}>BURAK POINTS</Typography>
-                <Typography variant="h5" sx={{ fontWeight: 800 }}>{currentPoints} pts</Typography>
-              </div>
-            </Box>
+
+        <Grid size={{ xs: 4, sm: 4, md: 4 }}>
+          <Card
+            sx={{
+              p: { xs: 2, md: 2.5 },
+              textAlign: "center",
+              borderRadius: 4,
+              border: "1px solid #f1f5f9",
+              bgcolor: "#ffffff",
+              boxShadow: "0 6px 20px rgba(0,0,0,0.02)",
+            }}
+          >
+            <EmojiEventsOutlinedIcon sx={{ color: "#10b981", fontSize: { xs: 26, md: 30 }, mb: 0.5 }} />
+            <Typography variant="h5" sx={{ fontWeight: 900, color: "#0f172a", fontSize: { xs: "1.2rem", md: "1.5rem" } }}>
+              {currentPoints}
+            </Typography>
+            <Typography variant="caption" sx={{ color: "#64748b", fontWeight: 700, fontSize: { xs: "0.7rem", md: "0.8rem" } }}>
+              Points
+            </Typography>
           </Card>
         </Grid>
-        <Grid size={{ xs: 6, md: 3 }}>
-          <Card sx={{ p: 2.5, borderRadius: 3, border: "1px solid #e2e8f0" }}>
-            <Box sx={{ display: "flex", alignItems: "center", gap: 2 }}>
-              <Box sx={{ width: 48, height: 48, borderRadius: 2.5, bgcolor: "rgba(239, 68, 68, 0.12)", color: "#dc2626", display: "flex", alignItems: "center", justifyContent: "center" }}>
-                <FavoriteIcon />
-              </Box>
-              <div>
-                <Typography variant="caption" color="text.secondary" sx={{ fontWeight: 600 }}>FAVORITES</Typography>
-                <Typography variant="h5" sx={{ fontWeight: 800 }}>6 Dishes</Typography>
-              </div>
-            </Box>
-          </Card>
-        </Grid>
-        <Grid size={{ xs: 6, md: 3 }}>
-          <Card sx={{ p: 2.5, borderRadius: 3, border: "1px solid #e2e8f0" }}>
-            <Box sx={{ display: "flex", alignItems: "center", gap: 2 }}>
-              <Box sx={{ width: 48, height: 48, borderRadius: 2.5, bgcolor: "rgba(59, 130, 246, 0.12)", color: "#2563eb", display: "flex", alignItems: "center", justifyContent: "center" }}>
-                <LocationOnIcon />
-              </Box>
-              <div>
-                <Typography variant="caption" color="text.secondary" sx={{ fontWeight: 600 }}>SAVED ADDRESSES</Typography>
-                <Typography variant="h5" sx={{ fontWeight: 800 }}>2 Locations</Typography>
-              </div>
-            </Box>
+
+        <Grid size={{ xs: 4, sm: 4, md: 4 }}>
+          <Card
+            sx={{
+              p: { xs: 2, md: 2.5 },
+              textAlign: "center",
+              borderRadius: 4,
+              border: "1px solid #f1f5f9",
+              bgcolor: "#ffffff",
+              boxShadow: "0 6px 20px rgba(0,0,0,0.02)",
+            }}
+          >
+            <VerifiedOutlinedIcon sx={{ color: "#3b82f6", fontSize: { xs: 26, md: 30 }, mb: 0.5 }} />
+            <Typography variant="h5" sx={{ fontWeight: 900, color: "#0f172a", fontSize: { xs: "1.2rem", md: "1.5rem" } }}>
+              Active
+            </Typography>
+            <Typography variant="caption" sx={{ color: "#64748b", fontWeight: 700, fontSize: { xs: "0.7rem", md: "0.8rem" } }}>
+              Status
+            </Typography>
           </Card>
         </Grid>
       </Grid>

@@ -27,13 +27,17 @@ export default function App() {
   const [toastMsg, setToastMsg] = useState<string>("");
 
   useEffect(() => {
-    const memberService = new MemberService();
-    memberService
-      .getMemberDetail()
-      .then((data) => setAuthMember(data))
-      .catch(() => {
-        // If cookie/token invalid, keep localStorage or reset
-      });
+    const memberJson = localStorage.getItem("member_data");
+    if (memberJson) {
+      const memberService = new MemberService();
+      memberService
+        .getMemberDetail()
+        .then((data) => setAuthMember(data))
+        .catch(() => {
+          // If session expired on server, clear stale localStorage
+          setAuthMember(null);
+        });
+    }
   }, [setAuthMember]);
 
   const handleLogout = async () => {
@@ -50,6 +54,8 @@ export default function App() {
 
   const handleCheckout = async () => {
     if (!authMember) {
+      setToastMsg("Please sign in to place your order!");
+      setToastOpen(true);
       setAuthOpen(true);
       return;
     }
@@ -69,7 +75,13 @@ export default function App() {
       setToastOpen(true);
       window.location.href = "/orders";
     } catch (err: any) {
-      setToastMsg(err.response?.data?.message || "Order placement failed.");
+      if (err.response?.status === 401) {
+        setAuthMember(null);
+        setToastMsg("Session expired. Please sign in again.");
+        setAuthOpen(true);
+      } else {
+        setToastMsg(err.response?.data?.message || "Order placement failed.");
+      }
       setToastOpen(true);
     }
   };

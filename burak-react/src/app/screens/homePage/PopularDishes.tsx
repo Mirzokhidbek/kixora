@@ -29,7 +29,7 @@ export function PopularDishes({ onAdd }: PopularDishesProps) {
   const defaultDishes = [
     {
       _id: "1",
-      productName: "Burak Giant Tomahawk Steak",
+      productName: "Burak Signature Tomahawk",
       productPrice: 48.0,
       productViews: 1240,
       productImages: [
@@ -77,67 +77,85 @@ export function PopularDishes({ onAdd }: PopularDishesProps) {
   };
 
   return (
-    <Box sx={{ py: 8, bgcolor: "#fff" }}>
-      <Container maxWidth="lg">
+    <Box sx={{ py: { xs: 6, md: 9 }, bgcolor: "#ffffff", width: "100%", overflowX: "hidden" }}>
+      <Container maxWidth="lg" sx={{ px: { xs: 2, sm: 3 } }}>
         {/* Section Header */}
-        <Box sx={{ textAlign: "center", mb: 6 }}>
-          <Box sx={{ display: "inline-flex", alignItems: "center", gap: 1, mb: 1.5 }}>
-            <LocalFireDepartmentIcon sx={{ color: "#ef4444" }} />
-            <Typography variant="overline" sx={{ color: "primary.main", fontWeight: 800, letterSpacing: 2 }}>
-              MOST POPULAR SELECTIONS
+        <Box sx={{ textAlign: "center", mb: { xs: 4, md: 6 } }}>
+          <Box sx={{ display: "inline-flex", alignItems: "center", gap: 0.8, mb: 1.5, bgcolor: "#fffbeb", px: 2, py: 0.6, borderRadius: 99 }}>
+            <LocalFireDepartmentIcon sx={{ color: "#f59e0b", fontSize: 18 }} />
+            <Typography variant="overline" sx={{ color: "#d97706", fontWeight: 800, letterSpacing: 1.5 }}>
+              TOP CHEF SPECIALS
             </Typography>
           </Box>
-          <Typography variant="h3" sx={{ fontWeight: 800, mb: 1.5 }}>
-            Chef's Signature Dishes
+          <Typography
+            variant="h2"
+            sx={{
+              fontWeight: 900,
+              mb: 1.5,
+              color: "#0f172a",
+              fontSize: { xs: "1.75rem", sm: "2.2rem", md: "2.6rem" },
+              wordBreak: "break-word",
+            }}
+          >
+            Popular <span style={{ color: "#f59e0b" }}>Delicious</span> Dishes
           </Typography>
-          <Typography variant="body1" color="text.secondary" sx={{ maxWidth: 600, mx: "auto" }}>
-            The most celebrated culinary masterpieces crafted by Chef CZN Burak, ordered by thousands of food lovers daily.
+          <Typography variant="body1" color="text.secondary" sx={{ maxWidth: 580, mx: "auto", fontSize: { xs: "0.92rem", md: "1.05rem" } }}>
+            The most celebrated culinary masterpieces crafted by Chef CZN Burak, loved by thousands of guests daily.
           </Typography>
         </Box>
 
         {/* Dishes Grid */}
-        <Grid container spacing={3.5}>
+        <Grid container spacing={{ xs: 2.5, sm: 3, md: 3.5 }}>
           {dishes.map((dish) => (
             <Grid key={dish._id} size={{ xs: 12, sm: 6, md: 3 }}>
               <Card
                 sx={{
-                  borderRadius: 4,
+                  borderRadius: { xs: 4, md: 5 },
                   height: "100%",
                   display: "flex",
                   flexDirection: "column",
-                  transition: "all 0.3s cubic-bezier(0.4, 0, 0.2, 1)",
-                  border: "1px solid #e2e8f0",
+                  transition: "all 0.35s cubic-bezier(0.4, 0, 0.2, 1)",
+                  border: "1px solid #f1f5f9",
+                  bgcolor: "#ffffff",
+                  boxShadow: "0 10px 30px rgba(0,0,0,0.04)",
                   cursor: "pointer",
+                  overflow: "hidden",
                   "&:hover": {
                     transform: "translateY(-8px)",
-                    boxShadow: "0 20px 35px rgba(15, 23, 42, 0.12)",
-                    borderColor: "primary.light",
+                    boxShadow: "0 20px 40px rgba(245, 158, 11, 0.15)",
+                    borderColor: "#fef3c7",
                   },
                 }}
                 onClick={() => navigate(`/products/${dish._id}`)}
               >
-                <Box sx={{ position: "relative", overflow: "hidden" }}>
+                <Box sx={{ position: "relative", overflow: "hidden", pt: "68%" }}>
                   <CardMedia
                     component="img"
-                    height="210"
                     image={getImageSrc(dish.productImages?.[0])}
                     alt={dish.productName}
                     sx={{
+                      position: "absolute",
+                      top: 0,
+                      left: 0,
+                      width: "100%",
+                      height: "100%",
+                      objectFit: "cover",
                       transition: "transform 0.5s ease",
-                      "&:hover": { transform: "scale(1.06)" },
+                      "&:hover": { transform: "scale(1.08)" },
                     }}
                   />
                   <Chip
-                    label="SIGNATURE"
+                    label="POPULAR"
                     size="small"
                     sx={{
                       position: "absolute",
                       top: 12,
                       left: 12,
-                      bgcolor: "#0f172a",
-                      color: "#f59e0b",
+                      bgcolor: "#f59e0b",
+                      color: "#fff",
                       fontWeight: 800,
-                      fontSize: "0.72rem",
+                      fontSize: "0.7rem",
+                      boxShadow: "0 4px 10px rgba(245, 158, 11, 0.4)",
                     }}
                   />
                   <Box
@@ -145,15 +163,17 @@ export function PopularDishes({ onAdd }: PopularDishesProps) {
                       position: "absolute",
                       bottom: 10,
                       right: 10,
-                      bgcolor: "rgba(0,0,0,0.65)",
+                      bgcolor: "rgba(15, 23, 42, 0.75)",
+                      backdropFilter: "blur(8px)",
                       color: "#fff",
-                      px: 1,
-                      py: 0.3,
+                      px: 1.2,
+                      py: 0.4,
                       borderRadius: 2,
                       display: "flex",
                       alignItems: "center",
                       gap: 0.5,
                       fontSize: "0.75rem",
+                      fontWeight: 700,
                     }}
                   >
                     <VisibilityIcon sx={{ fontSize: 14, color: "#f59e0b" }} />
@@ -161,31 +181,40 @@ export function PopularDishes({ onAdd }: PopularDishesProps) {
                   </Box>
                 </Box>
 
-                <CardContent sx={{ flexGrow: 1, p: 2.5, display: "flex", flexDirection: "column" }}>
-                  <Typography variant="h6" sx={{ fontWeight: 800, fontSize: "1.05rem", mb: 1, lineHeight: 1.3 }}>
+                <CardContent sx={{ flexGrow: 1, p: { xs: 2.2, md: 2.8 }, display: "flex", flexDirection: "column" }}>
+                  <Typography variant="h6" sx={{ fontWeight: 800, fontSize: "1.05rem", mb: 0.8, lineHeight: 1.3, color: "#0f172a" }}>
                     {dish.productName}
                   </Typography>
-                  <Typography variant="body2" color="text.secondary" sx={{ mb: 2, flexGrow: 1, fontSize: "0.85rem", lineHeight: 1.5 }}>
+                  <Typography variant="body2" color="text.secondary" sx={{ mb: 1.8, flexGrow: 1, fontSize: "0.85rem", lineHeight: 1.5 }}>
                     {dish.productDesc || "Traditional Burak culinary delight."}
                   </Typography>
 
                   <Box sx={{ display: "flex", alignItems: "center", gap: 1, mb: 2 }}>
                     <Rating value={5} readOnly size="small" sx={{ color: "#f59e0b" }} />
-                    <Typography variant="caption" sx={{ color: "#64748b", fontWeight: 700 }}>
-                      5.0
+                    <Typography variant="caption" sx={{ color: "#64748b", fontWeight: 800 }}>
+                      5.0 (120+)
                     </Typography>
                   </Box>
 
-                  <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "center", mt: "auto", pt: 1, borderTop: "1px solid #f1f5f9" }}>
-                    <Typography variant="h6" sx={{ fontWeight: 800, color: "#0f172a" }}>
+                  <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "center", mt: "auto", pt: 1.5, borderTop: "1px solid #f8fafc" }}>
+                    <Typography variant="h5" sx={{ fontWeight: 900, color: "#0f172a", fontSize: "1.25rem" }}>
                       ${dish.productPrice?.toFixed(2)}
                     </Typography>
                     <Button
                       variant="contained"
-                      color="primary"
                       size="small"
                       startIcon={<AddShoppingCartIcon sx={{ fontSize: 16 }} />}
-                      sx={{ borderRadius: 2.5, px: 2, fontWeight: 700, fontSize: "0.8rem" }}
+                      sx={{
+                        borderRadius: 3,
+                        px: 2.2,
+                        py: 0.7,
+                        fontWeight: 800,
+                        fontSize: "0.82rem",
+                        bgcolor: "#eab308",
+                        color: "#fff",
+                        boxShadow: "0 4px 12px rgba(234, 179, 8, 0.3)",
+                        "&:hover": { bgcolor: "#ca8a04" },
+                      }}
                       onClick={(e) => {
                         e.stopPropagation();
                         if (onAdd) onAdd(dish);

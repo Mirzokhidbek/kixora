@@ -11,7 +11,6 @@ import {
   Snackbar,
   Alert,
 } from "@mui/material";
-import RestaurantMenuIcon from "@mui/icons-material/RestaurantMenu";
 import InstagramIcon from "@mui/icons-material/Instagram";
 import YouTubeIcon from "@mui/icons-material/YouTube";
 import TelegramIcon from "@mui/icons-material/Telegram";
@@ -34,7 +33,7 @@ export function Footer() {
       setToastOpen(true);
       return;
     }
-    setToastMsg("Thank you for joining Burak VIP Club!");
+    setToastMsg("Thank you for joining Burakfood VIP Club!");
     setToastOpen(true);
     setEmail("");
   };
@@ -43,7 +42,7 @@ export function Footer() {
     <Box
       component="footer"
       sx={{
-        bgcolor: "#0b0f19",
+        bgcolor: "#090d16",
         color: "#94a3b8",
         pt: 8,
         pb: 4,
@@ -58,29 +57,24 @@ export function Footer() {
           <Grid size={{ xs: 12, md: 4 }}>
             <Box
               onClick={() => navigate("/")}
-              sx={{ display: "flex", alignItems: "center", gap: 1.5, mb: 2.5, cursor: "pointer" }}
+              sx={{ display: "flex", alignItems: "center", gap: 1, mb: 2, cursor: "pointer" }}
             >
-              <Box
+              <Typography
+                variant="h4"
                 sx={{
-                  width: 40,
-                  height: 40,
-                  borderRadius: 2,
-                  background: "linear-gradient(135deg, #f59e0b, #d97706)",
-                  display: "flex",
-                  alignItems: "center",
-                  justifyContent: "center",
-                  color: "#000",
+                  fontFamily: '"Outfit", sans-serif',
+                  fontWeight: 900,
+                  fontSize: "1.8rem",
+                  color: "#f59e0b",
+                  letterSpacing: "-0.03em",
                 }}
               >
-                <RestaurantMenuIcon />
-              </Box>
-              <Typography variant="h5" sx={{ color: "#fff", fontWeight: 800 }}>
-                BURAK <span style={{ color: "#f59e0b" }}>RESTAURANT</span>
+                Burak<span style={{ color: "#ffffff" }}>food</span>
               </Typography>
             </Box>
 
-            <Typography variant="body2" sx={{ lineHeight: 1.8, mb: 3, maxWidth: 340 }}>
-              Indulge in authentic Turkish gastronomy. Savor oversized steaks, wood-fired kebabs, and Gaziantep pistachio baklavas crafted with perfection.
+            <Typography variant="body2" sx={{ lineHeight: 1.8, mb: 3, maxWidth: 340, color: "#94a3b8" }}>
+              Indulge in authentic Turkish gastronomy. Savor oversized steaks, wood-fired kebabs, and Gaziantep pistachio baklavas crafted with love by Chef CZN Burak.
             </Typography>
 
             {/* Social Icons */}
@@ -101,7 +95,7 @@ export function Footer() {
                     border: "1px solid rgba(255,255,255,0.1)",
                     "&:hover": {
                       color: "#000",
-                      bgcolor: "primary.main",
+                      bgcolor: "#f59e0b",
                       transform: "translateY(-3px)",
                     },
                     transition: "0.2s",
@@ -115,7 +109,7 @@ export function Footer() {
 
           {/* Col 2: Quick Links */}
           <Grid size={{ xs: 6, sm: 3, md: 2 }}>
-            <Typography variant="subtitle1" sx={{ color: "#fff", fontWeight: 700, mb: 2.5 }}>
+            <Typography variant="subtitle1" sx={{ color: "#fff", fontWeight: 800, mb: 2.5 }}>
               Explore Menu
             </Typography>
             <Box sx={{ display: "flex", flexDirection: "column", gap: 1.2 }}>
@@ -129,30 +123,30 @@ export function Footer() {
                 Turkish Desserts
               </Link>
               <Link onClick={() => navigate("/products")} sx={{ cursor: "pointer", "&:hover": { color: "#f59e0b" } }} color="inherit" underline="hover">
-                Beverages & Drinks
+                Samovar Beverages
               </Link>
               <Link onClick={() => navigate("/orders")} sx={{ cursor: "pointer", "&:hover": { color: "#f59e0b" } }} color="inherit" underline="hover">
-                Track My Order
+                Track Orders
               </Link>
             </Box>
           </Grid>
 
           {/* Col 3: Contact Info */}
           <Grid size={{ xs: 6, sm: 3, md: 3 }}>
-            <Typography variant="subtitle1" sx={{ color: "#fff", fontWeight: 700, mb: 2.5 }}>
-              Restaurant Contact
+            <Typography variant="subtitle1" sx={{ color: "#fff", fontWeight: 800, mb: 2.5 }}>
+              Contact Us
             </Typography>
             <Box sx={{ display: "flex", flexDirection: "column", gap: 2 }}>
               <Box sx={{ display: "flex", alignItems: "flex-start", gap: 1.5 }}>
-                <LocationOnIcon sx={{ color: "primary.main", fontSize: 20, mt: 0.2 }} />
+                <LocationOnIcon sx={{ color: "#f59e0b", fontSize: 20, mt: 0.2 }} />
                 <Typography variant="body2">Amir Timur Avenue, Tashkent, Uzbekistan</Typography>
               </Box>
               <Box sx={{ display: "flex", alignItems: "center", gap: 1.5 }}>
-                <PhoneIcon sx={{ color: "primary.main", fontSize: 20 }} />
+                <PhoneIcon sx={{ color: "#f59e0b", fontSize: 20 }} />
                 <Typography variant="body2">+998 71 200 45 67</Typography>
               </Box>
               <Box sx={{ display: "flex", alignItems: "center", gap: 1.5 }}>
-                <AccessTimeIcon sx={{ color: "primary.main", fontSize: 20 }} />
+                <AccessTimeIcon sx={{ color: "#f59e0b", fontSize: 20 }} />
                 <Typography variant="body2">Mon - Sun: 10:00 - 23:30</Typography>
               </Box>
             </Box>
@@ -160,10 +154,10 @@ export function Footer() {
 
           {/* Col 4: Newsletter */}
           <Grid size={{ xs: 12, md: 3 }}>
-            <Typography variant="subtitle1" sx={{ color: "#fff", fontWeight: 700, mb: 2.5 }}>
-              Join Burak VIP Club
+            <Typography variant="subtitle1" sx={{ color: "#fff", fontWeight: 800, mb: 2.5 }}>
+              Join Burakfood VIP Club
             </Typography>
-            <Typography variant="body2" sx={{ mb: 2 }}>
+            <Typography variant="body2" sx={{ mb: 2, color: "#94a3b8" }}>
               Subscribe to receive exclusive chef specials, seasonal discounts, and secret menu invites.
             </Typography>
             <Box sx={{ display: "flex", gap: 1 }}>
@@ -182,8 +176,7 @@ export function Footer() {
               />
               <Button
                 variant="contained"
-                color="primary"
-                sx={{ minWidth: 44, px: 2, borderRadius: 2 }}
+                sx={{ minWidth: 44, px: 2, borderRadius: 2, bgcolor: "#f59e0b", "&:hover": { bgcolor: "#d97706" } }}
                 onClick={handleSubscribe}
               >
                 <SendIcon fontSize="small" />
@@ -205,7 +198,7 @@ export function Footer() {
           }}
         >
           <Typography variant="caption" sx={{ color: "#64748b" }}>
-            &copy; {new Date().getFullYear()} Burak Restaurant Group. All Rights Reserved.
+            &copy; {new Date().getFullYear()} Burakfood Culinary Group. All Rights Reserved.
           </Typography>
           <Box sx={{ display: "flex", gap: 3 }}>
             <Link onClick={() => navigate("/help")} sx={{ cursor: "pointer", color: "#64748b" }} underline="hover" variant="caption">
