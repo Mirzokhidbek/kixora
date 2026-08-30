@@ -1,15 +1,13 @@
-import { createTheme } from "@mui/material/styles";
+import { createTheme, responsiveFontSizes } from "@mui/material/styles";
 
-/**
- * BURAK REACT - CUSTOM MATERIAL-UI THEME
- */
-const customTheme = createTheme({
+let customTheme = createTheme({
   palette: {
+    mode: "light",
     primary: {
       main: "#f59e0b",
       light: "#fbbf24",
       dark: "#d97706",
-      contrastText: "#000000",
+      contrastText: "#090d16",
     },
     secondary: {
       main: "#0f172a",
@@ -29,56 +27,84 @@ const customTheme = createTheme({
   typography: {
     fontFamily: ['"Plus Jakarta Sans"', '"Outfit"', "sans-serif"].join(","),
     h1: {
+      fontFamily: ['"Outfit"', '"Plus Jakarta Sans"', "sans-serif"].join(","),
+      fontWeight: 900,
+      letterSpacing: "-0.03em",
+      color: "#0f172a",
+    },
+    h2: {
+      fontFamily: ['"Outfit"', '"Plus Jakarta Sans"', "sans-serif"].join(","),
+      fontWeight: 800,
+      letterSpacing: "-0.02em",
+      color: "#0f172a",
+    },
+    h3: {
+      fontFamily: ['"Outfit"', '"Plus Jakarta Sans"', "sans-serif"].join(","),
       fontWeight: 800,
       letterSpacing: "-0.02em",
     },
-    h2: {
-      fontWeight: 700,
-      letterSpacing: "-0.02em",
-    },
-    h3: {
-      fontWeight: 700,
-    },
     h4: {
-      fontWeight: 600,
+      fontFamily: ['"Outfit"', '"Plus Jakarta Sans"', "sans-serif"].join(","),
+      fontWeight: 700,
     },
     h5: {
-      fontWeight: 600,
+      fontWeight: 700,
     },
     h6: {
-      fontWeight: 600,
+      fontWeight: 700,
     },
     button: {
-      fontWeight: 700,
+      fontFamily: ['"Plus Jakarta Sans"', "sans-serif"].join(","),
+      fontWeight: 800,
       textTransform: "none",
+      letterSpacing: "0.01em",
     },
   },
   shape: {
-    borderRadius: 12,
+    borderRadius: 16,
   },
   components: {
     MuiButton: {
       styleOverrides: {
         root: {
-          borderRadius: 12,
-          padding: "8px 22px",
+          borderRadius: 14,
+          padding: "10px 24px",
+          transition: "all 0.25s cubic-bezier(0.4, 0, 0.2, 1)",
           boxShadow: "none",
           "&:hover": {
-            boxShadow: "0 4px 12px rgba(245, 158, 11, 0.25)",
+            transform: "translateY(-2px)",
+            boxShadow: "0 8px 20px rgba(245, 158, 11, 0.3)",
           },
+          "&:active": {
+            transform: "translateY(0)",
+          },
+        },
+        contained: {
+          fontWeight: 800,
         },
       },
     },
     MuiCard: {
       styleOverrides: {
         root: {
-          borderRadius: 16,
-          boxShadow: "0 4px 20px rgba(15, 23, 42, 0.06)",
+          borderRadius: 20,
+          boxShadow: "0 10px 30px rgba(15, 23, 42, 0.06)",
           border: "1px solid #e2e8f0",
+          transition: "all 0.3s cubic-bezier(0.4, 0, 0.2, 1)",
+        },
+      },
+    },
+    MuiChip: {
+      styleOverrides: {
+        root: {
+          borderRadius: 10,
+          fontWeight: 700,
         },
       },
     },
   },
 });
+
+customTheme = responsiveFontSizes(customTheme);
 
 export default customTheme;

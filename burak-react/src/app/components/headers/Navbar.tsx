@@ -16,12 +16,14 @@ import {
   ListItem,
   ListItemButton,
   ListItemText,
+  Slide,
 } from "@mui/material";
 import ShoppingCartOutlinedIcon from "@mui/icons-material/ShoppingCartOutlined";
 import RestaurantMenuIcon from "@mui/icons-material/RestaurantMenu";
 import MenuIcon from "@mui/icons-material/Menu";
 import PersonIcon from "@mui/icons-material/Person";
 import LogoutIcon from "@mui/icons-material/Logout";
+import ArrowForwardIcon from "@mui/icons-material/ArrowForward";
 import { NavLink, useNavigate, useLocation } from "react-router-dom";
 
 import { BasketDrawer } from "./BasketDrawer";
@@ -79,15 +81,22 @@ export function Navbar({
     0
   );
 
+  const totalCartPrice = cartItems.reduce(
+    (total, item) => total + item.price * item.quantity,
+    0
+  );
+
   return (
     <Box sx={{ position: "sticky", top: 0, zIndex: 1200 }}>
       {/* Luxury Dark Navbar */}
       <AppBar
         position="static"
         sx={{
-          bgcolor: "#0b0f19",
+          bgcolor: "rgba(9, 13, 22, 0.92)",
+          backdropFilter: "blur(20px)",
+          WebkitBackdropFilter: "blur(20px)",
           borderBottom: "1px solid rgba(255, 255, 255, 0.08)",
-          boxShadow: "0 4px 24px rgba(0, 0, 0, 0.3)",
+          boxShadow: "0 8px 32px rgba(0, 0, 0, 0.4)",
           py: 0.8,
         }}
       >
@@ -107,39 +116,56 @@ export function Navbar({
             >
               <Box
                 sx={{
-                  width: 42,
-                  height: 42,
-                  borderRadius: 2.5,
+                  width: { xs: 38, md: 44 },
+                  height: { xs: 38, md: 44 },
+                  borderRadius: 3,
                   background: "linear-gradient(135deg, #f59e0b, #d97706)",
                   display: "flex",
                   alignItems: "center",
                   justifyContent: "center",
                   color: "#000",
-                  boxShadow: "0 4px 14px rgba(245, 158, 11, 0.4)",
+                  boxShadow: "0 4px 16px rgba(245, 158, 11, 0.4)",
                 }}
               >
-                <RestaurantMenuIcon sx={{ fontSize: 24 }} />
+                <RestaurantMenuIcon sx={{ fontSize: { xs: 22, md: 26 } }} />
               </Box>
-              <Typography
-                variant="h5"
-                sx={{
-                  fontWeight: 800,
-                  letterSpacing: "0.02em",
-                  color: "#ffffff",
-                  textShadow: "0 2px 10px rgba(0,0,0,0.5)",
-                }}
-              >
-                BURAK <span style={{ color: "#f59e0b" }}>RESTAURANT</span>
-              </Typography>
+              <div>
+                <Typography
+                  variant="h6"
+                  sx={{
+                    fontFamily: '"Outfit", sans-serif',
+                    fontWeight: 900,
+                    fontSize: { xs: "1.1rem", md: "1.35rem" },
+                    letterSpacing: "0.02em",
+                    color: "#ffffff",
+                    lineHeight: 1.1,
+                  }}
+                >
+                  BURAK <span style={{ color: "#f59e0b" }}>RESTAURANT</span>
+                </Typography>
+                <Typography
+                  variant="caption"
+                  sx={{
+                    display: { xs: "none", sm: "block" },
+                    color: "#94a3b8",
+                    fontSize: "0.68rem",
+                    letterSpacing: 1.5,
+                    fontWeight: 600,
+                    textTransform: "uppercase",
+                  }}
+                >
+                  Authentic Open-Fire Gastronomy
+                </Typography>
+              </div>
             </Box>
 
-            {/* Desktop Capsule Pill Navigation Links */}
+            {/* Desktop Capsule Navigation Links */}
             <Box
               sx={{
                 display: { xs: "none", md: "flex" },
                 alignItems: "center",
-                gap: 1,
-                background: "rgba(30, 41, 59, 0.7)",
+                gap: 0.8,
+                background: "rgba(30, 41, 59, 0.6)",
                 backdropFilter: "blur(16px)",
                 px: 1.5,
                 py: 0.6,
@@ -156,18 +182,18 @@ export function Navbar({
                     component={NavLink}
                     to={item.path}
                     sx={{
-                      color: isActive ? "#ffffff" : "#94a3b8",
-                      fontWeight: 700,
-                      fontSize: "0.92rem",
+                      color: isActive ? "#000" : "#cbd5e1",
+                      fontWeight: 800,
+                      fontSize: "0.9rem",
                       px: 2.2,
-                      py: 0.6,
+                      py: 0.7,
                       borderRadius: 99,
                       backgroundColor: isActive ? "#f59e0b" : "transparent",
-                      boxShadow: isActive ? "0 2px 10px rgba(245, 158, 11, 0.4)" : "none",
+                      boxShadow: isActive ? "0 4px 14px rgba(245, 158, 11, 0.4)" : "none",
                       transition: "all 0.25s ease",
                       "&:hover": {
-                        color: "#ffffff",
-                        backgroundColor: isActive ? "#d97706" : "rgba(255, 255, 255, 0.08)",
+                        color: isActive ? "#000" : "#ffffff",
+                        backgroundColor: isActive ? "#fbbf24" : "rgba(255, 255, 255, 0.08)",
                       },
                     }}
                   >
@@ -178,7 +204,7 @@ export function Navbar({
             </Box>
 
             {/* Right Action Icons */}
-            <Box sx={{ display: "flex", alignItems: "center", gap: 2 }}>
+            <Box sx={{ display: "flex", alignItems: "center", gap: { xs: 1, sm: 2 } }}>
               {/* Cart Button */}
               <IconButton
                 sx={{
@@ -186,6 +212,8 @@ export function Navbar({
                   background: "rgba(30, 41, 59, 0.7)",
                   backdropFilter: "blur(12px)",
                   border: "1px solid rgba(255, 255, 255, 0.12)",
+                  width: { xs: 40, sm: 44 },
+                  height: { xs: 40, sm: 44 },
                   "&:hover": { background: "rgba(245, 158, 11, 0.2)", color: "#f59e0b" },
                 }}
                 onClick={() => setBasketOpen(true)}
@@ -196,12 +224,12 @@ export function Navbar({
                     "& .MuiBadge-badge": {
                       bgcolor: "#f59e0b",
                       color: "#000",
-                      fontWeight: 800,
+                      fontWeight: 900,
                       boxShadow: "0 2px 6px rgba(245,158,11,0.5)",
                     },
                   }}
                 >
-                  <ShoppingCartOutlinedIcon />
+                  <ShoppingCartOutlinedIcon fontSize="small" />
                 </Badge>
               </IconButton>
 
@@ -218,8 +246,8 @@ export function Navbar({
                       background: "rgba(30, 41, 59, 0.7)",
                       backdropFilter: "blur(12px)",
                       border: "1px solid rgba(255, 255, 255, 0.12)",
-                      pl: 0.8,
-                      pr: 2,
+                      pl: 0.6,
+                      pr: { xs: 0.6, sm: 2 },
                       py: 0.5,
                       borderRadius: 99,
                       transition: "0.2s",
@@ -297,7 +325,7 @@ export function Navbar({
                   variant="contained"
                   color="primary"
                   onClick={onLoginClick}
-                  sx={{ borderRadius: 99, px: 3, fontWeight: 700 }}
+                  sx={{ borderRadius: 99, px: { xs: 2, sm: 3 }, py: { xs: 0.6, sm: 0.8 }, fontWeight: 800, fontSize: { xs: "0.82rem", sm: "0.9rem" } }}
                 >
                   Sign In
                 </Button>
@@ -315,6 +343,59 @@ export function Navbar({
         </Container>
       </AppBar>
 
+      {/* Mobile Floating Cart Action Bar */}
+      {totalCartCount > 0 && (
+        <Slide direction="up" in={totalCartCount > 0} mountOnEnter unmountOnExit>
+          <Box
+            sx={{
+              display: { xs: "block", md: "none" },
+              position: "fixed",
+              bottom: 16,
+              left: 16,
+              right: 16,
+              zIndex: 1300,
+            }}
+          >
+            <Box
+              onClick={() => setBasketOpen(true)}
+              sx={{
+                bgcolor: "#0f172a",
+                color: "#fff",
+                p: 2,
+                borderRadius: 4,
+                display: "flex",
+                justifyContent: "space-between",
+                alignItems: "center",
+                boxShadow: "0 10px 30px rgba(0,0,0,0.5), 0 0 20px rgba(245, 158, 11, 0.3)",
+                border: "2px solid #f59e0b",
+                cursor: "pointer",
+              }}
+            >
+              <Box sx={{ display: "flex", alignItems: "center", gap: 1.5 }}>
+                <Badge badgeContent={totalCartCount} color="primary">
+                  <ShoppingCartOutlinedIcon sx={{ color: "#f59e0b" }} />
+                </Badge>
+                <div>
+                  <Typography variant="body2" sx={{ fontWeight: 800 }}>
+                    {totalCartCount} {totalCartCount === 1 ? "Dish" : "Dishes"} in Cart
+                  </Typography>
+                  <Typography variant="caption" sx={{ color: "#f59e0b", fontWeight: 700 }}>
+                    Total: ${totalCartPrice.toFixed(2)}
+                  </Typography>
+                </div>
+              </Box>
+
+              <Box sx={{ display: "flex", alignItems: "center", gap: 0.5, color: "#f59e0b", fontWeight: 800 }}>
+                <Typography variant="body2" sx={{ fontWeight: 800 }}>
+                  View Cart
+                </Typography>
+                <ArrowForwardIcon fontSize="small" />
+              </Box>
+            </Box>
+          </Box>
+        </Slide>
+      )}
+
       {/* Mobile Navigation Drawer */}
       <Drawer
         anchor="right"
@@ -322,28 +403,46 @@ export function Navbar({
         onClose={() => setMobileOpen(false)}
         slotProps={{
           paper: {
-            sx: { width: 260, bgcolor: "#0f172a", color: "#fff", p: 3 },
+            sx: { width: 280, bgcolor: "#090d16", color: "#fff", p: 3 },
           },
         }}
       >
-        <Typography variant="h6" sx={{ fontWeight: 800, color: "#f59e0b", mb: 3 }}>
-          BURAK MENU
-        </Typography>
+        <Box sx={{ display: "flex", alignItems: "center", gap: 1.5, mb: 4 }}>
+          <Box
+            sx={{
+              width: 36,
+              height: 36,
+              borderRadius: 2,
+              background: "linear-gradient(135deg, #f59e0b, #d97706)",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              color: "#000",
+            }}
+          >
+            <RestaurantMenuIcon />
+          </Box>
+          <Typography variant="h6" sx={{ fontWeight: 800, color: "#fff" }}>
+            BURAK <span style={{ color: "#f59e0b" }}>MENU</span>
+          </Typography>
+        </Box>
+
         <List>
           {navLinks.map((item) => (
-            <ListItem key={item.title} disablePadding sx={{ mb: 1 }}>
+            <ListItem key={item.title} disablePadding sx={{ mb: 1.2 }}>
               <ListItemButton
                 component={NavLink}
                 to={item.path}
                 onClick={() => setMobileOpen(false)}
                 sx={{
-                  borderRadius: 2,
-                  "&.active": { bgcolor: "rgba(245, 158, 11, 0.15)", color: "#f59e0b" },
+                  borderRadius: 3,
+                  py: 1.2,
+                  "&.active": { bgcolor: "rgba(245, 158, 11, 0.2)", color: "#f59e0b" },
                 }}
               >
                 <ListItemText
                   primary={
-                    <Typography sx={{ fontWeight: 600, color: "inherit" }}>
+                    <Typography sx={{ fontWeight: 700, fontSize: "1.05rem", color: "inherit" }}>
                       {item.title}
                     </Typography>
                   }

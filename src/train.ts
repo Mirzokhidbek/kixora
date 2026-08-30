@@ -16,14 +16,13 @@
         - `cors({ credentials: true, origin: true })`
         - Brauzer xavfsizlik siyosati tufayli turli xil portlardagi (React `http://localhost:5173` va Node backend `http://localhost:3001`) so'rovlarning cookie va headerlar bilan to'siqsiz almashinishini ta'minlaydi.
 
-  - Clean Code Architecture (Backend & Frontend):
-      1. Backend Architecture:
-         - MVC Model: Router &rarr; Controller &rarr; Service &rarr; Schema &rarr; Error Handling.
-         - Server & DB Resilience: `store.on("error")`, `uncaughtException`, `unhandledRejection`, cloud health check `GET /`.
-      2. Frontend Architecture:
-         - Pure Type Imports: `import type { Member, Product, Order }` runtime xatoliklarning oldini oladi.
-         - React Hooks & Fast Refresh: Action dispatchers `useMemo` bilan o'raldi, `useGlobals` alohida hook fayliga ajratildi, barcha `useEffect` dependency massivlari to'liq qanoatlantirildi.
-         - Linting: `oxlint` orqali 0 warning va 0 error standartiga yetkazildi.
-         - URL Sanitization: `serverApi` oxiridagi ortiqcha qiya chiziqlar tozalanishi (`.replace(/\/+$/, "")`) orqali `//route` 404 xatolarining oldi olindi.
-         - Production Serving: React SPA uchun `serve -s dist -l $PORT` qo'llandi.
+  - Responsive UI/UX & Mobile-First Excellence (Dars 87):
+      1. Layout & Viewport Fluidity:
+         - Eski tor 1126px `#root` chegaralari olib tashlandi, butun ekran kengligida (*Full-Bleed*) silliq moslashuvchanlik ta'minlandi.
+         - `index.html` ga zamonaviy Google Fonts (`Outfit`, `Plus Jakarta Sans`, `Playfair Display`) ulandi.
+      2. Mobile Ergonomics & Floating Cart Bar:
+         - Mobil qurilmalarda foydalanuvchi taom tanlaganda ekranning pastki qismida silliq chiquvchi **Floating Cart Bar** (`Slide` animatsiyasi) qo'shildi.
+         - Sensorli ekranlar uchun minimal 44px teginish hududi (*Touch targets*) va qulay barmoq ergonomikasi yaratildi.
+      3. Luxury Typography & Theme Tokens:
+         - MaterialTheme `responsiveFontSizes` orqali noutbuk, planshet va telefon ekranlarida sarlavhalar avtomatik mutanosib o'lchamga keladi.
 */
