@@ -10,6 +10,8 @@ const memberService = new MemberService();
 const authService = new AuthService();
 const memberController: T = {};
 
+const isProduction = process.env.NODE_ENV === "production";
+
 /** SPA: Get Restaurant Details **/
 memberController.getRestaurant = async (req: Request, res: Response) => {
   try {
@@ -49,6 +51,8 @@ memberController.signup = async (req: Request, res: Response) => {
     res.cookie("accessToken", token, {
       maxAge: AUTH_TIMER * 3600 * 1000,
       httpOnly: false,
+      sameSite: isProduction ? "none" : "lax",
+      secure: isProduction,
     });
 
     res.status(HTTPCode.CREATED).json({ member: result, accessToken: token });
@@ -70,6 +74,8 @@ memberController.login = async (req: Request, res: Response) => {
     res.cookie("accessToken", token, {
       maxAge: AUTH_TIMER * 3600 * 1000,
       httpOnly: false,
+      sameSite: isProduction ? "none" : "lax",
+      secure: isProduction,
     });
 
     res.status(HTTPCode.OK).json({ member: result, accessToken: token });
@@ -84,7 +90,12 @@ memberController.login = async (req: Request, res: Response) => {
 memberController.logout = (req: Request, res: Response) => {
   try {
     console.log("logout");
-    res.cookie("accessToken", null, { maxAge: 0, httpOnly: false });
+    res.cookie("accessToken", null, {
+      maxAge: 0,
+      httpOnly: false,
+      sameSite: isProduction ? "none" : "lax",
+      secure: isProduction,
+    });
     res.status(HTTPCode.OK).json({ logout: true });
   } catch (err) {
     console.log("Error, logout:", err);

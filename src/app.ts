@@ -18,6 +18,18 @@ const store = new MongoDBStore({
 
 /** 1-ENTRANCE **/
 const app = express();
+app.set("trust proxy", 1);
+
+// Configure CORS at top priority
+app.use(
+  cors({
+    credentials: true,
+    origin: true,
+    methods: ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
+    allowedHeaders: ["Content-Type", "Authorization", "X-Requested-With", "Accept", "Origin"],
+  })
+);
+
 app.use(express.static(path.join(__dirname, "public")));
 app.use(express.static(path.resolve("public")));
 app.use(express.static("public"));
@@ -27,21 +39,18 @@ app.use("/public/uploads", express.static(path.resolve("public/uploads")));
 
 app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
-app.use(
-  cors({
-    credentials: true,
-    origin: true,
-  })
-);
 app.use(cookieParser());
 app.use(morgan(MORGAN_FORMAT));
 
 /** 2-SESSIONS **/
+const isProduction = process.env.NODE_ENV === "production";
 app.use(
   session({
     secret: String(process.env.SESSION_SECRET || "BURAK_SESSION_SECRET"),
     cookie: {
       maxAge: 1000 * 3600 * 6, // 6 hours
+      sameSite: isProduction ? "none" : "lax",
+      secure: isProduction,
     },
     store: store,
     resave: true,

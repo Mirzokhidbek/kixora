@@ -29,6 +29,8 @@
               - Build: `npm run build`
               - Start: `npm run serve`
               - Variables: `VITE_API_URL` (Backend Railway domeni).
-      2. Vite Cloud Hosts Security:
-         - `vite.config.ts` da `preview: { allowedHosts: true }` sozlamasi orqali Railway cloud domenlari (`.railway.app`) orqali saytning bloklanmasdan to'siqsiz ochilishi ta'minlandi.
+      2. Cloud CORS & Cross-Domain Cookies:
+         - `app.set("trust proxy", 1)`: Cloud proksi (Railway/Cloudflare) orqasida HTTPS so'rovlarini to'g'ri qabul qilish.
+         - CORS middleware eng yuqori 1-o'ringa qo'yildi (barcha preflight va GET/POST so'rovlariga zudlik bilan javob berish uchun).
+         - `sameSite: "none"` va `secure: true`: Turli xil domenlar (masalan, `burakfrontend-production.up.railway.app` &rarr; `burak-backend-production.up.railway.app`) o'rtasida `accessToken` cookie-larining uzatilishini ta'minlaydi.
 */
