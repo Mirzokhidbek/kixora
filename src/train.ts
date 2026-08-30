@@ -29,6 +29,6 @@
               - Build: `npm run build`
               - Start: `npm run serve` (yoki `serve -s dist -l $PORT`)
               - Variables: `VITE_API_URL` (Backend Railway domeni).
-      2. Production SPA Static Server (`serve`):
-         - Frontend uchun `serve -s dist -l $PORT` o'rnatildi. Bu SPA routing (`/products`, `/orders`, `/user`, `/help`) to'g'ridan-to'g'ri ochilganda 404 bermasdan, cloud portida to'xtovsiz ishlashini ta'minlaydi.
+      2. Production URL Sanitization:
+         - `serverApi` dagi oxirgi qiya chiziqlar (`/`) avtomatik tozalanishi (`.replace(/\/+$/, "")`) ta'minlandi. Bu `//member/restaurant` kabi qo'sh chiziq sababli 404 xatolarining oldini oladi.
 */
