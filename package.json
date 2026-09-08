@@ -1,7 +1,7 @@
 {
-  "name": "burak",
+  "name": "kixora-server",
   "version": "1.0.0",
-  "description": "This is burak project backend",
+  "description": "KIXORA Luxury Footwear Backend API & Admin Portal",
   "main": "src/server.ts",
   "scripts": {
     "start": "ts-node src/server.ts",
