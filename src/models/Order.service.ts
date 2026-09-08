@@ -136,6 +136,70 @@ class OrderService {
 
     return (result as any).toJSON() as Order;
   }
+
+  /** BSSR: Get All Orders for Brand Admin with Customer & Product details **/
+  public async getAllOrdersByAdmin(): Promise<Order[]> {
+    const result = await this.orderModel
+      .aggregate([
+        { $sort: { createdAt: -1 } },
+        {
+          $lookup: {
+            from: "members",
+            localField: "memberId",
+            foreignField: "_id",
+            as: "memberData",
+          },
+        },
+        {
+          $unwind: {
+            path: "$memberData",
+            preserveNullAndEmptyArrays: true,
+          },
+        },
+        {
+          $lookup: {
+            from: "orderitems",
+            localField: "_id",
+            foreignField: "orderId",
+            as: "orderItems",
+          },
+        },
+        {
+          $lookup: {
+            from: "products",
+            localField: "orderItems.productId",
+            foreignField: "_id",
+            as: "productData",
+          },
+        },
+      ])
+      .exec();
+
+    if (!result) throw new Errors(HTTPCode.NOT_FOUND, Message.NO_DATA_FOUND);
+
+    return result as Order[];
+  }
+
+  /** BSSR: Update Order Status by Brand Admin **/
+  public async updateOrderByAdmin(input: {
+    orderId: string;
+    orderStatus: OrderStatus;
+  }): Promise<Order> {
+    const orderId = shapeIntoMongooseObjectId(input.orderId);
+    const orderStatus = input.orderStatus;
+
+    const result = await this.orderModel
+      .findByIdAndUpdate(
+        { _id: orderId },
+        { orderStatus: orderStatus },
+        { new: true }
+      )
+      .exec();
+
+    if (!result) throw new Errors(HTTPCode.NOT_MODIFIED, Message.UPDATE_FAILED);
+
+    return (result as any).toJSON() as Order;
+  }
 }
 
 export default OrderService;

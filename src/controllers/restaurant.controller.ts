@@ -2,10 +2,12 @@ import { NextFunction, Request, Response } from "express";
 import { T } from "../libs/types/common";
 import Errors, { HTTPCode, Message } from "../libs/Errors";
 import MemberService from "../models/Member.service";
+import OrderService from "../models/Order.service";
 import { LoginInput, MemberInput } from "../libs/types/member";
 import { MemberType } from "../libs/enums/member.enum";
 
 const memberService = new MemberService();
+const orderService = new OrderService();
 const restaurantController: T = {};
 
 restaurantController.goHome = (req: Request, res: Response) => {
@@ -134,6 +136,35 @@ restaurantController.checkAuthSession = async (
     }
   } catch (err) {
     console.log("Error, checkAuthSession:", err);
+    if (err instanceof Errors) res.status(err.code).json(err);
+    else res.status(Errors.standard.code).json(Errors.standard);
+  }
+};
+
+/** Admin BSSR: Get All Footwear Orders **/
+restaurantController.getAllOrders = async (req: Request, res: Response) => {
+  try {
+    console.log("getAllOrders (Admin)");
+    const result = await orderService.getAllOrdersByAdmin();
+    res.render("orders", { orders: result });
+  } catch (err) {
+    console.log("Error, getAllOrders:", err);
+    if (err instanceof Errors) res.status(err.code).json(err);
+    else res.status(Errors.standard.code).json(Errors.standard);
+  }
+};
+
+/** Admin BSSR: 1-Click Update Order Status **/
+restaurantController.updateChosenOrder = async (
+  req: Request,
+  res: Response
+) => {
+  try {
+    console.log("updateChosenOrder (Admin):", req.body);
+    const result = await orderService.updateOrderByAdmin(req.body);
+    res.status(HTTPCode.OK).json({ data: result });
+  } catch (err) {
+    console.log("Error, updateChosenOrder:", err);
     if (err instanceof Errors) res.status(err.code).json(err);
     else res.status(Errors.standard.code).json(Errors.standard);
   }
