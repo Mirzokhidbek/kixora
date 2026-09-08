@@ -18,7 +18,6 @@ import VisibilityOff from "@mui/icons-material/VisibilityOff";
 import LockOutlinedIcon from "@mui/icons-material/LockOutlined";
 import PersonOutlineOutlinedIcon from "@mui/icons-material/PersonOutlineOutlined";
 import PhoneOutlinedIcon from "@mui/icons-material/PhoneOutlined";
-import RestaurantIcon from "@mui/icons-material/Restaurant";
 import CheckCircleIcon from "@mui/icons-material/CheckCircle";
 
 import MemberService from "../../services/MemberService";
@@ -60,7 +59,7 @@ export function AuthModal({ open, onClose, onSuccess }: AuthModalProps) {
     resetState();
   };
 
-  /** STANDARD LOGIN PROCESS **/
+  /** LOGIN PROCESS **/
   const handleLogin = async () => {
     resetState();
     const cleanNick = loginNick.trim();
@@ -96,22 +95,22 @@ export function AuthModal({ open, onClose, onSuccess }: AuthModalProps) {
     }
   };
 
-  /** STANDARD SIGNUP / REGISTRATION PROCESS **/
+  /** SIGNUP PROCESS **/
   const handleSignup = async () => {
     resetState();
     const cleanNick = signupNick.trim();
     const cleanPhone = signupPhone.trim();
 
     if (!cleanNick) {
-      setErrorMsg("Please choose a Nickname.");
+      setErrorMsg("Please enter a username or nickname.");
       return;
     }
     if (!cleanPhone) {
-      setErrorMsg("Please enter your Phone number.");
+      setErrorMsg("Please enter your phone number.");
       return;
     }
     if (!signupPassword) {
-      setErrorMsg("Please enter a Password.");
+      setErrorMsg("Please enter a password.");
       return;
     }
     if (signupPassword.length < 4) {
@@ -119,7 +118,7 @@ export function AuthModal({ open, onClose, onSuccess }: AuthModalProps) {
       return;
     }
     if (signupPassword !== signupConfirm) {
-      setErrorMsg("Passwords do not match! Please check again.");
+      setErrorMsg("Passwords do not match! Please verify.");
       return;
     }
 
@@ -148,7 +147,7 @@ export function AuthModal({ open, onClose, onSuccess }: AuthModalProps) {
         err.response?.status === 400
       ) {
         setErrorMsg(
-          `Nickname "${cleanNick}" or Phone "${cleanPhone}" is already registered. Switch to Login to sign in!`
+          `Nickname "${cleanNick}" or Phone "${cleanPhone}" is already registered. Please sign in instead.`
         );
         setLoginNick(cleanNick);
       } else {
@@ -176,66 +175,56 @@ export function AuthModal({ open, onClose, onSuccess }: AuthModalProps) {
       slotProps={{
         paper: {
           sx: {
-            borderRadius: 5,
+            borderRadius: 4,
             bgcolor: "#ffffff",
-            color: "#0f172a",
-            border: "1px solid #f1f5f9",
-            boxShadow: "0 25px 70px rgba(0,0,0,0.18)",
-            p: { xs: 1.5, sm: 2 },
+            color: "#111827",
+            border: "1px solid #e5e7eb",
+            boxShadow: "0 20px 60px rgba(0,0,0,0.12)",
+            p: { xs: 2, sm: 3 },
             overflow: "hidden",
           },
         },
       }}
     >
       {/* Modal Top Header */}
-      <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", px: 1.5, pt: 1 }}>
-        <Box sx={{ display: "flex", alignItems: "center", gap: 1.5 }}>
-          <Box
+      <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", mb: 2 }}>
+        <Box>
+          <Typography
+            variant="h5"
             sx={{
-              width: 44,
-              height: 44,
-              borderRadius: 3,
-              bgcolor: "#fffbeb",
-              border: "1.5px solid #fef3c7",
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-              color: "#f59e0b",
-              boxShadow: "0 4px 14px rgba(245, 158, 11, 0.15)",
+              fontFamily: '"Outfit", sans-serif',
+              fontWeight: 900,
+              letterSpacing: "0.06em",
+              color: "#000000",
+              lineHeight: 1.1,
             }}
           >
-            <RestaurantIcon sx={{ fontSize: 24 }} />
-          </Box>
-          <div>
-            <Typography variant="h6" sx={{ fontWeight: 900, color: "#0f172a", lineHeight: 1.2 }}>
-              Burak<span style={{ color: "#f59e0b" }}>food</span> VIP
-            </Typography>
-            <Typography variant="caption" sx={{ color: "#64748b", fontWeight: 600 }}>
-              {activeTab === "login"
-                ? "Sign in to track orders & earn rewards"
-                : "Create your VIP account in seconds"}
-            </Typography>
-          </div>
+            KIXORA
+          </Typography>
+          <Typography variant="body2" sx={{ color: "#6b7280", mt: 0.5, fontSize: "0.85rem" }}>
+            {activeTab === "login"
+              ? "Sign in to access exclusive drops & member benefits."
+              : "Join the KIXORA club for early access & VIP drops."}
+          </Typography>
         </Box>
         <IconButton
           onClick={onClose}
           disabled={loading}
           size="small"
-          sx={{ color: "#94a3b8", "&:hover": { color: "#0f172a" } }}
+          sx={{ color: "#9ca3af", "&:hover": { color: "#000000" } }}
         >
           <CloseIcon fontSize="small" />
         </IconButton>
       </Box>
 
-      <DialogContent sx={{ px: { xs: 1.5, sm: 2 }, pt: 2.5, pb: 2 }} onKeyDown={handleKeyDown}>
-        {/* Standard Segmented Tab Switcher */}
+      <DialogContent sx={{ px: 0, pt: 1, pb: 1 }} onKeyDown={handleKeyDown}>
+        {/* Segmented Tab Switcher */}
         <Box
           sx={{
             display: "flex",
-            p: 0.6,
-            bgcolor: "#f8fafc",
-            borderRadius: 4,
-            border: "1px solid #e2e8f0",
+            p: 0.5,
+            bgcolor: "#f3f4f6",
+            borderRadius: 9999,
             mb: 3,
           }}
         >
@@ -243,53 +232,44 @@ export function AuthModal({ open, onClose, onSuccess }: AuthModalProps) {
             fullWidth
             onClick={() => handleTabSwitch("login")}
             sx={{
-              borderRadius: 3.5,
-              py: 1,
-              fontWeight: 800,
-              fontSize: "0.9rem",
+              borderRadius: 9999,
+              py: 0.8,
+              fontWeight: 700,
+              fontSize: "0.85rem",
               textTransform: "none",
-              color: activeTab === "login" ? "#0f172a" : "#64748b",
+              color: activeTab === "login" ? "#000000" : "#6b7280",
               bgcolor: activeTab === "login" ? "#ffffff" : "transparent",
-              boxShadow: activeTab === "login" ? "0 4px 12px rgba(0,0,0,0.06)" : "none",
-              border: activeTab === "login" ? "1px solid #e2e8f0" : "1px solid transparent",
+              boxShadow: activeTab === "login" ? "0 2px 8px rgba(0,0,0,0.08)" : "none",
               transition: "all 0.2s ease",
             }}
           >
-            🔑 Login
+            Sign In
           </Button>
 
           <Button
             fullWidth
             onClick={() => handleTabSwitch("signup")}
             sx={{
-              borderRadius: 3.5,
-              py: 1,
-              fontWeight: 800,
-              fontSize: "0.9rem",
+              borderRadius: 9999,
+              py: 0.8,
+              fontWeight: 700,
+              fontSize: "0.85rem",
               textTransform: "none",
-              color: activeTab === "signup" ? "#0f172a" : "#64748b",
+              color: activeTab === "signup" ? "#000000" : "#6b7280",
               bgcolor: activeTab === "signup" ? "#ffffff" : "transparent",
-              boxShadow: activeTab === "signup" ? "0 4px 12px rgba(0,0,0,0.06)" : "none",
-              border: activeTab === "signup" ? "1px solid #e2e8f0" : "1px solid transparent",
+              boxShadow: activeTab === "signup" ? "0 2px 8px rgba(0,0,0,0.08)" : "none",
               transition: "all 0.2s ease",
             }}
           >
-            ✨ Sign Up
+            Create Account
           </Button>
         </Box>
 
         {/* Status Alerts */}
         {errorMsg && (
           <Alert
-            severity={errorMsg.includes("already registered") ? "info" : "error"}
-            sx={{ mb: 2.5, borderRadius: 3, fontSize: "0.82rem", fontWeight: 600 }}
-            action={
-              errorMsg.includes("already registered") ? (
-                <Button color="inherit" size="small" onClick={() => handleTabSwitch("login")} sx={{ fontWeight: 800 }}>
-                  Login
-                </Button>
-              ) : undefined
-            }
+            severity={errorMsg.includes("registered") ? "info" : "error"}
+            sx={{ mb: 2, borderRadius: 2, fontSize: "0.82rem", fontWeight: 600 }}
           >
             {errorMsg}
           </Alert>
@@ -299,36 +279,34 @@ export function AuthModal({ open, onClose, onSuccess }: AuthModalProps) {
           <Alert
             icon={<CheckCircleIcon fontSize="inherit" />}
             severity="success"
-            sx={{ mb: 2.5, borderRadius: 3, fontSize: "0.85rem", fontWeight: 700 }}
+            sx={{ mb: 2, borderRadius: 2, fontSize: "0.85rem", fontWeight: 700 }}
           >
             {successMsg}
           </Alert>
         )}
 
-        {/* 1. STANDARD LOGIN FORM */}
+        {/* 1. LOGIN FORM */}
         {activeTab === "login" && (
-          <Stack spacing={2.2}>
+          <Stack spacing={2}>
             <TextField
               fullWidth
               size="medium"
-              label="Nickname"
-              placeholder="e.g. Zokhidbek"
+              label="Nickname or Email"
+              placeholder="e.g. alexander"
               value={loginNick}
               onChange={(e) => setLoginNick(e.target.value)}
               disabled={loading}
               autoFocus
               sx={{
                 "& .MuiOutlinedInput-root": {
-                  borderRadius: 3,
-                  bgcolor: "#ffffff",
-                  "&:hover fieldset": { borderColor: "#f59e0b" },
+                  borderRadius: 2.5,
                 },
               }}
               slotProps={{
                 input: {
                   startAdornment: (
                     <InputAdornment position="start">
-                      <PersonOutlineOutlinedIcon sx={{ color: "#f59e0b", fontSize: 22 }} />
+                      <PersonOutlineOutlinedIcon sx={{ color: "#6b7280", fontSize: 20 }} />
                     </InputAdornment>
                   ),
                 },
@@ -346,16 +324,14 @@ export function AuthModal({ open, onClose, onSuccess }: AuthModalProps) {
               disabled={loading}
               sx={{
                 "& .MuiOutlinedInput-root": {
-                  borderRadius: 3,
-                  bgcolor: "#ffffff",
-                  "&:hover fieldset": { borderColor: "#f59e0b" },
+                  borderRadius: 2.5,
                 },
               }}
               slotProps={{
                 input: {
                   startAdornment: (
                     <InputAdornment position="start">
-                      <LockOutlinedIcon sx={{ color: "#f59e0b", fontSize: 22 }} />
+                      <LockOutlinedIcon sx={{ color: "#6b7280", fontSize: 20 }} />
                     </InputAdornment>
                   ),
                   endAdornment: (
@@ -364,7 +340,7 @@ export function AuthModal({ open, onClose, onSuccess }: AuthModalProps) {
                         onClick={() => setShowPassword(!showPassword)}
                         edge="end"
                         size="small"
-                        sx={{ color: "#94a3b8" }}
+                        sx={{ color: "#9ca3af" }}
                       >
                         {showPassword ? <VisibilityOff fontSize="small" /> : <Visibility fontSize="small" />}
                       </IconButton>
@@ -382,24 +358,25 @@ export function AuthModal({ open, onClose, onSuccess }: AuthModalProps) {
               disabled={loading}
               sx={{
                 py: 1.4,
-                borderRadius: 3,
-                fontWeight: 900,
-                fontSize: "1rem",
-                bgcolor: "#0f172a",
+                borderRadius: 9999,
+                fontWeight: 800,
+                fontSize: "0.95rem",
+                bgcolor: "#000000",
                 color: "#ffffff",
-                boxShadow: "0 8px 25px rgba(15, 23, 42, 0.25)",
-                "&:hover": { bgcolor: "#1e293b" },
+                textTransform: "none",
+                boxShadow: "none",
+                "&:hover": { bgcolor: "#262626", boxShadow: "0 6px 20px rgba(0,0,0,0.15)" },
                 mt: 1,
               }}
             >
-              {loading ? <CircularProgress size={24} color="inherit" /> : "Login to Account ➔"}
+              {loading ? <CircularProgress size={22} color="inherit" /> : "Sign In"}
             </Button>
 
             <Box sx={{ textAlign: "center", pt: 1 }}>
-              <Typography variant="body2" sx={{ color: "#64748b" }}>
-                Don't have an account yet?{" "}
+              <Typography variant="body2" sx={{ color: "#6b7280", fontSize: "0.85rem" }}>
+                Don't have an account?{" "}
                 <strong
-                  style={{ color: "#f59e0b", cursor: "pointer", textDecoration: "underline" }}
+                  style={{ color: "#000000", cursor: "pointer", textDecoration: "underline" }}
                   onClick={() => handleTabSwitch("signup")}
                 >
                   Create one now
@@ -409,30 +386,28 @@ export function AuthModal({ open, onClose, onSuccess }: AuthModalProps) {
           </Stack>
         )}
 
-        {/* 2. STANDARD SIGNUP / REGISTRATION FORM */}
+        {/* 2. SIGNUP FORM */}
         {activeTab === "signup" && (
           <Stack spacing={2}>
             <TextField
               fullWidth
               size="small"
-              label="Nickname"
-              placeholder="e.g. Zokhidbek or my_nickname"
+              label="Nickname / Full Name"
+              placeholder="e.g. John Doe"
               value={signupNick}
               onChange={(e) => setSignupNick(e.target.value)}
               disabled={loading}
               autoFocus
               sx={{
                 "& .MuiOutlinedInput-root": {
-                  borderRadius: 3,
-                  bgcolor: "#ffffff",
-                  "&:hover fieldset": { borderColor: "#f59e0b" },
+                  borderRadius: 2.5,
                 },
               }}
               slotProps={{
                 input: {
                   startAdornment: (
                     <InputAdornment position="start">
-                      <PersonOutlineOutlinedIcon sx={{ color: "#f59e0b", fontSize: 20 }} />
+                      <PersonOutlineOutlinedIcon sx={{ color: "#6b7280", fontSize: 18 }} />
                     </InputAdornment>
                   ),
                 },
@@ -449,16 +424,14 @@ export function AuthModal({ open, onClose, onSuccess }: AuthModalProps) {
               disabled={loading}
               sx={{
                 "& .MuiOutlinedInput-root": {
-                  borderRadius: 3,
-                  bgcolor: "#ffffff",
-                  "&:hover fieldset": { borderColor: "#f59e0b" },
+                  borderRadius: 2.5,
                 },
               }}
               slotProps={{
                 input: {
                   startAdornment: (
                     <InputAdornment position="start">
-                      <PhoneOutlinedIcon sx={{ color: "#f59e0b", fontSize: 20 }} />
+                      <PhoneOutlinedIcon sx={{ color: "#6b7280", fontSize: 18 }} />
                     </InputAdornment>
                   ),
                 },
@@ -476,16 +449,14 @@ export function AuthModal({ open, onClose, onSuccess }: AuthModalProps) {
               disabled={loading}
               sx={{
                 "& .MuiOutlinedInput-root": {
-                  borderRadius: 3,
-                  bgcolor: "#ffffff",
-                  "&:hover fieldset": { borderColor: "#f59e0b" },
+                  borderRadius: 2.5,
                 },
               }}
               slotProps={{
                 input: {
                   startAdornment: (
                     <InputAdornment position="start">
-                      <LockOutlinedIcon sx={{ color: "#f59e0b", fontSize: 20 }} />
+                      <LockOutlinedIcon sx={{ color: "#6b7280", fontSize: 18 }} />
                     </InputAdornment>
                   ),
                   endAdornment: (
@@ -494,7 +465,7 @@ export function AuthModal({ open, onClose, onSuccess }: AuthModalProps) {
                         onClick={() => setShowPassword(!showPassword)}
                         edge="end"
                         size="small"
-                        sx={{ color: "#94a3b8" }}
+                        sx={{ color: "#9ca3af" }}
                       >
                         {showPassword ? <VisibilityOff fontSize="small" /> : <Visibility fontSize="small" />}
                       </IconButton>
@@ -515,16 +486,14 @@ export function AuthModal({ open, onClose, onSuccess }: AuthModalProps) {
               disabled={loading}
               sx={{
                 "& .MuiOutlinedInput-root": {
-                  borderRadius: 3,
-                  bgcolor: "#ffffff",
-                  "&:hover fieldset": { borderColor: "#f59e0b" },
+                  borderRadius: 2.5,
                 },
               }}
               slotProps={{
                 input: {
                   startAdornment: (
                     <InputAdornment position="start">
-                      <LockOutlinedIcon sx={{ color: "#f59e0b", fontSize: 20 }} />
+                      <LockOutlinedIcon sx={{ color: "#6b7280", fontSize: 18 }} />
                     </InputAdornment>
                   ),
                   endAdornment: (
@@ -533,7 +502,7 @@ export function AuthModal({ open, onClose, onSuccess }: AuthModalProps) {
                         onClick={() => setShowConfirmPassword(!showConfirmPassword)}
                         edge="end"
                         size="small"
-                        sx={{ color: "#94a3b8" }}
+                        sx={{ color: "#9ca3af" }}
                       >
                         {showConfirmPassword ? <VisibilityOff fontSize="small" /> : <Visibility fontSize="small" />}
                       </IconButton>
@@ -551,27 +520,28 @@ export function AuthModal({ open, onClose, onSuccess }: AuthModalProps) {
               disabled={loading}
               sx={{
                 py: 1.4,
-                borderRadius: 3,
-                fontWeight: 900,
-                fontSize: "1rem",
-                bgcolor: "#f59e0b",
-                color: "#090d16",
-                boxShadow: "0 8px 25px rgba(245, 158, 11, 0.4)",
-                "&:hover": { bgcolor: "#fbbf24" },
+                borderRadius: 9999,
+                fontWeight: 800,
+                fontSize: "0.95rem",
+                bgcolor: "#000000",
+                color: "#ffffff",
+                textTransform: "none",
+                boxShadow: "none",
+                "&:hover": { bgcolor: "#262626", boxShadow: "0 6px 20px rgba(0,0,0,0.15)" },
                 mt: 1,
               }}
             >
-              {loading ? <CircularProgress size={24} color="inherit" /> : "Sign Up & Join VIP Club"}
+              {loading ? <CircularProgress size={22} color="inherit" /> : "Create Account"}
             </Button>
 
             <Box sx={{ textAlign: "center", pt: 0.5 }}>
-              <Typography variant="body2" sx={{ color: "#64748b" }}>
+              <Typography variant="body2" sx={{ color: "#6b7280", fontSize: "0.85rem" }}>
                 Already have an account?{" "}
                 <strong
-                  style={{ color: "#f59e0b", cursor: "pointer", textDecoration: "underline" }}
+                  style={{ color: "#000000", cursor: "pointer", textDecoration: "underline" }}
                   onClick={() => handleTabSwitch("login")}
                 >
-                  Login here
+                  Sign In
                 </strong>
               </Typography>
             </Box>

@@ -1,3 +1,13 @@
+/**
+ * ============================================================================
+ * App.tsx - Root Application Component & Layout Shell
+ * ============================================================================
+ * - Configures Global MUI Theme & baseline styling
+ * - Sets up React Router routing for all screens (Home, Products, Orders, User, Help)
+ * - Manages global shopping cart state & checkout triggers
+ * - Manages authentication modal and persistent login session restoration
+ */
+
 import { useState, useEffect } from "react";
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import { ThemeProvider, CssBaseline, Box, Snackbar, Alert } from "@mui/material";

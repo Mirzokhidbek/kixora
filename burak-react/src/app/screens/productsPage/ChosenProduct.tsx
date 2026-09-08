@@ -7,32 +7,31 @@ import {
   Box,
   Grid,
   Button,
-  Chip,
   IconButton,
   Divider,
   Snackbar,
   Alert,
   Breadcrumbs,
   Link,
-  Card,
-  CardMedia,
-  CardContent,
+  Rating,
+  Tabs,
+  Tab,
 } from "@mui/material";
-import AddShoppingCartIcon from "@mui/icons-material/AddShoppingCart";
 import ArrowBackIcon from "@mui/icons-material/ArrowBack";
 import RemoveIcon from "@mui/icons-material/Remove";
 import AddIcon from "@mui/icons-material/Add";
-import VerifiedIcon from "@mui/icons-material/Verified";
-import LocalShippingIcon from "@mui/icons-material/LocalShipping";
-import RestaurantIcon from "@mui/icons-material/Restaurant";
-import StorefrontIcon from "@mui/icons-material/Storefront";
-import RestaurantMenuIcon from "@mui/icons-material/RestaurantMenu";
+import FavoriteBorderIcon from "@mui/icons-material/FavoriteBorder";
+import FavoriteIcon from "@mui/icons-material/Favorite";
+import LocalShippingOutlinedIcon from "@mui/icons-material/LocalShippingOutlined";
+import VerifiedOutlinedIcon from "@mui/icons-material/VerifiedOutlined";
+import AutorenewOutlinedIcon from "@mui/icons-material/AutorenewOutlined";
+import ShoppingBagOutlinedIcon from "@mui/icons-material/ShoppingBagOutlined";
 
 import ProductService from "../../services/ProductService";
 import { setChosenProduct } from "./slice";
-import { retrieveChosenProduct, retrieveRestaurant, retrieveProducts } from "./selector";
+import { retrieveChosenProduct } from "./selector";
 import { serverApi } from "../../../lib/config";
-import type { Product } from "../../../lib/types/product";
+import { ProductSize } from "../../../lib/enums/common.enum";
 
 interface ChosenProductProps {
   onAdd?: (product: any, quantity?: number) => void;
@@ -43,13 +42,25 @@ export function ChosenProduct({ onAdd }: ChosenProductProps) {
   const navigate = useNavigate();
   const dispatch = useDispatch();
   const product = useSelector(retrieveChosenProduct);
-  const restaurant = useSelector(retrieveRestaurant);
-  const allProducts = useSelector(retrieveProducts);
 
   const [quantity, setQuantity] = useState<number>(1);
-  const [selectedPortion, setSelectedPortion] = useState<string>("NORMAL");
+  const [selectedSize, setSelectedSize] = useState<string>("42");
   const [activeImgIndex, setActiveImgIndex] = useState<number>(0);
+  const [isFavorite, setIsFavorite] = useState<boolean>(false);
+  const [activeTab, setActiveTab] = useState<number>(0);
   const [toastOpen, setToastOpen] = useState<boolean>(false);
+  const [toastMsg, setToastMsg] = useState<string>("");
+
+  const sizeList = [
+    ProductSize.SIZE_38,
+    ProductSize.SIZE_39,
+    ProductSize.SIZE_40,
+    ProductSize.SIZE_41,
+    ProductSize.SIZE_42,
+    ProductSize.SIZE_43,
+    ProductSize.SIZE_44,
+    ProductSize.SIZE_45,
+  ];
 
   useEffect(() => {
     if (productId) {
@@ -73,21 +84,17 @@ export function ChosenProduct({ onAdd }: ChosenProductProps) {
 
   if (!product) {
     return (
-      <Box sx={{ py: 10, minHeight: "75vh", display: "flex", alignItems: "center", bgcolor: "#ffffff" }}>
+      <Box sx={{ py: 12, minHeight: "70vh", display: "flex", alignItems: "center", bgcolor: "#ffffff" }}>
         <Container maxWidth="sm" sx={{ textAlign: "center" }}>
-          <RestaurantMenuIcon sx={{ fontSize: 48, color: "#94a3b8", mb: 2 }} />
-          <Typography variant="h5" sx={{ fontWeight: 800, mb: 1, color: "#0f172a" }}>
-            Dish Details Loading or Not Found
-          </Typography>
-          <Typography variant="body2" color="text.secondary" sx={{ mb: 3 }}>
-            Please select a dish from the menu catalog.
+          <Typography variant="h5" sx={{ fontWeight: 800, mb: 2, color: "#111827" }}>
+            Loading Footwear Details...
           </Typography>
           <Button
             variant="contained"
             onClick={() => navigate("/products")}
-            sx={{ bgcolor: "#f59e0b", color: "#000", fontWeight: 800, borderRadius: 2.5 }}
+            sx={{ bgcolor: "#000000", color: "#ffffff", fontWeight: 700, borderRadius: 9999 }}
           >
-            Back to Menu Catalog
+            Back to Catalog
           </Button>
         </Container>
       </Box>
@@ -95,375 +102,420 @@ export function ChosenProduct({ onAdd }: ChosenProductProps) {
   }
 
   const images = product.productImages && product.productImages.length > 0 ? product.productImages : [];
-
-  const basePrice = product.productPrice || 0;
-  const portionMultiplier = selectedPortion === "LARGE" ? 1.3 : selectedPortion === "SET" ? 1.5 : 1.0;
-  const unitPrice = basePrice * portionMultiplier;
-  const totalPrice = unitPrice * quantity;
-
-  // Filter other related dishes from live database
-  const relatedDishes = allProducts.filter((p: Product) => p._id !== productId).slice(0, 3);
+  const mainImageSrc = images[activeImgIndex] ? getImageSrc(images[activeImgIndex]) : "";
 
   const handleAddToCart = () => {
-    if (onAdd && product) {
-      onAdd(
-        {
-          ...product,
-          productPrice: unitPrice,
-        },
-        quantity
-      );
-      setToastOpen(true);
+    if (onAdd) {
+      for (let i = 0; i < quantity; i++) {
+        onAdd({
+          _id: product._id,
+          productName: `${product.productName} (EU ${selectedSize})`,
+          productPrice: product.productPrice,
+          productImages: product.productImages,
+        });
+      }
     }
+    setToastMsg(`Added ${quantity} x ${product.productName} (Size ${selectedSize}) to your bag!`);
+    setToastOpen(true);
   };
 
   return (
-    <Box sx={{ py: 5, minHeight: "85vh", bgcolor: "#ffffff" }}>
+    <Box sx={{ py: 5, bgcolor: "#ffffff", minHeight: "85vh" }}>
       <Container maxWidth="lg">
-        {/* Navigation Breadcrumbs */}
-        <Box sx={{ mb: 4, display: "flex", justifyContent: "space-between", alignItems: "center", flexWrap: "wrap", gap: 2 }}>
-          <Breadcrumbs aria-label="breadcrumb">
+        {/* Breadcrumb Navigation */}
+        <Box sx={{ mb: 4, display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+          <Breadcrumbs separator="›" aria-label="breadcrumb">
             <Link
-              underline="hover"
-              color="inherit"
               onClick={() => navigate("/")}
-              sx={{ cursor: "pointer", fontWeight: 600, fontSize: "0.9rem" }}
+              sx={{ cursor: "pointer", color: "#6b7280", fontWeight: 600, fontSize: "0.85rem" }}
+              underline="hover"
             >
               Home
             </Link>
             <Link
-              underline="hover"
-              color="inherit"
               onClick={() => navigate("/products")}
-              sx={{ cursor: "pointer", fontWeight: 600, fontSize: "0.9rem" }}
+              sx={{ cursor: "pointer", color: "#6b7280", fontWeight: 600, fontSize: "0.85rem" }}
+              underline="hover"
             >
-              Menu
+              Footwear
             </Link>
-            <Typography color="text.primary" sx={{ fontWeight: 800, fontSize: "0.9rem" }}>
+            <Typography sx={{ color: "#111827", fontWeight: 700, fontSize: "0.85rem" }}>
               {product.productName}
             </Typography>
           </Breadcrumbs>
 
           <Button
-            variant="outlined"
-            size="small"
             startIcon={<ArrowBackIcon />}
             onClick={() => navigate("/products")}
-            sx={{ borderRadius: 2.5, fontWeight: 700, borderColor: "#e2e8f0", color: "#64748b" }}
+            sx={{ color: "#6b7280", fontWeight: 700, textTransform: "none", fontSize: "0.85rem" }}
           >
-            Back to Menu
+            Back to Catalog
           </Button>
         </Box>
 
-        {/* Main Product Showcase Grid */}
-        <Grid container spacing={6}>
-          {/* Left Column: Media Gallery */}
-          <Grid size={{ xs: 12, md: 6 }}>
-            {/* Main Stage Image */}
-            <Box
-              sx={{
-                width: "100%",
-                borderRadius: 5,
-                overflow: "hidden",
-                boxShadow: "0 20px 40px rgba(0, 0, 0, 0.08)",
-                border: "1px solid #f1f5f9",
-                bgcolor: "#f8fafc",
-                position: "relative",
-                aspectRatio: "4/3",
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "center",
-              }}
-            >
-              {images[activeImgIndex] ? (
-                <img
-                  src={getImageSrc(images[activeImgIndex])}
-                  alt={product.productName}
-                  style={{ width: "100%", height: "100%", objectFit: "cover" }}
-                />
-              ) : (
-                <RestaurantIcon sx={{ fontSize: 60, color: "#cbd5e1" }} />
+        {/* Main Product Layout */}
+        <Grid container spacing={{ xs: 4, md: 6 }}>
+          {/* Left Column: Multi-Angle Gallery */}
+          <Grid size={{ xs: 12, md: 7 }}>
+            <Box sx={{ display: "flex", flexDirection: { xs: "column-reverse", sm: "row" }, gap: 2.5 }}>
+              {/* Vertical Thumbnail List */}
+              {images.length > 1 && (
+                <Box
+                  sx={{
+                    display: "flex",
+                    flexDirection: { xs: "row", sm: "column" },
+                    gap: 1.5,
+                    overflowX: { xs: "auto", sm: "visible" },
+                  }}
+                >
+                  {images.map((img, idx) => (
+                    <Box
+                      key={idx}
+                      onClick={() => setActiveImgIndex(idx)}
+                      sx={{
+                        width: { xs: 64, sm: 76 },
+                        height: { xs: 64, sm: 76 },
+                        borderRadius: 3,
+                        p: 0.5,
+                        bgcolor: "#f9fafb",
+                        border: idx === activeImgIndex ? "2px solid #000000" : "1px solid #e5e7eb",
+                        cursor: "pointer",
+                        display: "flex",
+                        alignItems: "center",
+                        justifyContent: "center",
+                        transition: "all 0.2s",
+                        "&:hover": { borderColor: "#000000" },
+                      }}
+                    >
+                      <Box
+                        component="img"
+                        src={getImageSrc(img)}
+                        alt={`Angle ${idx + 1}`}
+                        sx={{ width: "100%", height: "100%", objectFit: "contain" }}
+                      />
+                    </Box>
+                  ))}
+                </Box>
               )}
 
-              {/* Status Chip */}
-              <Chip
-                label={product.productCollection || "DISH"}
-                size="small"
-                sx={{
-                  position: "absolute",
-                  top: 16,
-                  left: 16,
-                  bgcolor: "#ffffff",
-                  color: "#d97706",
-                  fontWeight: 800,
-                  fontSize: "0.75rem",
-                  boxShadow: "0 4px 12px rgba(0,0,0,0.1)",
-                }}
-              />
-            </Box>
-
-            {/* Thumbnail Navigation Row */}
-            {images.length > 1 && (
-              <Box sx={{ display: "flex", gap: 2, mt: 2.5, overflowX: "auto", pb: 1 }}>
-                {images.map((img: string, idx: number) => (
-                  <Box
-                    key={idx}
-                    onClick={() => setActiveImgIndex(idx)}
-                    sx={{
-                      width: 80,
-                      height: 80,
-                      borderRadius: 3,
-                      overflow: "hidden",
-                      cursor: "pointer",
-                      border: activeImgIndex === idx ? "2.5px solid #f59e0b" : "1.5px solid #e2e8f0",
-                      boxShadow: activeImgIndex === idx ? "0 4px 14px rgba(245, 158, 11, 0.3)" : "none",
-                      transition: "0.2s ease",
-                      flexShrink: 0,
-                    }}
-                  >
-                    <img
-                      src={getImageSrc(img)}
-                      alt={`Thumbnail ${idx + 1}`}
-                      style={{ width: "100%", height: "100%", objectFit: "cover" }}
-                    />
-                  </Box>
-                ))}
-              </Box>
-            )}
-          </Grid>
-
-          {/* Right Column: Dish Specs & Portion Builder */}
-          <Grid size={{ xs: 12, md: 6 }}>
-            {/* Restaurant Affiliation */}
-            {restaurant && (
-              <Box sx={{ display: "flex", alignItems: "center", gap: 1, mb: 1.5 }}>
-                <StorefrontIcon sx={{ fontSize: 18, color: "#f59e0b" }} />
-                <Typography variant="caption" sx={{ fontWeight: 800, color: "#d97706", letterSpacing: 1 }}>
-                  AUTHENTIC KITCHEN &bull; {restaurant.memberNick?.toUpperCase()}
-                </Typography>
-              </Box>
-            )}
-
-            <Typography
-              variant="h3"
-              sx={{
-                fontWeight: 900,
-                color: "#0f172a",
-                mb: 1.5,
-                lineHeight: 1.2,
-                fontSize: { xs: "2rem", md: "2.4rem" },
-              }}
-            >
-              {product.productName}
-            </Typography>
-
-            {/* Views & Availability */}
-            <Box sx={{ display: "flex", alignItems: "center", gap: 2, mb: 2.5, flexWrap: "wrap" }}>
-              <Chip
-                icon={<VerifiedIcon sx={{ fontSize: 16, color: "#10b981 !important" }} />}
-                label={product.productLeftCount > 0 ? "IN STOCK" : "PRE-ORDER"}
-                size="small"
-                sx={{
-                  bgcolor: "rgba(16, 185, 129, 0.1)",
-                  color: "#059669",
-                  fontWeight: 800,
-                  fontSize: "0.75rem",
-                }}
-              />
-              <Typography variant="body2" sx={{ color: "#64748b", fontWeight: 600 }}>
-                👁 {product.productViews || 0} gourmet food lovers viewed
-              </Typography>
-            </Box>
-
-            {/* Dynamic Price Display */}
-            <Box sx={{ display: "flex", alignItems: "baseline", gap: 2, mb: 3 }}>
-              <Typography variant="h3" sx={{ fontWeight: 900, color: "#0f172a" }}>
-                ${unitPrice.toFixed(2)}
-              </Typography>
-              {selectedPortion !== "NORMAL" && (
-                <Typography variant="body2" sx={{ color: "#f59e0b", fontWeight: 700 }}>
-                  ({selectedPortion} Portion)
-                </Typography>
-              )}
-            </Box>
-
-            <Divider sx={{ my: 2.5, borderColor: "#f1f5f9" }} />
-
-            {/* Culinary Description */}
-            <Typography variant="body1" sx={{ color: "#475569", lineHeight: 1.8, mb: 3.5 }}>
-              {product.productDesc || "Handcrafted Ottoman recipe made with fresh ingredients and grilled over open embers."}
-            </Typography>
-
-            {/* Portion Size Selection */}
-            <Box sx={{ mb: 3.5 }}>
-              <Typography variant="subtitle2" sx={{ fontWeight: 800, color: "#0f172a", mb: 1.2 }}>
-                SELECT PORTION SIZE:
-              </Typography>
-              <Box sx={{ display: "flex", gap: 1.5, flexWrap: "wrap" }}>
-                {[
-                  { key: "NORMAL", label: "Normal (Standard)", price: `$${basePrice.toFixed(2)}` },
-                  { key: "LARGE", label: "Large (+30%)", price: `$${(basePrice * 1.3).toFixed(2)}` },
-                  { key: "SET", label: "VIP Banquet Set (+50%)", price: `$${(basePrice * 1.5).toFixed(2)}` },
-                ].map((item) => (
-                  <Button
-                    key={item.key}
-                    variant={selectedPortion === item.key ? "contained" : "outlined"}
-                    onClick={() => setSelectedPortion(item.key)}
-                    sx={{
-                      borderRadius: 3,
-                      px: 2.5,
-                      py: 1,
-                      fontWeight: 700,
-                      fontSize: "0.85rem",
-                      bgcolor: selectedPortion === item.key ? "#0f172a" : "transparent",
-                      color: selectedPortion === item.key ? "#fff" : "#475569",
-                      borderColor: "#e2e8f0",
-                      "&:hover": {
-                        bgcolor: selectedPortion === item.key ? "#1e293b" : "#f8fafc",
-                        borderColor: "#cbd5e1",
-                      },
-                    }}
-                  >
-                    {item.label} &bull; {item.price}
-                  </Button>
-                ))}
-              </Box>
-            </Box>
-
-            {/* Quantity Selector & Add to Cart Action */}
-            <Box sx={{ display: "flex", alignItems: "center", gap: 3, mb: 4, flexWrap: "wrap" }}>
-              {/* Stepper */}
+              {/* Large Featured Image View */}
               <Box
                 sx={{
+                  flexGrow: 1,
+                  bgcolor: "#f9fafb",
+                  borderRadius: 5,
+                  border: "1px solid #e5e7eb",
+                  p: { xs: 3, sm: 5 },
                   display: "flex",
                   alignItems: "center",
-                  border: "2px solid #e2e8f0",
-                  borderRadius: 3,
-                  p: 0.5,
-                  bgcolor: "#f8fafc",
+                  justifyContent: "center",
+                  minHeight: { xs: 300, sm: 440 },
+                  position: "relative",
                 }}
               >
-                <IconButton
-                  size="small"
-                  onClick={() => setQuantity(Math.max(1, quantity - 1))}
-                  disabled={quantity <= 1}
-                  sx={{ color: "#0f172a" }}
-                >
-                  <RemoveIcon fontSize="small" />
-                </IconButton>
-                <Typography sx={{ px: 2, fontWeight: 800, fontSize: "1.1rem", minWidth: 40, textAlign: "center" }}>
-                  {quantity}
-                </Typography>
-                <IconButton
-                  size="small"
-                  onClick={() => setQuantity(quantity + 1)}
-                  sx={{ color: "#0f172a" }}
-                >
-                  <AddIcon fontSize="small" />
-                </IconButton>
+                {mainImageSrc ? (
+                  <Box
+                    component="img"
+                    src={mainImageSrc}
+                    alt={product.productName}
+                    sx={{
+                      maxWidth: "100%",
+                      maxHeight: 380,
+                      objectFit: "contain",
+                      transition: "transform 0.4s ease",
+                      "&:hover": { transform: "scale(1.06) rotate(-2deg)" },
+                    }}
+                  />
+                ) : (
+                  <Typography variant="body2" color="text.secondary">
+                    No image available
+                  </Typography>
+                )}
               </Box>
-
-              {/* Add to Cart Button */}
-              <Button
-                variant="contained"
-                size="large"
-                startIcon={<AddShoppingCartIcon />}
-                onClick={handleAddToCart}
-                sx={{
-                  flexGrow: 1,
-                  py: 1.6,
-                  borderRadius: 3,
-                  fontWeight: 900,
-                  fontSize: "1rem",
-                  bgcolor: "#f59e0b",
-                  color: "#090d16",
-                  boxShadow: "0 8px 25px rgba(245, 158, 11, 0.4)",
-                  "&:hover": { bgcolor: "#fbbf24" },
-                }}
-              >
-                Add {quantity} to Cart &bull; ${totalPrice.toFixed(2)}
-              </Button>
             </Box>
+          </Grid>
 
-            {/* Quality Guarantees */}
-            <Box sx={{ p: 2.5, bgcolor: "#fffbeb", borderRadius: 3, border: "1px solid #fef3c7", display: "flex", gap: 3 }}>
-              <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
-                <LocalShippingIcon sx={{ color: "#d97706", fontSize: 20 }} />
-                <Typography variant="caption" sx={{ fontWeight: 700, color: "#92400e" }}>
-                  Express Hot Delivery (30-40 min)
+          {/* Right Column: Product Details & Buying Actions */}
+          <Grid size={{ xs: 12, md: 5 }}>
+            <Box sx={{ display: "flex", flexDirection: "column", gap: 3 }}>
+              {/* Header Title & Badge */}
+              <Box>
+                <Box
+                  sx={{
+                    display: "inline-block",
+                    px: 1.5,
+                    py: 0.4,
+                    borderRadius: 9999,
+                    bgcolor: "#f3f4f6",
+                    border: "1px solid #e5e7eb",
+                    mb: 1.5,
+                  }}
+                >
+                  <Typography
+                    variant="caption"
+                    sx={{
+                      color: "#111827",
+                      fontWeight: 800,
+                      letterSpacing: "0.1em",
+                      fontSize: "0.72rem",
+                      textTransform: "uppercase",
+                    }}
+                  >
+                    {product.productCollection || "SNEAKERS"}
+                  </Typography>
+                </Box>
+
+                <Typography
+                  variant="h3"
+                  sx={{
+                    fontWeight: 900,
+                    color: "#000000",
+                    fontSize: { xs: "1.8rem", md: "2.2rem" },
+                    lineHeight: 1.15,
+                    letterSpacing: "-0.03em",
+                    mb: 1,
+                  }}
+                >
+                  {product.productName}
+                </Typography>
+
+                <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
+                  <Rating value={4.8} precision={0.1} size="small" readOnly />
+                  <Typography variant="body2" sx={{ color: "#6b7280", fontWeight: 700, fontSize: "0.85rem" }}>
+                    4.8 (128 reviews) &bull; In Stock
+                  </Typography>
+                </Box>
+              </Box>
+
+              {/* Price */}
+              <Box>
+                <Typography variant="h4" sx={{ fontWeight: 900, color: "#000000" }}>
+                  ${product.productPrice.toFixed(2)}
+                </Typography>
+                <Typography variant="caption" sx={{ color: "#6b7280" }}>
+                  Taxes and duties included. Free express shipping over $100.
                 </Typography>
               </Box>
-              <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
-                <RestaurantIcon sx={{ color: "#d97706", fontSize: 20 }} />
-                <Typography variant="caption" sx={{ fontWeight: 700, color: "#92400e" }}>
-                  Fresh Wood-Fired Preparation
-                </Typography>
+
+              <Divider />
+
+              {/* Size Selector (EU 38-45) */}
+              <Box>
+                <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "center", mb: 1.5 }}>
+                  <Typography variant="subtitle2" sx={{ fontWeight: 800, color: "#111827" }}>
+                    Select Size (EU)
+                  </Typography>
+                  <Typography
+                    variant="caption"
+                    onClick={() => navigate("/help")}
+                    sx={{ color: "#6b7280", textDecoration: "underline", cursor: "pointer", fontWeight: 600 }}
+                  >
+                    Size Guide
+                  </Typography>
+                </Box>
+
+                <Box sx={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: 1 }}>
+                  {sizeList.map((size) => {
+                    const isSelected = selectedSize === size;
+                    return (
+                      <Button
+                        key={size}
+                        onClick={() => setSelectedSize(size)}
+                        sx={{
+                          py: 1.2,
+                          borderRadius: 2.5,
+                          border: isSelected ? "2px solid #000000" : "1px solid #e5e7eb",
+                          bgcolor: isSelected ? "#000000" : "#ffffff",
+                          color: isSelected ? "#ffffff" : "#111827",
+                          fontWeight: 800,
+                          fontSize: "0.88rem",
+                          "&:hover": {
+                            bgcolor: isSelected ? "#000000" : "#f3f4f6",
+                          },
+                        }}
+                      >
+                        EU {size}
+                      </Button>
+                    );
+                  })}
+                </Box>
+              </Box>
+
+              {/* Quantity Stepper & Add to Cart */}
+              <Box sx={{ display: "flex", gap: 2, alignItems: "center", pt: 1 }}>
+                {/* Stepper */}
+                <Box
+                  sx={{
+                    display: "flex",
+                    alignItems: "center",
+                    border: "1px solid #e5e7eb",
+                    borderRadius: 9999,
+                    p: 0.5,
+                    bgcolor: "#f9fafb",
+                  }}
+                >
+                  <IconButton
+                    size="small"
+                    onClick={() => setQuantity((q) => Math.max(1, q - 1))}
+                    sx={{ color: "#374151" }}
+                  >
+                    <RemoveIcon fontSize="small" />
+                  </IconButton>
+                  <Typography sx={{ px: 2, fontWeight: 800, fontSize: "0.95rem" }}>
+                    {quantity}
+                  </Typography>
+                  <IconButton
+                    size="small"
+                    onClick={() => setQuantity((q) => q + 1)}
+                    sx={{ color: "#374151" }}
+                  >
+                    <AddIcon fontSize="small" />
+                  </IconButton>
+                </Box>
+
+                {/* Black Pill Add to Bag Button */}
+                <Button
+                  fullWidth
+                  variant="contained"
+                  size="large"
+                  onClick={handleAddToCart}
+                  startIcon={<ShoppingBagOutlinedIcon />}
+                  sx={{
+                    py: 1.6,
+                    borderRadius: 9999,
+                    fontWeight: 800,
+                    fontSize: "0.95rem",
+                    bgcolor: "#000000",
+                    color: "#ffffff",
+                    textTransform: "none",
+                    boxShadow: "none",
+                    "&:hover": {
+                      bgcolor: "#262626",
+                      boxShadow: "0 6px 20px rgba(0,0,0,0.15)",
+                    },
+                  }}
+                >
+                  Add to Bag &bull; ${(product.productPrice * quantity).toFixed(2)}
+                </Button>
+
+                {/* Wishlist Button */}
+                <IconButton
+                  onClick={() => setIsFavorite(!isFavorite)}
+                  sx={{
+                    border: "1px solid #e5e7eb",
+                    borderRadius: 9999,
+                    p: 1.5,
+                    "&:hover": { bgcolor: "#f3f4f6" },
+                  }}
+                >
+                  {isFavorite ? (
+                    <FavoriteIcon sx={{ color: "#ef4444" }} />
+                  ) : (
+                    <FavoriteBorderIcon sx={{ color: "#6b7280" }} />
+                  )}
+                </IconButton>
+              </Box>
+
+              {/* Product Perks */}
+              <Box
+                sx={{
+                  bgcolor: "#f9fafb",
+                  borderRadius: 3.5,
+                  p: 2.5,
+                  border: "1px solid #e5e7eb",
+                  display: "flex",
+                  flexDirection: "column",
+                  gap: 1.5,
+                }}
+              >
+                <Box sx={{ display: "flex", alignItems: "center", gap: 1.5 }}>
+                  <LocalShippingOutlinedIcon sx={{ fontSize: 20, color: "#000000" }} />
+                  <Typography variant="caption" sx={{ fontWeight: 700, color: "#374151" }}>
+                    Complimentary Express Shipping over $100
+                  </Typography>
+                </Box>
+                <Box sx={{ display: "flex", alignItems: "center", gap: 1.5 }}>
+                  <VerifiedOutlinedIcon sx={{ fontSize: 20, color: "#000000" }} />
+                  <Typography variant="caption" sx={{ fontWeight: 700, color: "#374151" }}>
+                    100% Authentic & Original KIXORA Guarantee
+                  </Typography>
+                </Box>
+                <Box sx={{ display: "flex", alignItems: "center", gap: 1.5 }}>
+                  <AutorenewOutlinedIcon sx={{ fontSize: 20, color: "#000000" }} />
+                  <Typography variant="caption" sx={{ fontWeight: 700, color: "#374151" }}>
+                    30-Day Hassle-Free Returns & Size Exchanges
+                  </Typography>
+                </Box>
               </Box>
             </Box>
           </Grid>
         </Grid>
 
-        {/* Related Dishes from Database */}
-        {relatedDishes.length > 0 && (
-          <Box sx={{ mt: 10 }}>
-            <Typography variant="h4" sx={{ fontWeight: 900, mb: 3.5, color: "#0f172a" }}>
-              Pair With Other Culinary Specialties
-            </Typography>
-            <Grid container spacing={3.5}>
-              {relatedDishes.map((dish: Product) => (
-                <Grid key={dish._id} size={{ xs: 12, sm: 6, md: 4 }}>
-                  <Card
-                    sx={{
-                      borderRadius: 4,
-                      border: "1px solid #f1f5f9",
-                      boxShadow: "0 8px 25px rgba(0,0,0,0.03)",
-                      cursor: "pointer",
-                      transition: "0.2s ease",
-                      "&:hover": { transform: "translateY(-4px)", borderColor: "#fde68a" },
-                    }}
-                    onClick={() => {
-                      navigate(`/products/${dish._id}`);
-                      window.scrollTo({ top: 0, behavior: "smooth" });
-                    }}
-                  >
-                    <Box sx={{ pt: "60%", position: "relative", bgcolor: "#f8fafc" }}>
-                      {dish.productImages?.[0] ? (
-                        <CardMedia
-                          component="img"
-                          image={getImageSrc(dish.productImages[0])}
-                          alt={dish.productName}
-                          sx={{ position: "absolute", top: 0, left: 0, width: "100%", height: "100%", objectFit: "cover" }}
-                        />
-                      ) : (
-                        <Box sx={{ position: "absolute", top: 0, left: 0, width: "100%", height: "100%", display: "flex", alignItems: "center", justifyContent: "center" }}>
-                          <RestaurantIcon sx={{ fontSize: 40, color: "#cbd5e1" }} />
-                        </Box>
-                      )}
-                    </Box>
-                    <CardContent sx={{ p: 2.5 }}>
-                      <Typography variant="h6" sx={{ fontWeight: 800, mb: 0.5, fontSize: "1.05rem" }}>
-                        {dish.productName}
-                      </Typography>
-                      <Typography variant="h6" sx={{ fontWeight: 900, color: "#f59e0b" }}>
-                        ${dish.productPrice?.toFixed(2)}
-                      </Typography>
-                    </CardContent>
-                  </Card>
-                </Grid>
-              ))}
-            </Grid>
-          </Box>
-        )}
+        {/* Tabs: Description / Specifications / Care */}
+        <Box sx={{ mt: 8, pt: 6, borderTop: "1px solid #e5e7eb" }}>
+          <Tabs
+            value={activeTab}
+            onChange={(_, val) => setActiveTab(val)}
+            sx={{
+              mb: 3,
+              "& .MuiTab-root": {
+                fontWeight: 800,
+                fontSize: "0.95rem",
+                textTransform: "none",
+                color: "#6b7280",
+                "&.Mui-selected": { color: "#000000" },
+              },
+              "& .MuiTabs-indicator": { bgcolor: "#000000", height: 2 },
+            }}
+          >
+            <Tab label="Description" />
+            <Tab label="Specifications" />
+            <Tab label="Fit & Care" />
+          </Tabs>
 
-        {/* Added Toast */}
+          {activeTab === 0 && (
+            <Typography variant="body1" sx={{ color: "#4b5563", lineHeight: 1.8, maxWidth: 800 }}>
+              {product.productDesc ||
+                "Engineered with premium technical fabrics, high-resilience foam midsole, and durable rubber outsole for supreme traction. The breathable upper hugs your foot with a glove-like fit, delivering unmatched comfort on the street or the track."}
+            </Typography>
+          )}
+
+          {activeTab === 1 && (
+            <Box sx={{ maxWidth: 600, display: "flex", flexDirection: "column", gap: 1.5 }}>
+              <Box sx={{ display: "flex", justifyContent: "space-between", py: 0.8, borderBottom: "1px solid #f3f4f6" }}>
+                <Typography variant="body2" sx={{ color: "#6b7280" }}>Upper Material</Typography>
+                <Typography variant="body2" sx={{ fontWeight: 700 }}>Engineered Knit & Suede Overlays</Typography>
+              </Box>
+              <Box sx={{ display: "flex", justifyContent: "space-between", py: 0.8, borderBottom: "1px solid #f3f4f6" }}>
+                <Typography variant="body2" sx={{ color: "#6b7280" }}>Midsole</Typography>
+                <Typography variant="body2" sx={{ fontWeight: 700 }}>Responsive Foam + Carbon Shank</Typography>
+              </Box>
+              <Box sx={{ display: "flex", justifyContent: "space-between", py: 0.8, borderBottom: "1px solid #f3f4f6" }}>
+                <Typography variant="body2" sx={{ color: "#6b7280" }}>Outsole</Typography>
+                <Typography variant="body2" sx={{ fontWeight: 700 }}>Multi-Directional Traction Rubber</Typography>
+              </Box>
+              <Box sx={{ display: "flex", justifyContent: "space-between", py: 0.8 }}>
+                <Typography variant="body2" sx={{ color: "#6b7280" }}>Weight</Typography>
+                <Typography variant="body2" sx={{ fontWeight: 700 }}>290g (Size EU 42)</Typography>
+              </Box>
+            </Box>
+          )}
+
+          {activeTab === 2 && (
+            <Typography variant="body1" sx={{ color: "#4b5563", lineHeight: 1.8, maxWidth: 800 }}>
+              Fits true to size. If you are between sizes or prefer a roomier fit, we recommend ordering one half size up. Clean with a soft brush and lukewarm water. Avoid machine washing and high heat drying.
+            </Typography>
+          )}
+        </Box>
+
         <Snackbar
           open={toastOpen}
-          autoHideDuration={2500}
+          autoHideDuration={3000}
           onClose={() => setToastOpen(false)}
           anchorOrigin={{ vertical: "bottom", horizontal: "center" }}
         >
           <Alert severity="success" sx={{ width: "100%", borderRadius: 3, fontWeight: 700 }}>
-            {quantity} &times; {product.productName} added to your basket! 🛒
+            {toastMsg}
           </Alert>
         </Snackbar>
       </Container>

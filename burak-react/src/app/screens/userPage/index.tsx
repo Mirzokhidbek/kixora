@@ -16,53 +16,54 @@ export function UserPage({ member: propMember, onLoginClick }: UserPageProps) {
 
   if (!member) {
     return (
-      <Box sx={{ py: 10, minHeight: "85vh", display: "flex", alignItems: "center", bgcolor: "#ffffff" }}>
+      <Box sx={{ py: 12, minHeight: "80vh", display: "flex", alignItems: "center", bgcolor: "#ffffff" }}>
         <Container maxWidth="sm">
           <Card
             sx={{
               p: { xs: 4, md: 6 },
               textAlign: "center",
-              borderRadius: 5,
+              borderRadius: 4,
               bgcolor: "#ffffff",
-              color: "#0f172a",
-              border: "1px solid #f1f5f9",
-              boxShadow: "0 15px 40px rgba(0,0,0,0.05)",
+              color: "#111827",
+              border: "1px solid #e5e7eb",
+              boxShadow: "0 10px 30px rgba(0,0,0,0.05)",
             }}
           >
             <Box
               sx={{
-                width: 70,
-                height: 70,
-                borderRadius: 4,
-                bgcolor: "#fffbeb",
+                width: 64,
+                height: 64,
+                borderRadius: "50%",
+                bgcolor: "#f3f4f6",
                 display: "inline-flex",
                 alignItems: "center",
                 justifyContent: "center",
                 mb: 2.5,
               }}
             >
-              <LockOutlinedIcon sx={{ fontSize: 36, color: "#f59e0b" }} />
+              <LockOutlinedIcon sx={{ fontSize: 32, color: "#111827" }} />
             </Box>
-            <Typography variant="h4" sx={{ fontWeight: 900, mb: 1.5, color: "#0f172a" }}>
-              VIP Account Required
+            <Typography variant="h4" sx={{ fontWeight: 900, mb: 1, color: "#000000", letterSpacing: "-0.02em" }}>
+              Member Sign In Required
             </Typography>
-            <Typography variant="body1" sx={{ color: "#64748b", mb: 4, lineHeight: 1.7 }}>
-              Please sign in to access your personal credentials, loyalty tier rewards, saved delivery addresses, and culinary preferences.
+            <Typography variant="body2" sx={{ color: "#6b7280", mb: 4, lineHeight: 1.6, maxWidth: 360, mx: "auto" }}>
+              Sign in to manage your KIXORA Club profile, view drop order status, and track your VIP points.
             </Typography>
             <Button
               variant="contained"
               size="large"
               onClick={onLoginClick || (() => (window.location.href = "/"))}
               sx={{
-                borderRadius: 3,
-                px: 5,
+                borderRadius: 9999,
+                px: 4.5,
                 py: 1.4,
                 fontWeight: 800,
-                fontSize: "1rem",
-                bgcolor: "#eab308",
-                color: "#fff",
-                boxShadow: "0 8px 20px rgba(234, 179, 8, 0.4)",
-                "&:hover": { bgcolor: "#ca8a04" },
+                fontSize: "0.95rem",
+                bgcolor: "#000000",
+                color: "#ffffff",
+                textTransform: "none",
+                boxShadow: "none",
+                "&:hover": { bgcolor: "#262626", boxShadow: "0 6px 20px rgba(0,0,0,0.15)" },
               }}
             >
               Sign In to Your Account
@@ -76,10 +77,10 @@ export function UserPage({ member: propMember, onLoginClick }: UserPageProps) {
   return (
     <Box sx={{ py: 6, minHeight: "85vh", bgcolor: "#ffffff" }}>
       <Container maxWidth="lg">
-        {/* 1. Member Profile Hero & Metrics */}
+        {/* Member Profile Hero & Metrics */}
         <MemberInfo member={member} />
 
-        {/* 2. Member Settings, Addresses & Preferences */}
+        {/* Member Settings, Addresses & Preferences */}
         <MemberSettings member={member} />
       </Container>
     </Box>

@@ -4,100 +4,118 @@ let customTheme = createTheme({
   palette: {
     mode: "light",
     primary: {
-      main: "#f59e0b",
-      light: "#fbbf24",
-      dark: "#d97706",
-      contrastText: "#090d16",
+      main: "#000000",
+      light: "#1f2937",
+      dark: "#000000",
+      contrastText: "#ffffff",
     },
     secondary: {
-      main: "#0f172a",
-      light: "#1e293b",
-      dark: "#020617",
+      main: "#ff4655",
+      light: "#ff6b77",
+      dark: "#e02d3c",
       contrastText: "#ffffff",
     },
     background: {
-      default: "#f8fafc",
+      default: "#ffffff",
       paper: "#ffffff",
     },
     text: {
-      primary: "#0f172a",
-      secondary: "#64748b",
+      primary: "#111827",
+      secondary: "#6b7280",
     },
+    divider: "#e5e7eb",
   },
   typography: {
-    fontFamily: ['"Plus Jakarta Sans"', '"Outfit"', "sans-serif"].join(","),
+    fontFamily: ['"Inter"', '"Plus Jakarta Sans"', '"Outfit"', "sans-serif"].join(","),
     h1: {
-      fontFamily: ['"Outfit"', '"Plus Jakarta Sans"', "sans-serif"].join(","),
+      fontFamily: ['"Outfit"', '"Inter"', "sans-serif"].join(","),
       fontWeight: 900,
       letterSpacing: "-0.03em",
-      color: "#0f172a",
+      color: "#111827",
     },
     h2: {
-      fontFamily: ['"Outfit"', '"Plus Jakarta Sans"', "sans-serif"].join(","),
+      fontFamily: ['"Outfit"', '"Inter"', "sans-serif"].join(","),
       fontWeight: 800,
       letterSpacing: "-0.02em",
-      color: "#0f172a",
+      color: "#111827",
     },
     h3: {
-      fontFamily: ['"Outfit"', '"Plus Jakarta Sans"', "sans-serif"].join(","),
+      fontFamily: ['"Outfit"', '"Inter"', "sans-serif"].join(","),
       fontWeight: 800,
       letterSpacing: "-0.02em",
+      color: "#111827",
     },
     h4: {
-      fontFamily: ['"Outfit"', '"Plus Jakarta Sans"', "sans-serif"].join(","),
+      fontFamily: ['"Outfit"', '"Inter"', "sans-serif"].join(","),
       fontWeight: 700,
+      color: "#111827",
     },
     h5: {
       fontWeight: 700,
+      color: "#111827",
     },
     h6: {
       fontWeight: 700,
+      color: "#111827",
     },
     button: {
-      fontFamily: ['"Plus Jakarta Sans"', "sans-serif"].join(","),
-      fontWeight: 800,
+      fontFamily: ['"Inter"', "sans-serif"].join(","),
+      fontWeight: 700,
       textTransform: "none",
       letterSpacing: "0.01em",
     },
   },
   shape: {
-    borderRadius: 16,
+    borderRadius: 12,
   },
   components: {
     MuiButton: {
       styleOverrides: {
         root: {
-          borderRadius: 14,
+          borderRadius: 9999,
           padding: "10px 24px",
-          transition: "all 0.25s cubic-bezier(0.4, 0, 0.2, 1)",
+          transition: "all 0.2s ease-in-out",
           boxShadow: "none",
           "&:hover": {
-            transform: "translateY(-2px)",
-            boxShadow: "0 8px 20px rgba(245, 158, 11, 0.3)",
-          },
-          "&:active": {
-            transform: "translateY(0)",
+            boxShadow: "0 4px 12px rgba(0, 0, 0, 0.15)",
           },
         },
         contained: {
-          fontWeight: 800,
+          fontWeight: 700,
+          backgroundColor: "#000000",
+          color: "#ffffff",
+          "&:hover": {
+            backgroundColor: "#1f2937",
+          },
+        },
+        outlined: {
+          borderColor: "#e5e7eb",
+          color: "#111827",
+          "&:hover": {
+            borderColor: "#111827",
+            backgroundColor: "#f9fafb",
+          },
         },
       },
     },
     MuiCard: {
       styleOverrides: {
         root: {
-          borderRadius: 20,
-          boxShadow: "0 10px 30px rgba(15, 23, 42, 0.06)",
-          border: "1px solid #e2e8f0",
-          transition: "all 0.3s cubic-bezier(0.4, 0, 0.2, 1)",
+          borderRadius: 16,
+          boxShadow: "none",
+          border: "1px solid #e5e7eb",
+          transition: "all 0.25s ease",
+          "&:hover": {
+            borderColor: "#d1d5db",
+            boxShadow: "0 10px 25px rgba(0, 0, 0, 0.05)",
+          },
         },
       },
     },
     MuiChip: {
       styleOverrides: {
         root: {
-          borderRadius: 10,
+          borderRadius: 8,
           fontWeight: 700,
         },
       },
