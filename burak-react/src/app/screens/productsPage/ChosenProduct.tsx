@@ -191,6 +191,9 @@ export function ChosenProduct({ onAdd }: ChosenProductProps) {
                         component="img"
                         src={getImageSrc(img)}
                         alt={`Angle ${idx + 1}`}
+                        onError={(e: any) => {
+                          e.target.src = "/img/kixora/sneakers.jpg";
+                        }}
                         sx={{ width: "100%", height: "100%", objectFit: "contain" }}
                       />
                     </Box>
@@ -218,6 +221,9 @@ export function ChosenProduct({ onAdd }: ChosenProductProps) {
                     component="img"
                     src={mainImageSrc}
                     alt={product.productName}
+                    onError={(e: any) => {
+                      e.target.src = "/img/kixora/hero.jpg";
+                    }}
                     sx={{
                       maxWidth: "100%",
                       maxHeight: 380,

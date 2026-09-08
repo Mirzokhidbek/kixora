@@ -163,6 +163,9 @@ export function PopularDishes({ onAdd }: PopularDishesProps) {
                         component="img"
                         image={image}
                         alt={product.productName}
+                        onError={(e: any) => {
+                          e.target.src = "/img/kixora/sneakers.jpg";
+                        }}
                         sx={{
                           maxHeight: 180,
                           objectFit: "contain",
