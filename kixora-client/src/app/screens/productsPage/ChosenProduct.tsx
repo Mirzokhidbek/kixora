@@ -32,9 +32,10 @@ import { setChosenProduct } from "./slice";
 import { retrieveChosenProduct } from "./selector";
 import { serverApi } from "../../../lib/config";
 import { ProductSize } from "../../../lib/enums/common.enum";
+import { useWishlist } from "../../hooks/useWishlist";
 
 interface ChosenProductProps {
-  onAdd?: (product: any, quantity?: number) => void;
+  onAdd?: (product: any, quantity?: number, size?: number, color?: string) => void;
 }
 
 export function ChosenProduct({ onAdd }: ChosenProductProps) {
@@ -42,14 +43,12 @@ export function ChosenProduct({ onAdd }: ChosenProductProps) {
   const navigate = useNavigate();
   const dispatch = useDispatch();
   const product = useSelector(retrieveChosenProduct);
+  const { toggleWishlist, isInWishlist } = useWishlist();
 
   const [quantity, setQuantity] = useState<number>(1);
   const [selectedSize, setSelectedSize] = useState<string>("42");
   const [activeImgIndex, setActiveImgIndex] = useState<number>(0);
-  const [isFavorite, setIsFavorite] = useState<boolean>(false);
   const [activeTab, setActiveTab] = useState<number>(0);
-  const [toastOpen, setToastOpen] = useState<boolean>(false);
-  const [toastMsg, setToastMsg] = useState<string>("");
 
   const sizeList = [
     ProductSize.SIZE_38,
@@ -105,18 +104,9 @@ export function ChosenProduct({ onAdd }: ChosenProductProps) {
   const mainImageSrc = images[activeImgIndex] ? getImageSrc(images[activeImgIndex]) : "";
 
   const handleAddToCart = () => {
-    if (onAdd) {
-      for (let i = 0; i < quantity; i++) {
-        onAdd({
-          _id: product._id,
-          productName: `${product.productName} (EU ${selectedSize})`,
-          productPrice: product.productPrice,
-          productImages: product.productImages,
-        });
-      }
+    if (onAdd && product) {
+      onAdd(product, quantity, Number(selectedSize) || 42, "Standard");
     }
-    setToastMsg(`Added ${quantity} x ${product.productName} (Size ${selectedSize}) to your bag!`);
-    setToastOpen(true);
   };
 
   return (
@@ -406,7 +396,7 @@ export function ChosenProduct({ onAdd }: ChosenProductProps) {
 
                 {/* Wishlist Button */}
                 <IconButton
-                  onClick={() => setIsFavorite(!isFavorite)}
+                  onClick={() => product && toggleWishlist(product)}
                   sx={{
                     border: "1px solid #e5e7eb",
                     borderRadius: 9999,
@@ -414,7 +404,7 @@ export function ChosenProduct({ onAdd }: ChosenProductProps) {
                     "&:hover": { bgcolor: "#f3f4f6" },
                   }}
                 >
-                  {isFavorite ? (
+                  {product && isInWishlist(product._id) ? (
                     <FavoriteIcon sx={{ color: "#ef4444" }} />
                   ) : (
                     <FavoriteBorderIcon sx={{ color: "#6b7280" }} />
@@ -513,17 +503,6 @@ export function ChosenProduct({ onAdd }: ChosenProductProps) {
             </Typography>
           )}
         </Box>
-
-        <Snackbar
-          open={toastOpen}
-          autoHideDuration={3000}
-          onClose={() => setToastOpen(false)}
-          anchorOrigin={{ vertical: "bottom", horizontal: "center" }}
-        >
-          <Alert severity="success" sx={{ width: "100%", borderRadius: 3, fontWeight: 700 }}>
-            {toastMsg}
-          </Alert>
-        </Snackbar>
       </Container>
     </Box>
   );

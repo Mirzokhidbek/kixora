@@ -29,6 +29,7 @@ import { useGlobals } from "./hooks/useGlobals";
 import MemberService from "./services/MemberService";
 import OrderService from "./services/OrderService";
 import { OrderStatus } from "../lib/enums/common.enum";
+import { sweetTopSuccessAlert, sweetErrorAlert, sweetTopSmallSuccessAlert } from "../lib/sweetAlert";
 
 export default function App() {
   const { cartItems, onAdd, onRemove, onDelete, onDeleteAll } = useBasket();
@@ -36,8 +37,6 @@ export default function App() {
 
   const [authOpen, setAuthOpen] = useState<boolean>(false);
   const [checkoutOpen, setCheckoutOpen] = useState<boolean>(false);
-  const [toastOpen, setToastOpen] = useState<boolean>(false);
-  const [toastMsg, setToastMsg] = useState<string>("");
 
   useEffect(() => {
     const memberJson = localStorage.getItem("member_data");
@@ -58,8 +57,7 @@ export default function App() {
       const memberService = new MemberService();
       await memberService.logout();
       setAuthMember(null);
-      setToastMsg("Successfully logged out!");
-      setToastOpen(true);
+      sweetTopSmallSuccessAlert("Successfully logged out!");
     } catch {
       setAuthMember(null);
     }
@@ -67,15 +65,13 @@ export default function App() {
 
   const handleCheckoutClick = () => {
     if (!authMember) {
-      setToastMsg("Please sign in to place your order!");
-      setToastOpen(true);
+      sweetErrorAlert("Please sign in to place your luxury footwear order!");
       setAuthOpen(true);
       return;
     }
 
     if (cartItems.length === 0) {
-      setToastMsg("Your bag is empty!");
-      setToastOpen(true);
+      sweetErrorAlert("Your shopping bag is empty!");
       return;
     }
 
@@ -94,17 +90,17 @@ export default function App() {
       }
       onDeleteAll();
       setOrderBuilder(new Date());
-      setToastMsg("Luxury Order placed successfully! Tracking your shipment...");
-      setToastOpen(true);
+      sweetTopSuccessAlert("Luxury Order placed successfully! Tracking shipment...", 3000);
       setTimeout(() => {
         window.location.href = "/orders?tab=process";
-      }, 600);
+      }, 700);
     } catch (err: any) {
       if (err.response?.status === 401) {
         setAuthMember(null);
-        setToastMsg("Session expired. Please sign in again.");
+        sweetErrorAlert("Session expired. Please sign in again.");
         setAuthOpen(true);
       } else {
+        sweetErrorAlert(err.response?.data?.message || "Order placement failed.");
         throw new Error(err.response?.data?.message || "Order placement failed.");
       }
     }
@@ -145,8 +141,7 @@ export default function App() {
             onClose={() => setAuthOpen(false)}
             onSuccess={(member) => {
               setAuthMember(member);
-              setToastMsg(`Welcome back, ${member.memberNick}!`);
-              setToastOpen(true);
+              sweetTopSuccessAlert(`Welcome back, ${member.memberNick}! ✨`);
             }}
           />
 
@@ -158,18 +153,6 @@ export default function App() {
             member={authMember}
             onConfirmOrder={handleConfirmOrder}
           />
-
-          {/* Global Notification Toast */}
-          <Snackbar
-            open={toastOpen}
-            autoHideDuration={3000}
-            onClose={() => setToastOpen(false)}
-            anchorOrigin={{ vertical: "bottom", horizontal: "center" }}
-          >
-            <Alert severity="success" sx={{ width: "100%", borderRadius: 3, fontWeight: 700 }}>
-              {toastMsg}
-            </Alert>
-          </Snackbar>
         </Box>
       </Router>
     </ThemeProvider>

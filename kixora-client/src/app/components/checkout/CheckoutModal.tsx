@@ -18,6 +18,7 @@ import {
   Stepper,
   Step,
   StepLabel,
+  Chip,
 } from "@mui/material";
 import CloseIcon from "@mui/icons-material/Close";
 import CheckCircleIcon from "@mui/icons-material/CheckCircle";
@@ -455,12 +456,28 @@ export function CheckoutModal({
                         sx={{ width: 36, height: 36, borderRadius: "6px", border: "1px solid #e5e7eb" }}
                       />
                       <Box>
-                        <Typography variant="body2" sx={{ fontWeight: 700, fontSize: "0.82rem" }}>
+                        <Typography variant="body2" sx={{ fontWeight: 800, color: "#111827", fontSize: "0.85rem" }}>
                           {item.name}
                         </Typography>
-                        <Typography variant="caption" sx={{ color: "#6b7280" }}>
-                          Qty: {item.quantity} &bull; ${item.price} each
-                        </Typography>
+                        <Box sx={{ display: "flex", alignItems: "center", gap: 0.8, mt: 0.3 }}>
+                          {item.size ? (
+                            <Chip
+                              label={`EU ${item.size}`}
+                              size="small"
+                              sx={{
+                                height: 18,
+                                fontSize: "0.68rem",
+                                fontWeight: 800,
+                                bgcolor: "#111827",
+                                color: "#ffffff",
+                                borderRadius: "4px",
+                              }}
+                            />
+                          ) : null}
+                          <Typography variant="caption" sx={{ color: "#6b7280" }}>
+                            Qty: {item.quantity} &bull; ${item.price} each
+                          </Typography>
+                        </Box>
                       </Box>
                     </Box>
                     <Typography variant="body2" sx={{ fontWeight: 800, fontSize: "0.85rem" }}>

@@ -9,6 +9,7 @@ import {
   Divider,
   TextField,
   InputAdornment,
+  Chip,
 } from "@mui/material";
 import CloseIcon from "@mui/icons-material/Close";
 import AddIcon from "@mui/icons-material/Add";
@@ -24,7 +25,7 @@ interface BasketDrawerProps {
   open: boolean;
   onClose: () => void;
   cartItems: CartItem[];
-  onAdd: (item: any) => void;
+  onAdd: (item: any, quantity?: number, size?: number, color?: string) => void;
   onRemove: (item: CartItem) => void;
   onDelete: (item: CartItem) => void;
   onDeleteAll: () => void;
@@ -214,9 +215,36 @@ export function BasketDrawer({
                         <DeleteIcon fontSize="small" />
                       </IconButton>
                     </Box>
-                    <Typography variant="caption" sx={{ color: "#6b7280", fontWeight: 600 }}>
-                      Footwear Collection
-                    </Typography>
+                    <Box sx={{ display: "flex", gap: 0.8, alignItems: "center", mt: 0.5, flexWrap: "wrap" }}>
+                      {item.size ? (
+                        <Chip
+                          label={`EU ${item.size}`}
+                          size="small"
+                          sx={{
+                            height: 20,
+                            fontSize: "0.7rem",
+                            fontWeight: 800,
+                            bgcolor: "#111827",
+                            color: "#ffffff",
+                            borderRadius: "6px",
+                          }}
+                        />
+                      ) : null}
+                      {item.color && item.color !== "Standard" ? (
+                        <Chip
+                          label={item.color}
+                          size="small"
+                          sx={{
+                            height: 20,
+                            fontSize: "0.7rem",
+                            fontWeight: 700,
+                            bgcolor: "#f3f4f6",
+                            color: "#374151",
+                            borderRadius: "6px",
+                          }}
+                        />
+                      ) : null}
+                    </Box>
                   </Box>
 
                   <Box sx={{ display: "flex", alignItems: "center", justifyContent: "space-between", mt: 1.5 }}>
@@ -244,12 +272,17 @@ export function BasketDrawer({
                       <IconButton
                         size="small"
                         onClick={() =>
-                          onAdd({
-                            _id: item._id,
-                            productName: item.name,
-                            productPrice: item.price,
-                            productImages: [item.image],
-                          } as any)
+                          onAdd(
+                            {
+                              _id: item._id,
+                              productName: item.name,
+                              productPrice: item.price,
+                              productImages: [item.image],
+                            } as any,
+                            1,
+                            item.size,
+                            item.color
+                          )
                         }
                         sx={{ color: "#374151", p: 0.4 }}
                       >

@@ -39,7 +39,7 @@ import { ProductCollection, ProductSize } from "../../../lib/enums/common.enum";
 import { serverApi } from "../../../lib/config";
 
 interface ProductsProps {
-  onAdd?: (item: any) => void;
+  onAdd?: (item: any, quantity?: number, size?: number, color?: string) => void;
 }
 
 /** REDUX DISPATCH **/
@@ -520,9 +520,7 @@ export function Products({ onAdd }: ProductsProps) {
                             variant="contained"
                             onClick={(e) => {
                               e.stopPropagation();
-                              onAdd && onAdd(product);
-                              setToastMsg(`${product.productName} added to bag!`);
-                              setToastOpen(true);
+                              onAdd && onAdd(product, 1, selectedSize || product.productSizes?.[0] || 42, "Standard");
                             }}
                             startIcon={<AddShoppingCartIcon sx={{ fontSize: 16 }} />}
                             sx={{
@@ -569,17 +567,6 @@ export function Products({ onAdd }: ProductsProps) {
             </Box>
           </Grid>
         </Grid>
-
-        <Snackbar
-          open={toastOpen}
-          autoHideDuration={3000}
-          onClose={() => setToastOpen(false)}
-          anchorOrigin={{ vertical: "bottom", horizontal: "center" }}
-        >
-          <Alert severity="success" sx={{ width: "100%", borderRadius: 3, fontWeight: 700 }}>
-            {toastMsg}
-          </Alert>
-        </Snackbar>
       </Container>
     </Box>
   );
