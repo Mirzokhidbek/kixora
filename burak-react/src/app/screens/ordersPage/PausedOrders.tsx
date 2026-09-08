@@ -98,7 +98,7 @@ export function PausedOrders() {
                     <Avatar src={getImageSrc(product?.productImages?.[0])} variant="rounded" sx={{ width: 52, height: 52, borderRadius: 2 }} />
                     <div>
                       <Typography variant="body1" sx={{ fontWeight: 700 }}>
-                        {product?.productName || "Delicious Burak Specialty"}
+                        {product?.productName || "KIXORA Signature Footwear"}
                       </Typography>
                       <Typography variant="caption" color="text.secondary">
                         Qty: {item.itemQuantity}x &bull; Unit: ${item.itemPrice?.toFixed(2)}
