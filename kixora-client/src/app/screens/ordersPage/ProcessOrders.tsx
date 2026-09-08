@@ -1,6 +1,21 @@
-import { Box, Typography, Card, CardContent, Button, Avatar, Chip, LinearProgress } from "@mui/material";
-import OutdoorGrillIcon from "@mui/icons-material/OutdoorGrill";
+import {
+  Box,
+  Typography,
+  Card,
+  CardContent,
+  Button,
+  Avatar,
+  Chip,
+  Stepper,
+  Step,
+  StepLabel,
+  Stack,
+  Divider,
+} from "@mui/material";
+import LocalShippingOutlinedIcon from "@mui/icons-material/LocalShippingOutlined";
 import CheckCircleIcon from "@mui/icons-material/CheckCircle";
+import Inventory2OutlinedIcon from "@mui/icons-material/Inventory2Outlined";
+import VerifiedIcon from "@mui/icons-material/Verified";
 import { useSelector } from "react-redux";
 
 import { retrieveProcessOrders } from "./selector";
@@ -25,119 +40,212 @@ export function ProcessOrders() {
   };
 
   const getImageSrc = (img?: string) => {
-    if (!img) return "";
-    return img.startsWith("http") ? img : `${serverApi}/${img}`;
+    if (!img) return "/sample.jpg";
+    return img.startsWith("http") ? img : `${serverApi}/${img.replace("public/", "")}`;
   };
+
+  const trackingSteps = [
+    { label: "Order Verified", desc: "Payment Confirmed" },
+    { label: "QC & Crafting Lab", desc: "Footwear Inspected" },
+    { label: "Dispatched", desc: "Courier on the Way" },
+    { label: "Delivered", desc: "Awaiting Receipt" },
+  ];
 
   if (processOrders.length === 0) {
     return (
       <Box sx={{ textAlign: "center", py: 8 }}>
-        <OutdoorGrillIcon sx={{ fontSize: 60, color: "#94a3b8", mb: 2 }} />
-        <Typography variant="h6" sx={{ fontWeight: 700, mb: 1 }}>
-          No Active Cooking Orders
+        <Box
+          sx={{
+            width: 72,
+            height: 72,
+            borderRadius: "50%",
+            bgcolor: "#f3f4f6",
+            display: "inline-flex",
+            alignItems: "center",
+            justifyContent: "center",
+            mb: 2,
+          }}
+        >
+          <LocalShippingOutlinedIcon sx={{ fontSize: 36, color: "#9ca3af" }} />
+        </Box>
+        <Typography variant="h6" sx={{ fontWeight: 800, mb: 0.8, fontSize: "1.1rem" }}>
+          No Active Shipments
         </Typography>
         <Typography variant="body2" color="text.secondary">
-          No orders are currently being prepared in our open-fire kitchen.
+          You currently have no footwear orders in transit.
         </Typography>
       </Box>
     );
   }
 
   return (
-    <Box sx={{ display: "flex", flexDirection: "column", gap: 3 }}>
+    <Box sx={{ display: "flex", flexDirection: "column", gap: 3.5 }}>
       {processOrders.map((order: Order) => (
         <Card
           key={order._id}
           sx={{
-            borderRadius: 4,
-            border: "1px solid #e2e8f0",
+            borderRadius: "16px",
+            border: "1px solid #e5e7eb",
             overflow: "hidden",
-            boxShadow: "0 4px 16px rgba(15, 23, 42, 0.05)",
+            boxShadow: "0 6px 20px rgba(0, 0, 0, 0.04)",
           }}
         >
+          {/* Order Header */}
           <Box
             sx={{
-              bgcolor: "#0f172a",
-              color: "#fff",
-              px: 3,
-              py: 2,
+              bgcolor: "#050505",
+              color: "#ffffff",
+              px: 3.5,
+              py: 2.2,
               display: "flex",
               justifyContent: "space-between",
               alignItems: "center",
               flexWrap: "wrap",
-              gap: 1,
+              gap: 1.5,
             }}
           >
             <Box sx={{ display: "flex", alignItems: "center", gap: 1.5 }}>
-              <OutdoorGrillIcon sx={{ color: "#38bdf8" }} />
-              <Typography variant="subtitle1" sx={{ fontWeight: 800 }}>
-                Order #{order._id?.slice(-6)?.toUpperCase()}
-              </Typography>
+              <LocalShippingOutlinedIcon sx={{ color: "#ffffff", fontSize: 22 }} />
+              <Box>
+                <Typography variant="subtitle1" sx={{ fontWeight: 800, fontSize: "0.95rem" }}>
+                  KIXORA Shipment #{order._id?.slice(-6)?.toUpperCase()}
+                </Typography>
+                <Typography variant="caption" sx={{ color: "#9ca3af", display: "block" }}>
+                  Tracking: KX-{order._id?.slice(-8)?.toUpperCase()} &bull; Express Delivery
+                </Typography>
+              </Box>
             </Box>
+
             <Chip
-              label="COOKING ON EMBERS &bull; EN ROUTE"
+              label="IN TRANSIT • ON TIME"
               size="small"
-              sx={{ bgcolor: "#38bdf8", color: "#000", fontWeight: 800 }}
+              sx={{
+                bgcolor: "#16a34a",
+                color: "#ffffff",
+                fontWeight: 800,
+                fontSize: "0.72rem",
+                letterSpacing: "0.04em",
+              }}
             />
           </Box>
 
-          {/* Progress bar */}
-          <LinearProgress
-            variant="indeterminate"
-            sx={{
-              height: 4,
-              bgcolor: "rgba(56, 189, 248, 0.2)",
-              "& .MuiLinearProgress-bar": { bgcolor: "#38bdf8" },
-            }}
-          />
+          {/* Stepper Tracking Visualizer */}
+          <Box sx={{ px: { xs: 2, sm: 4 }, py: 3, bgcolor: "#fafafa", borderBottom: "1px solid #f3f4f6" }}>
+            <Stepper activeStep={2} alternativeLabel>
+              {trackingSteps.map((step) => (
+                <Step key={step.label}>
+                  <StepLabel
+                    sx={{
+                      "& .MuiStepLabel-label": {
+                        fontSize: "0.78rem",
+                        fontWeight: 700,
+                        color: "#374151",
+                        "&.Mui-active": { color: "#111827", fontWeight: 800 },
+                      },
+                      "& .MuiStepIcon-root": {
+                        color: "#111827",
+                        fontSize: 20,
+                        "&.Mui-active": { color: "#111827" },
+                        "&.Mui-completed": { color: "#16a34a" },
+                      },
+                    }}
+                  >
+                    {step.label}
+                    <Typography variant="caption" sx={{ display: "block", color: "#9ca3af", fontSize: "0.68rem" }}>
+                      {step.desc}
+                    </Typography>
+                  </StepLabel>
+                </Step>
+              ))}
+            </Stepper>
+          </Box>
 
-          <CardContent sx={{ p: 3 }}>
-            {order.orderItems?.map((item: OrderItem, idx: number) => {
-              const product = order.productData?.[idx];
-              return (
-                <Box
-                  key={item._id || idx}
-                  sx={{
-                    display: "flex",
-                    justifyContent: "space-between",
-                    alignItems: "center",
-                    bgcolor: "#f8fafc",
-                    p: 1.5,
-                    borderRadius: 3,
-                    mb: 2,
-                  }}
-                >
-                  <Box sx={{ display: "flex", alignItems: "center", gap: 2 }}>
-                    <Avatar src={getImageSrc(product?.productImages?.[0])} variant="rounded" sx={{ width: 52, height: 52, borderRadius: 2 }} />
-                    <div>
-                      <Typography variant="body1" sx={{ fontWeight: 700 }}>
-                        {product?.productName || "KIXORA Signature Footwear"}
-                      </Typography>
-                      <Typography variant="caption" color="text.secondary">
-                        Qty: {item.itemQuantity}x &bull; Freshly Crafted
-                      </Typography>
-                    </div>
+          {/* Order Items */}
+          <CardContent sx={{ p: 3.5 }}>
+            <Stack spacing={1.5} sx={{ mb: 2.5 }}>
+              {order.orderItems?.map((item: OrderItem, idx: number) => {
+                const product = order.productData?.[idx];
+                return (
+                  <Box
+                    key={item._id || idx}
+                    sx={{
+                      display: "flex",
+                      justifyContent: "space-between",
+                      alignItems: "center",
+                      bgcolor: "#f9fafb",
+                      p: 1.8,
+                      borderRadius: "12px",
+                      border: "1px solid #f3f4f6",
+                    }}
+                  >
+                    <Box sx={{ display: "flex", alignItems: "center", gap: 2 }}>
+                      <Avatar
+                        src={getImageSrc(product?.productImages?.[0])}
+                        variant="rounded"
+                        sx={{
+                          width: 54,
+                          height: 54,
+                          borderRadius: "10px",
+                          border: "1px solid #e5e7eb",
+                          bgcolor: "#ffffff",
+                        }}
+                      />
+                      <div>
+                        <Typography variant="body2" sx={{ fontWeight: 800, color: "#111827" }}>
+                          {product?.productName || "KIXORA Footwear Model"}
+                        </Typography>
+                        <Typography variant="caption" sx={{ color: "#6b7280", fontWeight: 600 }}>
+                          Qty: {item.itemQuantity}x &bull; EU {product?.productSizes?.[0] || 42} &bull; Verified Authentic
+                        </Typography>
+                      </div>
+                    </Box>
+                    <Typography variant="subtitle2" sx={{ fontWeight: 900, color: "#111827" }}>
+                      ${((item.itemPrice || 0) * (item.itemQuantity || 1)).toFixed(2)}
+                    </Typography>
                   </Box>
-                  <Typography variant="subtitle1" sx={{ fontWeight: 800, color: "#0f172a" }}>
-                    ${((item.itemPrice || 0) * (item.itemQuantity || 1)).toFixed(2)}
-                  </Typography>
-                </Box>
-              );
-            })}
+                );
+              })}
+            </Stack>
 
-            <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "center", pt: 2, borderTop: "1px solid #f1f5f9", flexWrap: "wrap", gap: 2 }}>
-              <Typography variant="subtitle1" sx={{ fontWeight: 800, color: "#0f172a" }}>
-                Total Paid: ${order.orderTotal?.toFixed(2)}
-              </Typography>
+            <Divider sx={{ my: 2 }} />
+
+            {/* Bottom Total & Actions */}
+            <Box
+              sx={{
+                display: "flex",
+                justifyContent: "space-between",
+                alignItems: "center",
+                flexWrap: "wrap",
+                gap: 2,
+              }}
+            >
+              <Box>
+                <Typography variant="caption" sx={{ color: "#6b7280", display: "block" }}>
+                  Total Paid Amount
+                </Typography>
+                <Typography variant="h6" sx={{ fontWeight: 900, color: "#111827" }}>
+                  ${order.orderTotal?.toFixed(2)}
+                </Typography>
+              </Box>
 
               <Button
                 variant="contained"
-                color="success"
                 startIcon={<CheckCircleIcon />}
                 onClick={() => handleUpdateOrder(order._id, OrderStatus.FINISH)}
-                sx={{ fontWeight: 800, px: 3, borderRadius: 3 }}
+                sx={{
+                  bgcolor: "#111827",
+                  color: "#ffffff",
+                  borderRadius: "10px",
+                  fontWeight: 800,
+                  fontSize: "0.86rem",
+                  px: 3,
+                  py: 1,
+                  textTransform: "none",
+                  boxShadow: "none",
+                  "&:hover": { bgcolor: "#000000", boxShadow: "none" },
+                }}
               >
-                Confirm Delivery (+10 Pts)
+                Confirm Delivery Received
               </Button>
             </Box>
           </CardContent>

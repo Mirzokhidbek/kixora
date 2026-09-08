@@ -31,6 +31,12 @@ class ProductService {
       if (inquiry.search) {
         url += `&search=${encodeURIComponent(inquiry.search)}`;
       }
+      if (inquiry.size) {
+        url += `&size=${inquiry.size}`;
+      }
+      if (inquiry.color) {
+        url += `&color=${encodeURIComponent(inquiry.color)}`;
+      }
 
       const result = await axios.get(url, { withCredentials: true });
       return result.data;

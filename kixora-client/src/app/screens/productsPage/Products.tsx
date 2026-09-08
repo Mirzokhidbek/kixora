@@ -30,6 +30,7 @@ import { useNavigate } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
 import type { Dispatch } from "@reduxjs/toolkit";
 
+import { useWishlist } from "../../hooks/useWishlist";
 import ProductService from "../../services/ProductService";
 import { setProducts } from "./slice";
 import { retrieveProducts } from "./selector";
@@ -51,6 +52,7 @@ export function Products({ onAdd }: ProductsProps) {
   const dispatch = useDispatch();
   const { setProducts } = useMemo(() => actionDispatch(dispatch), [dispatch]);
   const products = useSelector(retrieveProducts);
+  const { toggleWishlist, isInWishlist } = useWishlist();
 
   const [productsSearch, setProductsSearch] = useState<ProductInquiry>({
     page: 1,
@@ -58,11 +60,11 @@ export function Products({ onAdd }: ProductsProps) {
     order: "createdAt",
     productCollection: undefined,
     search: "",
+    size: undefined,
   });
 
   const [searchText, setSearchText] = useState("");
-  const [selectedSize, setSelectedSize] = useState<string | null>(null);
-  const [favorites, setFavorites] = useState<string[]>([]);
+  const [selectedSize, setSelectedSize] = useState<number | null>(null);
   const [toastOpen, setToastOpen] = useState(false);
   const [toastMsg, setToastMsg] = useState("");
 
@@ -90,6 +92,17 @@ export function Products({ onAdd }: ProductsProps) {
     });
   };
 
+  const sizeHandler = (size: number) => {
+    const isAlreadySelected = selectedSize === size;
+    const newSize = isAlreadySelected ? null : size;
+    setSelectedSize(newSize);
+    setProductsSearch({
+      ...productsSearch,
+      page: 1,
+      size: newSize || undefined,
+    });
+  };
+
   const orderHandler = (order: string) => {
     setProductsSearch({ ...productsSearch, page: 1, order: order });
   };
@@ -108,19 +121,22 @@ export function Products({ onAdd }: ProductsProps) {
       order: "createdAt",
       productCollection: undefined,
       search: "",
+      size: undefined,
     });
+    setToastMsg("Filters reset");
+    setToastOpen(true);
   };
 
-  const toggleFavorite = (e: React.MouseEvent, id: string) => {
+  const handleToggleWishlist = (e: React.MouseEvent, product: Product) => {
     e.stopPropagation();
-    setFavorites((prev) =>
-      prev.includes(id) ? prev.filter((item) => item !== id) : [...prev, id]
-    );
+    const added = toggleWishlist(product);
+    setToastMsg(added ? `Added "${product.productName}" to Wishlist!` : `Removed from Wishlist`);
+    setToastOpen(true);
   };
 
   const getImageSrc = (img?: string) => {
-    if (!img) return "";
-    return img.startsWith("http") ? img : `${serverApi}/${img}`;
+    if (!img) return "/sample.jpg";
+    return img.startsWith("http") ? img : `${serverApi}/${img.replace("public/", "")}`;
   };
 
   const categories = [
@@ -132,16 +148,7 @@ export function Products({ onAdd }: ProductsProps) {
     { label: "Limited Drops", value: ProductCollection.LIMITED_DROP },
   ];
 
-  const sizeList = [
-    ProductSize.SIZE_38,
-    ProductSize.SIZE_39,
-    ProductSize.SIZE_40,
-    ProductSize.SIZE_41,
-    ProductSize.SIZE_42,
-    ProductSize.SIZE_43,
-    ProductSize.SIZE_44,
-    ProductSize.SIZE_45,
-  ];
+  const sizeList = [38, 39, 40, 41, 42, 43, 44, 45];
 
   return (
     <Box sx={{ py: 6, bgcolor: "#ffffff", minHeight: "85vh" }}>
@@ -265,7 +272,7 @@ export function Products({ onAdd }: ProductsProps) {
                   return (
                     <Button
                       key={size}
-                      onClick={() => setSelectedSize(isSelected ? null : size)}
+                      onClick={() => sizeHandler(size)}
                       sx={{
                         minWidth: 0,
                         py: 0.8,
@@ -358,7 +365,7 @@ export function Products({ onAdd }: ProductsProps) {
                   No footwear found
                 </Typography>
                 <Typography variant="body2" color="text.secondary" sx={{ mb: 3 }}>
-                  Try adjusting your search query or reset the filters.
+                  Try adjusting your size or search query, or reset the filters.
                 </Typography>
                 <Button
                   variant="contained"
@@ -379,7 +386,7 @@ export function Products({ onAdd }: ProductsProps) {
             {/* Products Grid */}
             <Grid container spacing={3}>
               {products.map((product) => {
-                const isFav = favorites.includes(product._id);
+                const isFav = isInWishlist(product._id);
                 const image = product.productImages?.[0] ? getImageSrc(product.productImages[0]) : "";
 
                 return (
@@ -407,7 +414,7 @@ export function Products({ onAdd }: ProductsProps) {
                       {/* Wishlist Button */}
                       <IconButton
                         size="small"
-                        onClick={(e) => toggleFavorite(e, product._id)}
+                        onClick={(e) => handleToggleWishlist(e, product)}
                         sx={{
                           position: "absolute",
                           top: 12,
@@ -421,7 +428,7 @@ export function Products({ onAdd }: ProductsProps) {
                         }}
                       >
                         {isFav ? (
-                          <FavoriteIcon sx={{ color: "#ef4444", fontSize: 18 }} />
+                          <FavoriteIcon sx={{ color: "#e11d48", fontSize: 18 }} />
                         ) : (
                           <FavoriteBorderIcon sx={{ color: "#6b7280", fontSize: 18 }} />
                         )}

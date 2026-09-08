@@ -20,13 +20,16 @@ import {
 import SearchIcon from "@mui/icons-material/Search";
 import ShoppingBagOutlinedIcon from "@mui/icons-material/ShoppingBagOutlined";
 import PersonOutlineOutlinedIcon from "@mui/icons-material/PersonOutlineOutlined";
+import FavoriteBorderIcon from "@mui/icons-material/FavoriteBorder";
 import MenuIcon from "@mui/icons-material/Menu";
 import LogoutIcon from "@mui/icons-material/Logout";
 import LocalMallOutlinedIcon from "@mui/icons-material/LocalMallOutlined";
 import { NavLink, useNavigate, useLocation } from "react-router-dom";
 
 import { BasketDrawer } from "./BasketDrawer";
+import { WishlistDrawer } from "./WishlistDrawer";
 import { MobileBottomNav } from "./MobileBottomNav";
+import { useWishlist } from "../../hooks/useWishlist";
 import type { CartItem } from "../../../lib/types/cart";
 import type { Member } from "../../../lib/types/member";
 
@@ -55,10 +58,12 @@ export function Navbar({
 }: NavbarProps) {
   const navigate = useNavigate();
   const location = useLocation();
+  const { wishlist, wishlistCount, removeFromWishlist, clearWishlist } = useWishlist();
 
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
   const [mobileOpen, setMobileOpen] = useState(false);
   const [basketOpen, setBasketOpen] = useState(false);
+  const [wishlistOpen, setWishlistOpen] = useState(false);
 
   const handleMenuOpen = (event: React.MouseEvent<HTMLElement>) => {
     setAnchorEl(event.currentTarget);
@@ -405,6 +410,16 @@ export function Navbar({
           setBasketOpen(false);
           onCheckout();
         }}
+      />
+
+      {/* Wishlist Drawer */}
+      <WishlistDrawer
+        open={wishlistOpen}
+        onClose={() => setWishlistOpen(false)}
+        wishlist={wishlist}
+        onRemove={removeFromWishlist}
+        onClear={clearWishlist}
+        onAddToCart={onAdd}
       />
     </Box>
   );
