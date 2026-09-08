@@ -16,15 +16,13 @@ import {
   ListItem,
   ListItemButton,
   ListItemText,
-  Slide,
 } from "@mui/material";
 import SearchIcon from "@mui/icons-material/Search";
-import ShoppingCartOutlinedIcon from "@mui/icons-material/ShoppingCartOutlined";
-import NotificationsNoneOutlinedIcon from "@mui/icons-material/NotificationsNoneOutlined";
+import ShoppingBagOutlinedIcon from "@mui/icons-material/ShoppingBagOutlined";
+import PersonOutlineOutlinedIcon from "@mui/icons-material/PersonOutlineOutlined";
 import MenuIcon from "@mui/icons-material/Menu";
-import PersonIcon from "@mui/icons-material/Person";
 import LogoutIcon from "@mui/icons-material/Logout";
-import ArrowForwardIcon from "@mui/icons-material/ArrowForward";
+import LocalMallOutlinedIcon from "@mui/icons-material/LocalMallOutlined";
 import { NavLink, useNavigate, useLocation } from "react-router-dom";
 
 import { BasketDrawer } from "./BasketDrawer";
@@ -72,10 +70,10 @@ export function Navbar({
 
   const navLinks = [
     { title: "Home", path: "/" },
-    { title: "About", path: "/help" },
-    { title: "Menu", path: "/products" },
+    { title: "Shop", path: "/products" },
     { title: "Orders", path: "/orders" },
-    { title: "Contact us", path: "/help" },
+    { title: "Account", path: "/user" },
+    { title: "Support", path: "/help" },
   ];
 
   const totalCartCount = cartItems.reduce(
@@ -83,37 +81,44 @@ export function Navbar({
     0
   );
 
-  const totalCartPrice = cartItems.reduce(
-    (total, item) => total + item.price * item.quantity,
-    0
-  );
-
   return (
-    <Box sx={{ position: "sticky", top: 0, zIndex: 1200, width: "100%", overflowX: "hidden" }}>
-      {/* Clean White Modern Header */}
+    <Box sx={{ position: "sticky", top: 0, zIndex: 1200, width: "100%" }}>
+      {/* Top Banner Notice */}
+      <Box
+        sx={{
+          bgcolor: "#000000",
+          color: "#ffffff",
+          py: 0.75,
+          textAlign: "center",
+          fontSize: "0.78rem",
+          fontWeight: 600,
+          letterSpacing: "0.05em",
+        }}
+      >
+        COMPLIMENTARY EXPRESS SHIPPING ON ORDERS OVER $100 &bull; 30-DAY RETURNS
+      </Box>
+
+      {/* Main Luxury Header */}
       <AppBar
         position="static"
         sx={{
           bgcolor: "#ffffff",
-          color: "#0f172a",
-          borderBottom: "1px solid #f1f5f9",
-          boxShadow: "0 4px 20px rgba(0, 0, 0, 0.04)",
+          color: "#111827",
+          borderBottom: "1px solid #e5e7eb",
+          boxShadow: "0 1px 3px rgba(0, 0, 0, 0.05)",
           py: 0.5,
-          width: "100%",
         }}
       >
         <Container maxWidth="lg" sx={{ px: { xs: 2, sm: 3 } }}>
-          <Toolbar disableGutters sx={{ justifyContent: "space-between" }}>
-            {/* Brand Bubble Logo (matching Asianfood template style) */}
+          <Toolbar disableGutters sx={{ justifyContent: "space-between", minHeight: 70 }}>
+            {/* Brand Logo */}
             <Box
               component={NavLink}
               to="/"
               sx={{
                 display: "flex",
-                alignItems: "center",
-                gap: 0.5,
+                flexDirection: "column",
                 textDecoration: "none",
-                minWidth: 0,
               }}
             >
               <Typography
@@ -121,14 +126,26 @@ export function Navbar({
                 sx={{
                   fontFamily: '"Outfit", sans-serif',
                   fontWeight: 900,
-                  fontSize: { xs: "1.45rem", md: "1.9rem" },
-                  letterSpacing: "-0.03em",
-                  color: "#f59e0b",
-                  textShadow: "0 2px 8px rgba(245, 158, 11, 0.2)",
-                  whiteSpace: "nowrap",
+                  fontSize: { xs: "1.5rem", md: "1.85rem" },
+                  letterSpacing: "0.08em",
+                  color: "#000000",
+                  lineHeight: 1,
                 }}
               >
-                Burak<span style={{ color: "#334155" }}>food</span>
+                KIXORA
+              </Typography>
+              <Typography
+                variant="caption"
+                sx={{
+                  fontSize: "0.62rem",
+                  fontWeight: 800,
+                  letterSpacing: "0.22em",
+                  color: "#6b7280",
+                  textTransform: "uppercase",
+                  mt: 0.3,
+                }}
+              >
+                STEP INTO MORE
               </Typography>
             </Box>
 
@@ -137,7 +154,7 @@ export function Navbar({
               sx={{
                 display: { xs: "none", md: "flex" },
                 alignItems: "center",
-                gap: 4,
+                gap: 4.5,
               }}
             >
               {navLinks.map((item) => {
@@ -148,56 +165,74 @@ export function Navbar({
                     to={item.path}
                     style={{
                       textDecoration: "none",
-                      color: isActive ? "#f59e0b" : "#475569",
+                      color: isActive ? "#000000" : "#4b5563",
                       fontWeight: isActive ? 800 : 600,
-                      fontSize: "0.98rem",
-                      transition: "color 0.2s ease",
+                      fontSize: "0.92rem",
+                      letterSpacing: "0.02em",
+                      position: "relative",
+                      padding: "6px 0",
                     }}
                   >
                     {item.title}
+                    {isActive && (
+                      <Box
+                        sx={{
+                          position: "absolute",
+                          bottom: 0,
+                          left: 0,
+                          right: 0,
+                          height: "2px",
+                          bgcolor: "#000000",
+                          borderRadius: 1,
+                        }}
+                      />
+                    )}
                   </NavLink>
                 );
               })}
             </Box>
 
             {/* Right Action Icons & Login Button */}
-            <Box sx={{ display: "flex", alignItems: "center", gap: { xs: 0.8, sm: 2.5 } }}>
+            <Box sx={{ display: "flex", alignItems: "center", gap: { xs: 1, sm: 2 } }}>
               {/* Search Icon */}
               <IconButton
                 onClick={() => navigate("/products")}
-                sx={{ color: "#334155", p: { xs: 0.8, sm: 1 }, "&:hover": { color: "#f59e0b" } }}
+                sx={{
+                  color: "#111827",
+                  p: 1,
+                  "&:hover": { bgcolor: "#f3f4f6" },
+                }}
               >
                 <SearchIcon fontSize="small" />
               </IconButton>
 
-              {/* Cart Button */}
+              {/* Shopping Bag Icon */}
               <IconButton
-                sx={{ color: "#334155", p: { xs: 0.8, sm: 1 }, "&:hover": { color: "#f59e0b" } }}
+                sx={{
+                  color: "#111827",
+                  p: 1,
+                  "&:hover": { bgcolor: "#f3f4f6" },
+                }}
                 onClick={() => setBasketOpen(true)}
               >
                 <Badge
                   badgeContent={totalCartCount}
                   sx={{
                     "& .MuiBadge-badge": {
-                      bgcolor: "#f59e0b",
-                      color: "#fff",
+                      bgcolor: "#000000",
+                      color: "#ffffff",
                       fontWeight: 800,
+                      fontSize: "0.7rem",
+                      minWidth: 18,
+                      height: 18,
                     },
                   }}
                 >
-                  <ShoppingCartOutlinedIcon fontSize="small" />
+                  <ShoppingBagOutlinedIcon fontSize="small" />
                 </Badge>
               </IconButton>
 
-              {/* Notification Bell */}
-              <IconButton
-                sx={{ display: { xs: "none", sm: "flex" }, color: "#334155", "&:hover": { color: "#f59e0b" } }}
-                onClick={() => navigate("/orders")}
-              >
-                <NotificationsNoneOutlinedIcon fontSize="small" />
-              </IconButton>
-
-              {/* User Account / Login Button */}
+              {/* User Account / Sign In */}
               {member ? (
                 <>
                   <Box
@@ -207,12 +242,12 @@ export function Navbar({
                       alignItems: "center",
                       gap: 1.2,
                       cursor: "pointer",
-                      border: "1.5px solid #e2e8f0",
-                      p: 0.4,
-                      pr: { xs: 0.4, sm: 1.8 },
-                      borderRadius: 99,
+                      border: "1px solid #e5e7eb",
+                      p: 0.5,
+                      pr: { xs: 0.5, sm: 1.8 },
+                      borderRadius: 9999,
                       transition: "0.2s",
-                      "&:hover": { borderColor: "#f59e0b", bgcolor: "#fffbeb" },
+                      "&:hover": { borderColor: "#000000", bgcolor: "#f9fafb" },
                     }}
                   >
                     <Avatar
@@ -220,8 +255,8 @@ export function Navbar({
                       sx={{
                         width: 32,
                         height: 32,
-                        bgcolor: "#f59e0b",
-                        color: "#fff",
+                        bgcolor: "#111827",
+                        color: "#ffffff",
                         fontWeight: 800,
                         fontSize: "0.85rem",
                       }}
@@ -230,7 +265,7 @@ export function Navbar({
                     </Avatar>
                     <Typography
                       variant="body2"
-                      sx={{ color: "#0f172a", fontWeight: 700, display: { xs: "none", sm: "block" } }}
+                      sx={{ color: "#111827", fontWeight: 700, display: { xs: "none", sm: "block" } }}
                     >
                       {member.memberNick}
                     </Typography>
@@ -245,11 +280,12 @@ export function Navbar({
                       paper: {
                         sx: {
                           bgcolor: "#ffffff",
-                          color: "#0f172a",
+                          color: "#111827",
                           borderRadius: 3,
-                          border: "1px solid #e2e8f0",
-                          minWidth: 180,
+                          border: "1px solid #e5e7eb",
+                          minWidth: 190,
                           boxShadow: "0 10px 30px rgba(0,0,0,0.08)",
+                          p: 0.5,
                         },
                       },
                     }}
@@ -259,55 +295,57 @@ export function Navbar({
                         handleMenuClose();
                         navigate("/user");
                       }}
+                      sx={{ borderRadius: 2, fontWeight: 600, fontSize: "0.9rem", py: 1 }}
                     >
-                      <PersonIcon sx={{ mr: 1.5, color: "#f59e0b", fontSize: 20 }} /> Profile
+                      <PersonOutlineOutlinedIcon sx={{ mr: 1.5, fontSize: 20 }} /> My Profile
                     </MenuItem>
                     <MenuItem
                       onClick={() => {
                         handleMenuClose();
                         navigate("/orders");
                       }}
+                      sx={{ borderRadius: 2, fontWeight: 600, fontSize: "0.9rem", py: 1 }}
                     >
-                      <ShoppingCartOutlinedIcon sx={{ mr: 1.5, color: "#f59e0b", fontSize: 20 }} /> My Orders
+                      <LocalMallOutlinedIcon sx={{ mr: 1.5, fontSize: 20 }} /> My Orders
                     </MenuItem>
                     <MenuItem
                       onClick={() => {
                         handleMenuClose();
                         onLogoutClick();
                       }}
-                      sx={{ color: "#ef4444" }}
+                      sx={{ borderRadius: 2, fontWeight: 600, fontSize: "0.9rem", py: 1, color: "#ef4444" }}
                     >
-                      <LogoutIcon sx={{ mr: 1.5, fontSize: 20 }} /> Logout
+                      <LogoutIcon sx={{ mr: 1.5, fontSize: 20 }} /> Sign Out
                     </MenuItem>
                   </Menu>
                 </>
               ) : (
                 <Button
-                  variant="outlined"
+                  variant="contained"
                   onClick={onLoginClick}
                   sx={{
-                    borderRadius: 2.5,
-                    px: { xs: 1.8, sm: 3 },
-                    py: 0.6,
-                    fontWeight: 800,
-                    fontSize: { xs: "0.82rem", sm: "0.92rem" },
-                    borderColor: "#f59e0b",
-                    color: "#0f172a",
-                    borderWidth: 1.5,
+                    bgcolor: "#000000",
+                    color: "#ffffff",
+                    borderRadius: 9999,
+                    px: { xs: 2, sm: 3 },
+                    py: 0.8,
+                    fontWeight: 700,
+                    fontSize: { xs: "0.82rem", sm: "0.88rem" },
+                    textTransform: "none",
+                    boxShadow: "none",
                     "&:hover": {
-                      borderColor: "#d97706",
-                      bgcolor: "#fffbeb",
-                      borderWidth: 1.5,
+                      bgcolor: "#262626",
+                      boxShadow: "0 4px 12px rgba(0,0,0,0.15)",
                     },
                   }}
                 >
-                  Login
+                  Sign In
                 </Button>
               )}
 
-              {/* Mobile Menu Icon */}
+              {/* Mobile Menu Trigger */}
               <IconButton
-                sx={{ color: "#0f172a", display: { xs: "flex", md: "none" }, p: 0.8 }}
+                sx={{ color: "#111827", display: { xs: "flex", md: "none" }, p: 0.8 }}
                 onClick={() => setMobileOpen(true)}
               >
                 <MenuIcon />
@@ -317,79 +355,29 @@ export function Navbar({
         </Container>
       </AppBar>
 
-      {/* Mobile Floating Cart Action Bar (Positioned above bottom nav) */}
-      {totalCartCount > 0 && (
-        <Slide direction="up" in={totalCartCount > 0} mountOnEnter unmountOnExit>
-          <Box
-            sx={{
-              display: { xs: "block", md: "none" },
-              position: "fixed",
-              bottom: 72,
-              left: 12,
-              right: 12,
-              zIndex: 1300,
-            }}
-          >
-            <Box
-              onClick={() => setBasketOpen(true)}
-              sx={{
-                bgcolor: "#0f172a",
-                color: "#fff",
-                p: 1.8,
-                borderRadius: 4,
-                display: "flex",
-                justifyContent: "space-between",
-                alignItems: "center",
-                boxShadow: "0 12px 30px rgba(0,0,0,0.35), 0 0 20px rgba(245, 158, 11, 0.35)",
-                border: "2px solid #f59e0b",
-                cursor: "pointer",
-                transition: "transform 0.2s ease",
-                "&:active": { transform: "scale(0.98)" },
-              }}
-            >
-              <Box sx={{ display: "flex", alignItems: "center", gap: 1.5 }}>
-                <Badge badgeContent={totalCartCount} color="primary">
-                  <ShoppingCartOutlinedIcon sx={{ color: "#f59e0b" }} />
-                </Badge>
-                <div>
-                  <Typography variant="body2" sx={{ fontWeight: 800 }}>
-                    {totalCartCount} {totalCartCount === 1 ? "Dish" : "Dishes"}
-                  </Typography>
-                  <Typography variant="caption" sx={{ color: "#f59e0b", fontWeight: 800 }}>
-                    Total: ${totalCartPrice.toFixed(2)}
-                  </Typography>
-                </div>
-              </Box>
-
-              <Box sx={{ display: "flex", alignItems: "center", gap: 0.5, color: "#f59e0b", fontWeight: 800 }}>
-                <Typography variant="body2" sx={{ fontWeight: 800 }}>
-                  Checkout
-                </Typography>
-                <ArrowForwardIcon fontSize="small" />
-              </Box>
-            </Box>
-          </Box>
-        </Slide>
-      )}
-
-      {/* Mobile Navigation Drawer */}
+      {/* Mobile Drawer Menu */}
       <Drawer
         anchor="right"
         open={mobileOpen}
         onClose={() => setMobileOpen(false)}
         slotProps={{
           paper: {
-            sx: { width: 280, bgcolor: "#ffffff", color: "#0f172a", p: 3 },
+            sx: { width: 290, bgcolor: "#ffffff", color: "#111827", p: 3 },
           },
         }}
       >
-        <Typography variant="h5" sx={{ fontWeight: 900, color: "#f59e0b", mb: 3 }}>
-          Burak<span style={{ color: "#334155" }}>food</span>
-        </Typography>
+        <Box sx={{ mb: 4 }}>
+          <Typography variant="h5" sx={{ fontWeight: 900, letterSpacing: "0.08em" }}>
+            KIXORA
+          </Typography>
+          <Typography variant="caption" sx={{ color: "#6b7280", letterSpacing: "0.2em", fontWeight: 700 }}>
+            STEP INTO MORE
+          </Typography>
+        </Box>
 
         <List>
           {navLinks.map((item) => (
-            <ListItem key={item.title} disablePadding sx={{ mb: 1.2 }}>
+            <ListItem key={item.title} disablePadding sx={{ mb: 1 }}>
               <ListItemButton
                 component={NavLink}
                 to={item.path}
@@ -397,12 +385,12 @@ export function Navbar({
                 sx={{
                   borderRadius: 2,
                   py: 1.2,
-                  "&.active": { bgcolor: "#fffbeb", color: "#f59e0b" },
+                  "&.active": { bgcolor: "#f3f4f6", fontWeight: 800 },
                 }}
               >
                 <ListItemText
                   primary={
-                    <Typography sx={{ fontWeight: 700, fontSize: "1.05rem", color: "inherit" }}>
+                    <Typography sx={{ fontWeight: 700, fontSize: "1rem" }}>
                       {item.title}
                     </Typography>
                   }
@@ -413,13 +401,13 @@ export function Navbar({
         </List>
       </Drawer>
 
-      {/* Native App-Style Mobile Bottom Navigation Dock */}
+      {/* Mobile Bottom Navigation */}
       <MobileBottomNav
         cartItems={cartItems}
         onOpenBasket={() => setBasketOpen(true)}
       />
 
-      {/* Basket Drawer */}
+      {/* Cart Drawer */}
       <BasketDrawer
         open={basketOpen}
         onClose={() => setBasketOpen(false)}

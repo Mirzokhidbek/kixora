@@ -1,3 +1,11 @@
+/**
+ * ============================================================================
+ * store.ts - Global Redux Toolkit Store Configuration
+ * ============================================================================
+ * Combines feature reducers for HomePage, ProductsPage, and OrdersPage slices.
+ * Exports RootState and AppDispatch types for type-safe Redux hooks.
+ */
+
 import { configureStore } from "@reduxjs/toolkit";
 import homePageReducer from "./screens/homePage/slice";
 import productsPageReducer from "./screens/productsPage/slice";
@@ -13,3 +21,4 @@ export const store = configureStore({
 
 export type RootState = ReturnType<typeof store.getState>;
 export type AppDispatch = typeof store.dispatch;
+

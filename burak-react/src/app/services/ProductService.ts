@@ -1,3 +1,11 @@
+/**
+ * ============================================================================
+ * ProductService.ts - Client API Service for Menu & Product Operations
+ * ============================================================================
+ * Handles fetching product listings, filtering by category, search queries,
+ * sorting, pagination, and fetching detailed product info by ID.
+ */
+
 import axios from "axios";
 import { serverApi } from "../../lib/config";
 import type { Product, ProductInquiry } from "../../lib/types/product";
@@ -9,6 +17,11 @@ class ProductService {
     this.path = serverApi;
   }
 
+  /**
+   * Fetch paginated list of dishes with optional search and category filters.
+   * @param inquiry - Query options: page, limit, order, category, search
+   * @returns List of matching Product objects
+   */
   public async getProducts(inquiry: ProductInquiry): Promise<Product[]> {
     try {
       let url = `${this.path}/product/all?order=${inquiry.order || "createdAt"}&page=${inquiry.page}&limit=${inquiry.limit}`;
@@ -16,7 +29,7 @@ class ProductService {
         url += `&productCollection=${inquiry.productCollection}`;
       }
       if (inquiry.search) {
-        url += `&search=${inquiry.search}`;
+        url += `&search=${encodeURIComponent(inquiry.search)}`;
       }
 
       const result = await axios.get(url, { withCredentials: true });
@@ -27,6 +40,11 @@ class ProductService {
     }
   }
 
+  /**
+   * Fetch a single dish by MongoDB ObjectId and increments view counter.
+   * @param productId - MongoDB ObjectId string
+   * @returns Detailed Product object
+   */
   public async getProduct(productId: string): Promise<Product> {
     try {
       const url = `${this.path}/product/${productId}`;
@@ -40,3 +58,4 @@ class ProductService {
 }
 
 export default ProductService;
+

@@ -1,7 +1,9 @@
+import { useState } from "react";
 import { useSelector } from "react-redux";
-import { Box, Container, Typography, Button, Grid } from "@mui/material";
-import ShoppingCartOutlinedIcon from "@mui/icons-material/ShoppingCartOutlined";
-import RestaurantIcon from "@mui/icons-material/Restaurant";
+import { Box, Container, Typography, Button, Grid, IconButton } from "@mui/material";
+import ArrowForwardIcon from "@mui/icons-material/ArrowForward";
+import ArrowBackIosNewIcon from "@mui/icons-material/ArrowBackIosNew";
+import ArrowForwardIosIcon from "@mui/icons-material/ArrowForwardIos";
 import { useNavigate } from "react-router-dom";
 import { retrievePopularDishes } from "./selector";
 import { serverApi } from "../../../lib/config";
@@ -9,149 +11,223 @@ import { serverApi } from "../../../lib/config";
 export function HeroBanner() {
   const navigate = useNavigate();
   const popularDishes = useSelector(retrievePopularDishes);
+  const [activeSlide, setActiveSlide] = useState(0);
 
   const getImageSrc = (img?: string) => {
     if (!img) return "";
     return img.startsWith("http") ? img : `${serverApi}/${img}`;
   };
 
-  const mainDish = popularDishes?.[0];
-  const mainImage = mainDish?.productImages?.[0] ? getImageSrc(mainDish.productImages[0]) : "";
+  const slides = popularDishes && popularDishes.length > 0
+    ? popularDishes.slice(0, 3)
+    : [
+        {
+          _id: "demo-1",
+          productName: "KIXORA Velocity Air Pro",
+          productPrice: 180,
+          productCollection: "LIMITED DROP",
+          productImages: [],
+        },
+      ];
 
-  const satellitePositions = [
-    { top: "8%", right: "2%", size: 100 },
-    { top: "28%", left: "2%", size: 90 },
-    { bottom: "28%", left: "4%", size: 85 },
-    { bottom: "4%", left: "22%", size: 90 },
-  ];
+  const currentItem = slides[activeSlide % slides.length];
+  const currentImage = currentItem?.productImages?.[0] ? getImageSrc(currentItem.productImages[0]) : "";
 
-  const satelliteDishes = (popularDishes?.slice(1, 5) || [])
-    .filter((d) => d.productImages?.[0])
-    .map((dish, i) => ({
-      ...satellitePositions[i % satellitePositions.length],
-      img: getImageSrc(dish.productImages[0]),
-      dish,
-    }));
+  const handleNext = () => {
+    setActiveSlide((prev) => (prev + 1) % slides.length);
+  };
+
+  const handlePrev = () => {
+    setActiveSlide((prev) => (prev - 1 + slides.length) % slides.length);
+  };
 
   return (
     <Box
       sx={{
-        py: { xs: 4, md: 10 },
+        py: { xs: 4, md: 7 },
         bgcolor: "#ffffff",
         position: "relative",
-        overflow: "hidden",
       }}
     >
       <Container maxWidth="lg">
-        <Grid container spacing={{ xs: 5, md: 8 }} sx={{ alignItems: "center" }}>
-          {/* Left Column: Big Orbiting Plate Showcase */}
-          <Grid size={{ xs: 12, md: 6 }} sx={{ order: { xs: 2, md: 1 } }}>
-            <Box
-              sx={{
-                position: "relative",
-                width: "100%",
-                maxWidth: { xs: 340, sm: 460, md: 520 },
-                aspectRatio: "1/1",
-                mx: "auto",
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "center",
-              }}
-            >
-              {/* Flame / Spice Embers Petals */}
-              <Box
-                sx={{
-                  position: "absolute",
-                  top: "4%",
-                  left: "30%",
-                  width: { xs: 16, sm: 22 },
-                  height: { xs: 28, sm: 38 },
-                  borderRadius: "50% 50% 50% 0",
-                  transform: "rotate(-35deg)",
-                  background: "linear-gradient(135deg, #f97316 0%, #ef4444 100%)",
-                  boxShadow: "0 4px 12px rgba(249, 115, 22, 0.4)",
-                  animation: "floatSlow 4s ease-in-out infinite",
-                }}
-              />
-              <Box
-                sx={{
-                  position: "absolute",
-                  top: "0%",
-                  left: "45%",
-                  width: { xs: 18, sm: 26 },
-                  height: { xs: 32, sm: 44 },
-                  borderRadius: "50% 50% 50% 0",
-                  transform: "rotate(15deg)",
-                  background: "linear-gradient(135deg, #f59e0b 0%, #ea580c 100%)",
-                  boxShadow: "0 4px 14px rgba(245, 158, 11, 0.4)",
-                  animation: "floatSlow 3.5s ease-in-out infinite 0.5s",
-                }}
-              />
-              <Box
-                sx={{
-                  position: "absolute",
-                  top: "6%",
-                  right: "32%",
-                  width: { xs: 14, sm: 20 },
-                  height: { xs: 24, sm: 34 },
-                  borderRadius: "50% 50% 50% 0",
-                  transform: "rotate(45deg)",
-                  background: "linear-gradient(135deg, #f59e0b 0%, #f97316 100%)",
-                  boxShadow: "0 4px 12px rgba(245, 158, 11, 0.4)",
-                  animation: "floatSlow 4.2s ease-in-out infinite 1s",
-                }}
-              />
+        {/* Main Hero Container */}
+        <Box
+          sx={{
+            bgcolor: "#000000",
+            color: "#ffffff",
+            borderRadius: { xs: 4, md: 6 },
+            p: { xs: 4, sm: 6, md: 8 },
+            position: "relative",
+            overflow: "hidden",
+            minHeight: { xs: 480, md: 540 },
+            display: "flex",
+            alignItems: "center",
+          }}
+        >
+          {/* Subtle Ambient Background Gradient */}
+          <Box
+            sx={{
+              position: "absolute",
+              top: "-20%",
+              right: "-10%",
+              width: "60%",
+              height: "120%",
+              background: "radial-gradient(circle, rgba(255, 255, 255, 0.08) 0%, transparent 60%)",
+              filter: "blur(60px)",
+              pointerEvents: "none",
+            }}
+          />
 
-              {/* Orbiting Golden Ring Arc */}
-              <Box
-                sx={{
-                  position: "absolute",
-                  width: "92%",
-                  height: "92%",
-                  borderRadius: "50%",
-                  border: "3.5px solid transparent",
-                  borderLeftColor: "#ef4444",
-                  borderBottomColor: "#f59e0b",
-                  borderRightColor: "#fbbf24",
-                  transform: "rotate(-25deg)",
-                  zIndex: 0,
-                }}
-              />
+          <Grid container spacing={{ xs: 4, md: 6 }} sx={{ alignItems: "center", position: "relative", zIndex: 1 }}>
+            {/* Left Column: Bold Typography & CTA */}
+            <Grid size={{ xs: 12, md: 6 }}>
+              <Box sx={{ maxWidth: 480 }}>
+                <Box
+                  sx={{
+                    display: "inline-block",
+                    px: 1.5,
+                    py: 0.5,
+                    borderRadius: 9999,
+                    border: "1px solid rgba(255, 255, 255, 0.2)",
+                    bgcolor: "rgba(255, 255, 255, 0.06)",
+                    mb: 2.5,
+                  }}
+                >
+                  <Typography
+                    variant="caption"
+                    sx={{
+                      color: "#e5e7eb",
+                      fontWeight: 700,
+                      letterSpacing: "0.15em",
+                      fontSize: "0.72rem",
+                      textTransform: "uppercase",
+                    }}
+                  >
+                    {currentItem?.productCollection || "SEASON 2026 DROPS"}
+                  </Typography>
+                </Box>
 
-              {/* Center Main Signature Bowl Plate */}
+                <Typography
+                  variant="h1"
+                  sx={{
+                    fontFamily: '"Outfit", sans-serif',
+                    fontWeight: 900,
+                    fontSize: { xs: "2.5rem", sm: "3.2rem", md: "4rem" },
+                    lineHeight: 1.02,
+                    letterSpacing: "-0.03em",
+                    color: "#ffffff",
+                    mb: 2.5,
+                  }}
+                >
+                  STEP INTO <br />
+                  <span style={{ color: "#ffffff", textDecoration: "underline", textDecorationThickness: "4px" }}>
+                    MORE.
+                  </span>
+                </Typography>
+
+                <Typography
+                  variant="body1"
+                  sx={{
+                    color: "#9ca3af",
+                    fontSize: { xs: "0.95rem", md: "1.1rem" },
+                    lineHeight: 1.6,
+                    mb: 4,
+                  }}
+                >
+                  Premium shoes engineered for every journey. Style. Comfort. Performance. Crafted for the modern sneaker enthusiast.
+                </Typography>
+
+                {/* CTA Buttons */}
+                <Box sx={{ display: "flex", alignItems: "center", gap: 2, flexWrap: "wrap" }}>
+                  <Button
+                    variant="contained"
+                    size="large"
+                    endIcon={<ArrowForwardIcon />}
+                    onClick={() => navigate("/products")}
+                    sx={{
+                      bgcolor: "#ffffff",
+                      color: "#000000",
+                      borderRadius: 9999,
+                      px: { xs: 3.5, sm: 4.5 },
+                      py: 1.5,
+                      fontWeight: 800,
+                      fontSize: "0.95rem",
+                      textTransform: "none",
+                      boxShadow: "0 10px 30px rgba(255,255,255,0.15)",
+                      "&:hover": {
+                        bgcolor: "#f3f4f6",
+                        transform: "translateY(-2px)",
+                      },
+                      transition: "all 0.2s ease",
+                    }}
+                  >
+                    Shop Now
+                  </Button>
+
+                  {currentItem?._id && currentItem._id !== "demo-1" && (
+                    <Button
+                      variant="outlined"
+                      size="large"
+                      onClick={() => navigate(`/products/${currentItem._id}`)}
+                      sx={{
+                        borderColor: "rgba(255, 255, 255, 0.3)",
+                        color: "#ffffff",
+                        borderRadius: 9999,
+                        px: 3,
+                        py: 1.5,
+                        fontWeight: 700,
+                        fontSize: "0.9rem",
+                        textTransform: "none",
+                        "&:hover": {
+                          borderColor: "#ffffff",
+                          bgcolor: "rgba(255, 255, 255, 0.05)",
+                        },
+                      }}
+                    >
+                      View Drop &bull; ${currentItem.productPrice}
+                    </Button>
+                  )}
+                </Box>
+              </Box>
+            </Grid>
+
+            {/* Right Column: Hero Sneaker Visual */}
+            <Grid size={{ xs: 12, md: 6 }}>
               <Box
                 sx={{
-                  width: { xs: "68%", sm: "74%" },
-                  height: { xs: "68%", sm: "74%" },
-                  borderRadius: "50%",
-                  overflow: "hidden",
-                  boxShadow: "0 25px 60px rgba(0, 0, 0, 0.16), 0 0 40px rgba(245, 158, 11, 0.15)",
-                  border: { xs: "5px solid #ffffff", sm: "8px solid #ffffff" },
                   position: "relative",
-                  zIndex: 2,
-                  transition: "transform 0.5s ease",
-                  "&:hover": { transform: "scale(1.03)" },
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  minHeight: { xs: 240, sm: 320, md: 380 },
                 }}
               >
-                {mainImage ? (
+                {currentImage ? (
                   <Box
                     component="img"
-                    src={mainImage}
-                    alt={mainDish?.productName || "Burak Signature Dish"}
-                    onClick={() => mainDish?._id && navigate(`/products/${mainDish._id}`)}
+                    src={currentImage}
+                    alt={currentItem?.productName || "Sneaker Showcase"}
                     sx={{
                       width: "100%",
-                      height: "100%",
-                      objectFit: "cover",
-                      cursor: mainDish?._id ? "pointer" : "default",
+                      maxWidth: { xs: 320, sm: 420, md: 500 },
+                      maxHeight: { xs: 260, sm: 340, md: 400 },
+                      objectFit: "contain",
+                      filter: "drop-shadow(0 25px 35px rgba(0, 0, 0, 0.7))",
+                      transform: "rotate(-12deg)",
+                      transition: "transform 0.4s ease",
+                      "&:hover": { transform: "rotate(-6deg) scale(1.04)" },
+                      cursor: "pointer",
                     }}
+                    onClick={() => currentItem?._id && navigate(`/products/${currentItem._id}`)}
                   />
                 ) : (
                   <Box
                     sx={{
                       width: "100%",
-                      height: "100%",
-                      bgcolor: "#fffbeb",
+                      height: 300,
+                      borderRadius: 4,
+                      bgcolor: "rgba(255,255,255,0.04)",
+                      border: "1px dashed rgba(255,255,255,0.15)",
                       display: "flex",
                       flexDirection: "column",
                       alignItems: "center",
@@ -160,144 +236,62 @@ export function HeroBanner() {
                       textAlign: "center",
                     }}
                   >
-                    <RestaurantIcon sx={{ fontSize: 64, color: "#f59e0b", mb: 1 }} />
-                    <Typography variant="h6" sx={{ fontWeight: 800, color: "#0f172a" }}>
-                      BURAK RESTAURANT
+                    <Typography variant="h5" sx={{ fontWeight: 800, mb: 1, color: "#ffffff" }}>
+                      KIXORA SIGNATURE
+                    </Typography>
+                    <Typography variant="body2" sx={{ color: "#9ca3af" }}>
+                      Upload sneaker photos in the Admin Portal to showcase them here dynamically.
                     </Typography>
                   </Box>
                 )}
               </Box>
-
-              {/* Orbiting Satellite Miniature Plates */}
-              {satelliteDishes.map((satellite, idx) => (
-                <Box
-                  key={idx}
-                  onClick={() => satellite.dish?._id && navigate(`/products/${satellite.dish._id}`)}
-                  sx={{
-                    position: "absolute",
-                    top: satellite.top,
-                    bottom: satellite.bottom,
-                    left: satellite.left,
-                    right: satellite.right,
-                    width: { xs: satellite.size * 0.65, sm: satellite.size * 0.85, md: satellite.size },
-                    height: { xs: satellite.size * 0.65, sm: satellite.size * 0.85, md: satellite.size },
-                    borderRadius: "50%",
-                    overflow: "hidden",
-                    border: { xs: "2.5px solid #ffffff", sm: "4px solid #ffffff" },
-                    boxShadow: "0 8px 20px rgba(0,0,0,0.12)",
-                    zIndex: 3,
-                    bgcolor: "#fff",
-                    cursor: "pointer",
-                    transition: "transform 0.3s ease",
-                    "&:hover": { transform: "scale(1.12)" },
-                  }}
-                >
-                  <Box
-                    component="img"
-                    src={satellite.img}
-                    alt={satellite.dish?.productName || "Dish"}
-                    sx={{ width: "100%", height: "100%", objectFit: "cover" }}
-                  />
-                </Box>
-              ))}
-            </Box>
+            </Grid>
           </Grid>
 
-          {/* Right Column: Hero Typography & Actions */}
-          <Grid size={{ xs: 12, md: 6 }} sx={{ order: { xs: 1, md: 2 } }}>
-            <Box sx={{ maxWidth: 540, textAlign: { xs: "center", md: "left" } }}>
-              <Typography
-                variant="h1"
+          {/* Bottom Slider Nav & Indicator (Figma 01 / 03) */}
+          <Box
+            sx={{
+              position: "absolute",
+              bottom: { xs: 16, md: 24 },
+              right: { xs: 20, md: 36 },
+              display: "flex",
+              alignItems: "center",
+              gap: 1.5,
+              zIndex: 2,
+            }}
+          >
+            <Typography variant="caption" sx={{ color: "#9ca3af", fontWeight: 700, letterSpacing: 2 }}>
+              0{activeSlide + 1} / 0{Math.max(1, slides.length)}
+            </Typography>
+
+            <Box sx={{ display: "flex", gap: 0.5 }}>
+              <IconButton
+                size="small"
+                onClick={handlePrev}
                 sx={{
-                  fontFamily: '"Outfit", sans-serif',
-                  fontWeight: 900,
-                  fontSize: { xs: "2.1rem", sm: "2.8rem", md: "3.6rem" },
-                  lineHeight: 1.18,
-                  color: "#0f172a",
-                  mb: 2,
-                  letterSpacing: "-0.02em",
+                  color: "#ffffff",
+                  border: "1px solid rgba(255,255,255,0.2)",
+                  p: 0.6,
+                  "&:hover": { bgcolor: "rgba(255,255,255,0.1)" },
                 }}
               >
-                Happy With{" "}
-                <span style={{ color: "#f59e0b" }}>Delicious</span>{" "}
-                <span style={{ color: "#f59e0b" }}>Food</span> And Get New Experiences With{" "}
-                <span>Burak Gastronomy</span>
-              </Typography>
-
-              <Typography
-                variant="body1"
+                <ArrowBackIosNewIcon sx={{ fontSize: 12 }} />
+              </IconButton>
+              <IconButton
+                size="small"
+                onClick={handleNext}
                 sx={{
-                  color: "#64748b",
-                  fontSize: { xs: "0.92rem", md: "1.05rem" },
-                  lineHeight: 1.7,
-                  mb: 3.5,
-                  fontWeight: 500,
+                  color: "#ffffff",
+                  border: "1px solid rgba(255,255,255,0.2)",
+                  p: 0.6,
+                  "&:hover": { bgcolor: "rgba(255,255,255,0.1)" },
                 }}
               >
-                Exploring authentic wood-fired feasts, giant steak cuts, and rich handcrafted Ottoman recipes crafted with love by Chef CZN Burak right at your table.
-              </Typography>
-
-              {/* CTA Action Buttons */}
-              <Box
-                sx={{
-                  display: "flex",
-                  gap: 2,
-                  flexWrap: "wrap",
-                  justifyContent: { xs: "center", md: "flex-start" },
-                  alignItems: "center",
-                }}
-              >
-                <Button
-                  variant="contained"
-                  size="large"
-                  endIcon={<ShoppingCartOutlinedIcon />}
-                  onClick={() => navigate("/products")}
-                  sx={{
-                    bgcolor: "#eab308",
-                    color: "#ffffff",
-                    fontWeight: 800,
-                    fontSize: { xs: "0.95rem", sm: "1.05rem" },
-                    px: { xs: 3, sm: 4 },
-                    py: 1.4,
-                    borderRadius: 3,
-                    boxShadow: "0 10px 25px rgba(234, 179, 8, 0.4)",
-                    "&:hover": {
-                      bgcolor: "#ca8a04",
-                      boxShadow: "0 14px 30px rgba(234, 179, 8, 0.5)",
-                      transform: "translateY(-2px)",
-                    },
-                  }}
-                >
-                  Order Food
-                </Button>
-
-                <Button
-                  variant="outlined"
-                  size="large"
-                  onClick={() => navigate("/products")}
-                  sx={{
-                    color: "#0f172a",
-                    borderColor: "#e2e8f0",
-                    borderWidth: 2,
-                    fontWeight: 700,
-                    fontSize: { xs: "0.95rem", sm: "1.05rem" },
-                    px: { xs: 3, sm: 3.5 },
-                    py: 1.3,
-                    borderRadius: 3,
-                    bgcolor: "#ffffff",
-                    "&:hover": {
-                      borderColor: "#0f172a",
-                      borderWidth: 2,
-                      bgcolor: "#f8fafc",
-                    },
-                  }}
-                >
-                  Learn More
-                </Button>
-              </Box>
+                <ArrowForwardIosIcon sx={{ fontSize: 12 }} />
+              </IconButton>
             </Box>
-          </Grid>
-        </Grid>
+          </Box>
+        </Box>
       </Container>
     </Box>
   );

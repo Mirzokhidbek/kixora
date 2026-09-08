@@ -2,35 +2,35 @@
 
 <main class="container-fluid px-lg-5 my-5 flex-grow-1">
   <!-- Hero Card -->
-  <div class="admin-card p-4 p-md-5 mb-4 position-relative overflow-hidden" style="background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%); color: #fff;">
+  <div class="admin-card p-4 p-md-5 mb-4 position-relative overflow-hidden" style="background: linear-gradient(135deg, #090a0f 0%, #1e293b 100%); color: #fff; border: 1px solid rgba(255, 70, 85, 0.2);">
     <div class="position-absolute end-0 bottom-0 opacity-10 d-none d-lg-block p-4" style="pointer-events: none;">
-      <i class="fa-solid fa-utensils" style="font-size: 16rem; color: #fff;"></i>
+      <i class="fa-solid fa-shoe-prints" style="font-size: 16rem; color: #ff4655;"></i>
     </div>
     
     <div class="row align-items-center position-relative z-1">
       <div class="col-lg-8">
-        <div class="d-inline-flex align-items-center gap-2 px-3 py-1 rounded-pill bg-warning bg-opacity-10 text-warning border border-warning border-opacity-25 mb-3">
-          <i class="fa-solid fa-sparkles"></i>
-          <span class="small fw-semibold">Burak Management Console v2.0</span>
+        <div class="d-inline-flex align-items-center gap-2 px-3 py-1 rounded-pill bg-danger bg-opacity-10 text-danger border border-danger border-opacity-25 mb-3">
+          <i class="fa-solid fa-bolt"></i>
+          <span class="small fw-semibold text-warning">KIXORA Brand Management Suite v3.0</span>
         </div>
         <h1 class="display-5 fw-bold text-white mb-2">
-          Welcome, <span class="text-warning"><%= member ? member.memberNick : 'Administrator' %></span>!
+          Welcome, <span class="text-warning"><%= member ? member.memberNick : 'KIXORA Administrator' %></span>!
         </h1>
         <p class="fs-5 text-slate-300 mb-4 col-md-10" style="color: #94a3b8;">
-          Monitor real-time restaurant performance, customize menu selections, analyze customer points, and control operational permissions.
+          Monitor live sneaker sales, publish new footwear drops, manage shoe sizes and stock levels, and control VIP customer accounts.
         </p>
         
         <div class="d-flex flex-wrap gap-3">
           <% if (member) { %>
-            <a class="btn-gold" href="/admin/product/all">
-              <i class="fa-solid fa-layer-group"></i> Manage Products
+            <a class="btn-gold" href="/admin/product/all" style="background: linear-gradient(135deg, #ff4655, #f59e0b);">
+              <i class="fa-solid fa-shoe-prints"></i> Manage Footwear Catalog
             </a>
             <a class="btn btn-outline-light rounded-3 px-4 py-2 fw-semibold" href="/admin/user/all">
               <i class="fa-solid fa-users me-1"></i> Customer Accounts
             </a>
           <% } else { %>
-            <a class="btn-gold" href="/admin/signup">
-              <i class="fa-solid fa-user-plus"></i> Register Restaurant
+            <a class="btn-gold" href="/admin/signup" style="background: linear-gradient(135deg, #ff4655, #f59e0b);">
+              <i class="fa-solid fa-user-plus"></i> Register Brand
             </a>
             <a class="btn btn-outline-light rounded-3 px-4 py-2 fw-semibold" href="/admin/login">
               <i class="fa-solid fa-right-to-bracket me-1"></i> Login to Console
@@ -45,11 +45,11 @@
   <div class="row g-4 mb-4">
     <div class="col-sm-6 col-xl-3">
       <div class="admin-card stat-card">
-        <div class="stat-icon gold">
-          <i class="fa-solid fa-bowl-food"></i>
+        <div class="stat-icon gold" style="background: rgba(255, 70, 85, 0.15); color: #ff4655;">
+          <i class="fa-solid fa-shoe-prints"></i>
         </div>
         <div>
-          <div class="stat-title">Menu Offerings</div>
+          <div class="stat-title">Footwear Models</div>
           <h3 class="stat-value">Active</h3>
         </div>
       </div>
@@ -61,7 +61,7 @@
           <i class="fa-solid fa-user-check"></i>
         </div>
         <div>
-          <div class="stat-title">Registered Users</div>
+          <div class="stat-title">Sneakerheads / VIPs</div>
           <h3 class="stat-value">Connected</h3>
         </div>
       </div>
@@ -73,8 +73,8 @@
           <i class="fa-solid fa-shield-halved"></i>
         </div>
         <div>
-          <div class="stat-title">Session Security</div>
-          <h3 class="stat-value">MongoDB</h3>
+          <div class="stat-title">Database Storage</div>
+          <h3 class="stat-value">MongoDB Atlas</h3>
         </div>
       </div>
     </div>
@@ -85,8 +85,8 @@
           <i class="fa-solid fa-bolt"></i>
         </div>
         <div>
-          <div class="stat-title">Engine Status</div>
-          <h3 class="stat-value">Live (3001)</h3>
+          <div class="stat-title">API Engine</div>
+          <h3 class="stat-value">Live (Port 3001)</h3>
         </div>
       </div>
     </div>
@@ -94,3 +94,4 @@
 </main>
 
 <%- include('includes/footer') %>
+

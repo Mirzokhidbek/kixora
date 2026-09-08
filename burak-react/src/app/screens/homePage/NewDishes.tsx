@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { useSelector } from "react-redux";
 import {
   Box,
@@ -7,10 +8,12 @@ import {
   Card,
   CardMedia,
   CardContent,
-  Chip,
+  IconButton,
   Button,
+  Rating,
 } from "@mui/material";
-import SparklesIcon from "@mui/icons-material/AutoAwesome";
+import FavoriteBorderIcon from "@mui/icons-material/FavoriteBorder";
+import FavoriteIcon from "@mui/icons-material/Favorite";
 import AddShoppingCartIcon from "@mui/icons-material/AddShoppingCart";
 import { useNavigate } from "react-router-dom";
 import { retrieveNewDishes } from "./selector";
@@ -23,6 +26,14 @@ interface NewDishesProps {
 export function NewDishes({ onAdd }: NewDishesProps) {
   const navigate = useNavigate();
   const newDishes = useSelector(retrieveNewDishes);
+  const [favorites, setFavorites] = useState<string[]>([]);
+
+  const toggleFavorite = (e: React.MouseEvent, id: string) => {
+    e.stopPropagation();
+    setFavorites((prev) =>
+      prev.includes(id) ? prev.filter((item) => item !== id) : [...prev, id]
+    );
+  };
 
   const getImageSrc = (img?: string) => {
     if (!img) return "";
@@ -34,121 +45,195 @@ export function NewDishes({ onAdd }: NewDishesProps) {
   }
 
   return (
-    <Box sx={{ py: 9, bgcolor: "#fbfbfe" }}>
+    <Box sx={{ py: 8, bgcolor: "#ffffff" }}>
       <Container maxWidth="lg">
         {/* Section Header */}
-        <Box sx={{ textAlign: "center", mb: 6 }}>
-          <Box sx={{ display: "inline-flex", alignItems: "center", gap: 0.8, mb: 1.5, bgcolor: "#ecfdf5", px: 2, py: 0.6, borderRadius: 99 }}>
-            <SparklesIcon sx={{ color: "#10b981", fontSize: 18 }} />
-            <Typography variant="overline" sx={{ color: "#059669", fontWeight: 800, letterSpacing: 1.5 }}>
-              FRESH CHEF CREATIONS
-            </Typography>
-          </Box>
-          <Typography variant="h2" sx={{ fontWeight: 900, mb: 1.5, color: "#0f172a", fontSize: { xs: "2rem", md: "2.6rem" } }}>
-            New <span style={{ color: "#f59e0b" }}>Experience</span> In Turkish Food
+        <Box sx={{ mb: 5 }}>
+          <Typography
+            variant="caption"
+            sx={{
+              color: "#6b7280",
+              fontWeight: 800,
+              letterSpacing: "0.15em",
+              textTransform: "uppercase",
+              fontSize: "0.78rem",
+              display: "block",
+              mb: 0.8,
+            }}
+          >
+            FRESH INVENTORY
           </Typography>
-          <Typography variant="body1" color="text.secondary" sx={{ maxWidth: 580, mx: "auto", fontSize: "1.05rem" }}>
-            Explore our latest Anatolian delicacies newly introduced to make an unforgettable impression on your palate.
+          <Typography
+            variant="h3"
+            sx={{
+              fontWeight: 900,
+              color: "#000000",
+              fontSize: { xs: "1.8rem", md: "2.4rem" },
+              letterSpacing: "-0.03em",
+            }}
+          >
+            New Arrivals
           </Typography>
         </Box>
 
-        {/* Dishes Grid */}
+        {/* 4-Column Product Grid */}
         <Grid container spacing={3.5}>
-          {newDishes.map((dish) => (
-            <Grid key={dish._id} size={{ xs: 12, sm: 6, md: 3 }}>
-              <Card
-                sx={{
-                  borderRadius: 5,
-                  height: "100%",
-                  display: "flex",
-                  flexDirection: "column",
-                  transition: "all 0.35s cubic-bezier(0.4, 0, 0.2, 1)",
-                  border: "1px solid #f1f5f9",
-                  bgcolor: "#ffffff",
-                  boxShadow: "0 10px 30px rgba(0,0,0,0.03)",
-                  cursor: "pointer",
-                  overflow: "hidden",
-                  "&:hover": {
-                    transform: "translateY(-8px)",
-                    boxShadow: "0 20px 40px rgba(16, 185, 129, 0.12)",
-                    borderColor: "#a7f3d0",
-                  },
-                }}
-                onClick={() => navigate(`/products/${dish._id}`)}
-              >
-                <Box sx={{ position: "relative", overflow: "hidden", pt: "68%" }}>
-                  <CardMedia
-                    component="img"
-                    image={getImageSrc(dish.productImages?.[0])}
-                    alt={dish.productName}
-                    sx={{
-                      position: "absolute",
-                      top: 0,
-                      left: 0,
-                      width: "100%",
-                      height: "100%",
-                      objectFit: "cover",
-                      transition: "transform 0.5s ease",
-                      "&:hover": { transform: "scale(1.08)" },
-                    }}
-                  />
-                  <Chip
-                    label="NEW"
+          {newDishes.slice(0, 4).map((product) => {
+            const isFav = favorites.includes(product._id);
+            const image = product.productImages?.[0] ? getImageSrc(product.productImages[0]) : "";
+
+            return (
+              <Grid key={product._id} size={{ xs: 12, sm: 6, md: 3 }}>
+                <Card
+                  onClick={() => navigate(`/products/${product._id}`)}
+                  sx={{
+                    bgcolor: "#ffffff",
+                    borderRadius: 4,
+                    border: "1px solid #e5e7eb",
+                    boxShadow: "none",
+                    cursor: "pointer",
+                    transition: "all 0.25s ease",
+                    display: "flex",
+                    flexDirection: "column",
+                    height: "100%",
+                    position: "relative",
+                    "&:hover": {
+                      transform: "translateY(-4px)",
+                      boxShadow: "0 12px 30px rgba(0, 0, 0, 0.08)",
+                      borderColor: "#d1d5db",
+                    },
+                  }}
+                >
+                  {/* Top Wishlist Button */}
+                  <IconButton
                     size="small"
+                    onClick={(e) => toggleFavorite(e, product._id)}
                     sx={{
                       position: "absolute",
-                      top: 14,
-                      left: 14,
-                      bgcolor: "#10b981",
-                      color: "#fff",
-                      fontWeight: 800,
-                      fontSize: "0.7rem",
-                      boxShadow: "0 4px 10px rgba(16, 185, 129, 0.4)",
+                      top: 12,
+                      right: 12,
+                      zIndex: 2,
+                      bgcolor: "rgba(255, 255, 255, 0.9)",
+                      backdropFilter: "blur(4px)",
+                      border: "1px solid #e5e7eb",
+                      p: 0.8,
+                      "&:hover": { bgcolor: "#ffffff" },
                     }}
-                  />
-                </Box>
+                  >
+                    {isFav ? (
+                      <FavoriteIcon sx={{ color: "#ef4444", fontSize: 18 }} />
+                    ) : (
+                      <FavoriteBorderIcon sx={{ color: "#6b7280", fontSize: 18 }} />
+                    )}
+                  </IconButton>
 
-                <CardContent sx={{ flexGrow: 1, p: 2.8, display: "flex", flexDirection: "column" }}>
-                  <Typography variant="h6" sx={{ fontWeight: 800, fontSize: "1.05rem", mb: 1, lineHeight: 1.3, color: "#0f172a" }}>
-                    {dish.productName}
-                  </Typography>
-                  <Typography variant="body2" color="text.secondary" sx={{ mb: 2, flexGrow: 1, fontSize: "0.85rem", lineHeight: 1.6 }}>
-                    {dish.productDesc || "Fresh seasonal Turkish dish."}
-                  </Typography>
-
-                  <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "center", mt: "auto", pt: 1.5, borderTop: "1px solid #f8fafc" }}>
-                    <Typography variant="h5" sx={{ fontWeight: 900, color: "#0f172a" }}>
-                      ${dish.productPrice?.toFixed(2)}
-                    </Typography>
-                    <Button
-                      variant="outlined"
-                      size="small"
-                      startIcon={<AddShoppingCartIcon sx={{ fontSize: 16 }} />}
-                      sx={{
-                        borderRadius: 3,
-                        px: 2.5,
-                        py: 0.7,
-                        fontWeight: 800,
-                        fontSize: "0.82rem",
-                        borderColor: "#e2e8f0",
-                        color: "#0f172a",
-                        "&:hover": {
-                          borderColor: "#f59e0b",
-                          bgcolor: "#fffbeb",
-                        },
-                      }}
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        if (onAdd) onAdd(dish);
-                      }}
-                    >
-                      Add
-                    </Button>
+                  {/* Product Image Container */}
+                  <Box
+                    sx={{
+                      p: 3,
+                      bgcolor: "#f9fafb",
+                      borderTopLeftRadius: 16,
+                      borderTopRightRadius: 16,
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "center",
+                      height: 220,
+                      overflow: "hidden",
+                    }}
+                  >
+                    {image ? (
+                      <CardMedia
+                        component="img"
+                        image={image}
+                        alt={product.productName}
+                        sx={{
+                          maxHeight: 180,
+                          objectFit: "contain",
+                          transition: "transform 0.3s ease",
+                          "&:hover": { transform: "scale(1.06) rotate(-4deg)" },
+                        }}
+                      />
+                    ) : (
+                      <Typography variant="body2" color="text.secondary">
+                        KIXORA
+                      </Typography>
+                    )}
                   </Box>
-                </CardContent>
-              </Card>
-            </Grid>
-          ))}
+
+                  {/* Card Content */}
+                  <CardContent sx={{ p: 2.5, flexGrow: 1, display: "flex", flexDirection: "column", justifyContent: "space-between" }}>
+                    <Box>
+                      <Typography
+                        variant="caption"
+                        sx={{
+                          color: "#6b7280",
+                          fontWeight: 700,
+                          fontSize: "0.72rem",
+                          letterSpacing: "0.08em",
+                          textTransform: "uppercase",
+                        }}
+                      >
+                        {product.productCollection || "RUNNING"}
+                      </Typography>
+
+                      <Typography
+                        variant="subtitle1"
+                        sx={{
+                          fontWeight: 800,
+                          color: "#111827",
+                          lineHeight: 1.3,
+                          mt: 0.3,
+                          mb: 1,
+                          overflow: "hidden",
+                          textOverflow: "ellipsis",
+                          whiteSpace: "nowrap",
+                        }}
+                      >
+                        {product.productName}
+                      </Typography>
+
+                      <Box sx={{ display: "flex", alignItems: "center", gap: 0.8, mb: 1.5 }}>
+                        <Rating value={4.9} precision={0.1} size="small" readOnly sx={{ fontSize: "0.95rem" }} />
+                        <Typography variant="caption" sx={{ color: "#6b7280", fontWeight: 700 }}>
+                          4.9 (840)
+                        </Typography>
+                      </Box>
+                    </Box>
+
+                    <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "center", pt: 1, borderTop: "1px solid #f3f4f6" }}>
+                      <Typography variant="h6" sx={{ fontWeight: 900, color: "#000000", fontSize: "1.15rem" }}>
+                        ${product.productPrice.toFixed(2)}
+                      </Typography>
+
+                      <Button
+                        size="small"
+                        variant="contained"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          onAdd && onAdd(product);
+                        }}
+                        startIcon={<AddShoppingCartIcon sx={{ fontSize: 16 }} />}
+                        sx={{
+                          bgcolor: "#000000",
+                          color: "#ffffff",
+                          borderRadius: 9999,
+                          px: 2,
+                          py: 0.7,
+                          fontSize: "0.78rem",
+                          fontWeight: 700,
+                          textTransform: "none",
+                          boxShadow: "none",
+                          "&:hover": { bgcolor: "#262626", boxShadow: "0 4px 12px rgba(0,0,0,0.15)" },
+                        }}
+                      >
+                        Add
+                      </Button>
+                    </Box>
+                  </CardContent>
+                </Card>
+              </Grid>
+            );
+          })}
         </Grid>
       </Container>
     </Box>

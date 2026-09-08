@@ -4,17 +4,14 @@ import { useDispatch } from "react-redux";
 import type { Dispatch } from "@reduxjs/toolkit";
 
 import { HeroBanner } from "./HeroBanner";
-import { Statistics } from "./Statistics";
+import { ValuePropsBar } from "./ValuePropsBar";
 import { PopularDishes } from "./PopularDishes";
+import { CategoryShowcase } from "./CategoryShowcase";
+import { NewArrivalsBanner } from "./NewArrivalsBanner";
 import { NewDishes } from "./NewDishes";
-import { Advertisement } from "./Advertisement";
-import { ActiveUsers } from "./ActiveUsers";
-import { Events } from "./Events";
 
 import ProductService from "../../services/ProductService";
-import MemberService from "../../services/MemberService";
-import { setPopularDishes, setNewDishes, setTopUsers } from "./slice";
-import { ProductCollection } from "../../../lib/enums/common.enum";
+import { setPopularDishes, setNewDishes } from "./slice";
 
 interface HomePageProps {
   onAdd?: (item: any) => void;
@@ -24,70 +21,58 @@ interface HomePageProps {
 const actionDispatch = (dispatch: Dispatch) => ({
   setPopularDishes: (data: any) => dispatch(setPopularDishes(data)),
   setNewDishes: (data: any) => dispatch(setNewDishes(data)),
-  setTopUsers: (data: any) => dispatch(setTopUsers(data)),
 });
 
 export function HomePage({ onAdd }: HomePageProps) {
   const dispatch = useDispatch();
-  const { setPopularDishes, setNewDishes, setTopUsers } = useMemo(
+  const { setPopularDishes, setNewDishes } = useMemo(
     () => actionDispatch(dispatch),
     [dispatch]
   );
 
   useEffect(() => {
     const productService = new ProductService();
-    const memberService = new MemberService();
 
-    // 1. Fetch Popular Dishes (Highest Views)
+    // 1. Fetch Popular Products (Highest Views)
     productService
       .getProducts({
         page: 1,
-        limit: 4,
+        limit: 8,
         order: "productViews",
-        productCollection: ProductCollection.DISH,
       })
       .then((data) => setPopularDishes(data))
-      .catch((err) => console.log("Popular dishes fetch error:", err));
+      .catch((err) => console.log("Popular shoes fetch error:", err));
 
-    // 2. Fetch New Dishes (Latest Creation)
+    // 2. Fetch New Products (Latest Creation)
     productService
       .getProducts({
         page: 1,
-        limit: 4,
+        limit: 8,
         order: "createdAt",
       })
       .then((data) => setNewDishes(data))
-      .catch((err) => console.log("New dishes fetch error:", err));
-
-    // 3. Fetch Top Users (Highest Points)
-    memberService
-      .getTopUsers()
-      .then((data) => setTopUsers(data))
-      .catch((err) => console.log("Top users fetch error:", err));
-  }, [setPopularDishes, setNewDishes, setTopUsers]);
+      .catch((err) => console.log("New shoes fetch error:", err));
+  }, [setPopularDishes, setNewDishes]);
 
   return (
     <Box sx={{ width: "100%", overflowX: "hidden", bgcolor: "#ffffff" }}>
-      {/* 1. Primary Hero Section (Orbiting Dishes, Clean Typography, Dual CTA) */}
+      {/* 1. Hero Section (STEP INTO MORE, Black Container, CTA) */}
       <HeroBanner />
 
-      {/* 2. Most Popular Signature Dishes */}
+      {/* 2. Value Props Bar (Free Shipping, Returns, Secure, Support) */}
+      <ValuePropsBar />
+
+      {/* 3. Featured Shoes (Grid of dynamic shoe cards) */}
       <PopularDishes onAdd={onAdd} />
 
-      {/* 3. New Culinary Arrivals */}
+      {/* 4. Category Showcase (Sneakers, Running, Boots, Limited Drop) */}
+      <CategoryShowcase />
+
+      {/* 5. New Arrivals Banner (High impact CTA) */}
+      <NewArrivalsBanner />
+
+      {/* 6. New Arrivals Product Grid */}
       <NewDishes onAdd={onAdd} />
-
-      {/* 4. Brand Statistics & Excellence Metrics */}
-      <Statistics />
-
-      {/* 5. Live CZN Burak Show Banner */}
-      <Advertisement />
-
-      {/* 6. Active VIP Foodies & Top Community Reviews */}
-      <ActiveUsers />
-
-      {/* 7. Upcoming Gastro Events & Masterclasses */}
-      <Events />
     </Box>
   );
 }

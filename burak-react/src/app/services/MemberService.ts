@@ -1,3 +1,11 @@
+/**
+ * ============================================================================
+ * MemberService.ts - Client API Service for User & Restaurant Authentication
+ * ============================================================================
+ * Handles Member Signup, Login, Google OAuth, Profile Updates, and Session
+ * verification with Bearer token header injection and cookie credentials.
+ */
+
 import axios from "axios";
 import { serverApi } from "../../lib/config";
 import type { Member, LoginInput, MemberInput } from "../../lib/types/member";
@@ -18,6 +26,9 @@ class MemberService {
     this.path = serverApi;
   }
 
+  /**
+   * Fetch active Restaurant member information (brand info, phone, address).
+   */
   public async getRestaurant(): Promise<Member> {
     try {
       const url = `${this.path}/member/restaurant`;
@@ -29,6 +40,9 @@ class MemberService {
     }
   }
 
+  /**
+   * Fetch Top active members / leaderboard based on activity points.
+   */
   public async getTopUsers(): Promise<Member[]> {
     try {
       const url = `${this.path}/member/top-users`;
@@ -40,6 +54,9 @@ class MemberService {
     }
   }
 
+  /**
+   * Fetch current authenticated member's complete details.
+   */
   public async getMemberDetail(): Promise<Member> {
     const url = `${this.path}/member/detail`;
     const result = await axios.get(url, { withCredentials: true });

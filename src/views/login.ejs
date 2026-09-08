@@ -3,22 +3,22 @@
 <div class="auth-wrapper flex-grow-1">
   <div class="auth-card">
     <div class="auth-header">
-      <div class="brand-icon mx-auto mb-3" style="width: 48px; height: 48px; font-size: 1.3rem;">
-        <i class="fa-solid fa-lock"></i>
+      <div class="brand-icon mx-auto mb-3" style="width: 48px; height: 48px; font-size: 1.3rem; background: linear-gradient(135deg, #ff4655, #f59e0b);">
+        <i class="fa-solid fa-shoe-prints"></i>
       </div>
-      <h3 class="fw-bold mb-1">Restaurant Login</h3>
-      <p class="text-slate-400 small mb-0" style="color: #94a3b8;">Enter restaurant admin credentials to access console</p>
+      <h3 class="fw-bold mb-1">KIXORA Brand Login</h3>
+      <p class="text-slate-400 small mb-0" style="color: #94a3b8;">Enter brand admin credentials to access inventory suite</p>
     </div>
 
     <div class="auth-body">
       <form action="/admin/login" method="POST">
         <div class="mb-3">
-          <label class="form-label fw-semibold small text-muted">RESTAURANT NICKNAME</label>
+          <label class="form-label fw-semibold small text-muted">BRAND / STORE NICKNAME</label>
           <div class="input-group">
             <span class="input-group-text bg-light border-end-0" style="border-radius: var(--radius-md) 0 0 var(--radius-md); border-color: var(--light-border);">
               <i class="fa-solid fa-store text-muted"></i>
             </span>
-            <input type="text" class="form-control-modern form-control border-start-0" style="border-radius: 0 var(--radius-md) var(--radius-md) 0;" name="memberNick" placeholder="e.g. BurakResto" required>
+            <input type="text" class="form-control-modern form-control border-start-0" style="border-radius: 0 var(--radius-md) var(--radius-md) 0;" name="memberNick" placeholder="e.g. KixoraStore" required>
           </div>
         </div>
 
@@ -37,14 +37,14 @@
           </div>
         </div>
 
-        <button type="submit" class="btn-gold w-100 py-3 fs-6">
+        <button type="submit" class="btn-gold w-100 py-3 fs-6" style="background: linear-gradient(135deg, #ff4655, #f59e0b);">
           <span>Authenticate & Login</span>
           <i class="fa-solid fa-arrow-right-to-bracket ms-1"></i>
         </button>
       </form>
 
       <div class="text-center mt-4">
-        <span class="text-muted small">New restaurant branch?</span>
+        <span class="text-muted small">New brand partner?</span>
         <a href="/admin/signup" class="text-warning fw-bold text-decoration-none ms-1 small">Register Account</a>
       </div>
     </div>
@@ -52,3 +52,4 @@
 </div>
 
 <%- include('includes/footer') %>
+

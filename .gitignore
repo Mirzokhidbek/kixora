@@ -1,3 +1,7 @@
 node_modules/
+burak-react/node_modules/
 dist/
+burak-react/dist/
 .env
+.DS_Store
+*.log
