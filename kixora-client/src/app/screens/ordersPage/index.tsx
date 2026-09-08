@@ -1,9 +1,10 @@
 import { useState, useEffect, useMemo } from "react";
 import { Container, Typography, Box, Tabs, Tab, Button, Card } from "@mui/material";
-import ReceiptLongIcon from "@mui/icons-material/ReceiptLong";
+import LocalShippingOutlinedIcon from "@mui/icons-material/LocalShippingOutlined";
 import LockOutlinedIcon from "@mui/icons-material/LockOutlined";
 import { useDispatch, useSelector } from "react-redux";
 import type { Dispatch } from "@reduxjs/toolkit";
+import { useLocation, useNavigate } from "react-router-dom";
 
 import { PausedOrders } from "./PausedOrders";
 import { ProcessOrders } from "./ProcessOrders";
@@ -43,8 +44,27 @@ interface OrdersPageProps {
 }
 
 export function OrdersPage({ onLoginClick }: OrdersPageProps) {
-  const [tabIndex, setTabIndex] = useState(0);
+  const location = useLocation();
+  const navigate = useNavigate();
+
+  const getInitialTab = () => {
+    const params = new URLSearchParams(location.search);
+    const tab = params.get("tab");
+    if (tab === "process") return 1;
+    if (tab === "finish") return 2;
+    return 0;
+  };
+
+  const [tabIndex, setTabIndex] = useState(getInitialTab);
   const { authMember, orderBuilder } = useGlobals();
+
+  useEffect(() => {
+    const params = new URLSearchParams(location.search);
+    const tab = params.get("tab");
+    if (tab === "process") setTabIndex(1);
+    else if (tab === "finish") setTabIndex(2);
+    else if (tab === "paused") setTabIndex(0);
+  }, [location.search]);
 
   const dispatch = useDispatch();
   const { setPausedOrders, setProcessOrders, setFinishedOrders } = useMemo(
@@ -77,7 +97,13 @@ export function OrdersPage({ onLoginClick }: OrdersPageProps) {
           limit: 10,
           orderStatus: OrderStatus.PROCESS,
         })
-        .then((data) => setProcessOrders(data))
+        .then((data) => {
+          setProcessOrders(data);
+          const params = new URLSearchParams(location.search);
+          if (!params.get("tab") && data.length > 0 && pausedOrders.length === 0) {
+            setTabIndex(1);
+          }
+        })
         .catch((err) => console.log("Process orders error:", err));
 
       // 3. Finished Orders
@@ -92,8 +118,14 @@ export function OrdersPage({ onLoginClick }: OrdersPageProps) {
     }
   }, [authMember, orderBuilder, setPausedOrders, setProcessOrders, setFinishedOrders]);
 
+  const handleTabChange = (_: any, newVal: number) => {
+    setTabIndex(newVal);
+    const tabMap = ["paused", "process", "finish"];
+    navigate(`/orders?tab=${tabMap[newVal]}`, { replace: true });
+  };
+
   return (
-    <Box sx={{ py: 6, minHeight: "85vh", bgcolor: "#ffffff" }}>
+    <Box sx={{ py: 6, minHeight: "85vh", bgcolor: "#fbfbfe" }}>
       <Container maxWidth="lg">
         {/* Header Title */}
         <Box sx={{ mb: 4, display: "flex", alignItems: "center", gap: 2 }}>
@@ -101,22 +133,22 @@ export function OrdersPage({ onLoginClick }: OrdersPageProps) {
             sx={{
               width: 52,
               height: 52,
-              borderRadius: 3,
-              bgcolor: "rgba(245, 158, 11, 0.12)",
-              color: "#f59e0b",
+              borderRadius: "14px",
+              bgcolor: "#050505",
+              color: "#ffffff",
               display: "flex",
               alignItems: "center",
               justifyContent: "center",
             }}
           >
-            <ReceiptLongIcon sx={{ fontSize: 28 }} />
+            <LocalShippingOutlinedIcon sx={{ fontSize: 28 }} />
           </Box>
           <div>
-            <Typography variant="h4" sx={{ fontWeight: 900, color: "#0f172a" }}>
+            <Typography variant="h4" sx={{ fontWeight: 900, color: "#0f172a", fontFamily: '"Outfit", sans-serif' }}>
               My Orders & Live Tracker
             </Typography>
             <Typography variant="body2" color="text.secondary">
-              Track your gourmet preparations from the kitchen flame to your doorstep.
+              Track your luxury footwear orders and white-glove delivery in real time.
             </Typography>
           </div>
         </Box>
@@ -140,20 +172,20 @@ export function OrdersPage({ onLoginClick }: OrdersPageProps) {
                 width: 70,
                 height: 70,
                 borderRadius: 4,
-                bgcolor: "#fffbeb",
+                bgcolor: "#f3f4f6",
                 display: "inline-flex",
                 alignItems: "center",
                 justifyContent: "center",
                 mb: 2.5,
               }}
             >
-              <LockOutlinedIcon sx={{ fontSize: 36, color: "#f59e0b" }} />
+              <LockOutlinedIcon sx={{ fontSize: 36, color: "#111827" }} />
             </Box>
-            <Typography variant="h4" sx={{ fontWeight: 900, mb: 1.5, color: "#0f172a" }}>
+            <Typography variant="h5" sx={{ fontWeight: 900, mb: 1.5, color: "#0f172a" }}>
               Sign In to View Orders
             </Typography>
             <Typography variant="body2" sx={{ color: "#64748b", mb: 4, lineHeight: 1.7 }}>
-              Please sign in with your account to view your live kitchen preparations, order progress, and receipts.
+              Please sign in with your account to view your footwear orders, real-time shipment status, and receipts.
             </Typography>
             <Button
               variant="contained"
@@ -163,10 +195,10 @@ export function OrdersPage({ onLoginClick }: OrdersPageProps) {
                 px: 5,
                 py: 1.4,
                 fontWeight: 800,
-                bgcolor: "#eab308",
+                bgcolor: "#111827",
                 color: "#fff",
-                boxShadow: "0 8px 20px rgba(234, 179, 8, 0.4)",
-                "&:hover": { bgcolor: "#ca8a04" },
+                boxShadow: "0 8px 20px rgba(0, 0, 0, 0.2)",
+                "&:hover": { bgcolor: "#000000" },
               }}
               onClick={onLoginClick || (() => (window.location.href = "/"))}
             >
@@ -176,25 +208,25 @@ export function OrdersPage({ onLoginClick }: OrdersPageProps) {
         ) : (
           <>
             {/* Tab Selection */}
-            <Box sx={{ bgcolor: "#fbfbfe", p: 1, borderRadius: 4, border: "1px solid #f1f5f9", mb: 2 }}>
+            <Box sx={{ bgcolor: "#ffffff", p: 1, borderRadius: 3, border: "1px solid #e5e7eb", mb: 2 }}>
               <Tabs
                 value={tabIndex}
-                onChange={(_, newVal) => setTabIndex(newVal)}
+                onChange={handleTabChange}
                 variant="scrollable"
                 scrollButtons="auto"
                 sx={{
-                  "& .MuiTabs-indicator": { backgroundColor: "#f59e0b", height: 3, borderRadius: 2 },
+                  "& .MuiTabs-indicator": { backgroundColor: "#111827", height: 3, borderRadius: 2 },
                   "& .MuiTab-root": {
                     fontWeight: 800,
-                    fontSize: "0.95rem",
-                    color: "#64748b",
-                    "&.Mui-selected": { color: "#f59e0b" },
+                    fontSize: "0.9rem",
+                    color: "#6b7280",
+                    "&.Mui-selected": { color: "#111827" },
                   },
                 }}
               >
-                <Tab label={`PAUSED ORDERS (${pausedOrders.length})`} />
-                <Tab label={`PROCESS ORDERS (${processOrders.length})`} />
-                <Tab label={`FINISHED ORDERS (${finishedOrders.length})`} />
+                <Tab label={`PENDING PAYMENT (${pausedOrders.length})`} />
+                <Tab label={`ACTIVE SHIPMENTS (${processOrders.length})`} />
+                <Tab label={`DELIVERED (${finishedOrders.length})`} />
               </Tabs>
             </Box>
 

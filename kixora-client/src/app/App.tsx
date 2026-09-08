@@ -28,6 +28,7 @@ import { useBasket } from "./hooks/useBasket";
 import { useGlobals } from "./hooks/useGlobals";
 import MemberService from "./services/MemberService";
 import OrderService from "./services/OrderService";
+import { OrderStatus } from "../lib/enums/common.enum";
 
 export default function App() {
   const { cartItems, onAdd, onRemove, onDelete, onDeleteAll } = useBasket();
@@ -84,14 +85,20 @@ export default function App() {
   const handleConfirmOrder = async (shippingInfo: any) => {
     try {
       const orderService = new OrderService();
-      await orderService.createOrder(cartItems);
+      const createdOrder = await orderService.createOrder(cartItems);
+      if (createdOrder?._id) {
+        await orderService.updateOrder({
+          orderId: createdOrder._id,
+          orderStatus: OrderStatus.PROCESS,
+        });
+      }
       onDeleteAll();
       setOrderBuilder(new Date());
-      setToastMsg("Order placed successfully! Redirecting to orders...");
+      setToastMsg("Luxury Order placed successfully! Tracking your shipment...");
       setToastOpen(true);
       setTimeout(() => {
-        window.location.href = "/orders";
-      }, 500);
+        window.location.href = "/orders?tab=process";
+      }, 600);
     } catch (err: any) {
       if (err.response?.status === 401) {
         setAuthMember(null);

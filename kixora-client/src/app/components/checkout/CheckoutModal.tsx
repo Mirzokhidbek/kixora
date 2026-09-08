@@ -127,24 +127,28 @@ export function CheckoutModal({
             bgcolor: "#ffffff",
             color: "#111827",
             overflow: "hidden",
-            boxShadow: "0 30px 90px rgba(0, 0, 0, 0.3)",
-            maxWidth: 780,
-            m: { xs: 1.5, sm: 2 },
+            boxShadow: "0 30px 90px rgba(0, 0, 0, 0.35)",
+            maxWidth: 760,
+            maxHeight: "92vh",
+            display: "flex",
+            flexDirection: "column",
+            m: { xs: 1, sm: 2 },
           },
         },
       }}
     >
-      <DialogContent sx={{ p: 0, overflow: "hidden" }}>
-        {/* Header */}
+      <DialogContent sx={{ p: 0, display: "flex", flexDirection: "column", overflow: "hidden" }}>
+        {/* Fixed Header */}
         <Box
           sx={{
-            p: 2.5,
+            p: 2.2,
             px: 3.5,
             bgcolor: "#050505",
             color: "#ffffff",
             display: "flex",
             justifyContent: "space-between",
             alignItems: "center",
+            flexShrink: 0,
           }}
         >
           <Box sx={{ display: "flex", alignItems: "center", gap: 1.5 }}>
@@ -152,15 +156,16 @@ export function CheckoutModal({
               component="img"
               src="/img/kixora/logo.png"
               alt="KIXORA"
-              sx={{ height: 24, width: "auto", filter: "brightness(0) invert(1)" }}
+              sx={{ height: 26, width: "auto", filter: "brightness(0) invert(1)" }}
             />
             <Typography
               variant="h6"
               sx={{
                 fontWeight: 900,
-                fontSize: "1.05rem",
+                fontSize: "1.1rem",
                 fontFamily: '"Outfit", sans-serif',
                 letterSpacing: "-0.01em",
+                color: "#ffffff !important",
               }}
             >
               Luxury Checkout
@@ -171,14 +176,14 @@ export function CheckoutModal({
             onClick={onClose}
             disabled={loading}
             size="small"
-            sx={{ color: "#9ca3af", "&:hover": { color: "#ffffff" } }}
+            sx={{ color: "#9ca3af", "&:hover": { color: "#ffffff", bgcolor: "rgba(255,255,255,0.1)" } }}
           >
             <CloseIcon fontSize="small" />
           </IconButton>
         </Box>
 
         {/* Stepper Indicator */}
-        <Box sx={{ px: 4, pt: 3, pb: 1, bgcolor: "#f9fafb", borderBottom: "1px solid #f3f4f6" }}>
+        <Box sx={{ px: 4, pt: 2.5, pb: 1.5, bgcolor: "#f9fafb", borderBottom: "1px solid #f3f4f6", flexShrink: 0 }}>
           <Stepper activeStep={activeStep} alternativeLabel>
             {steps.map((label) => (
               <Step key={label}>
@@ -206,8 +211,8 @@ export function CheckoutModal({
           </Stepper>
         </Box>
 
-        {/* Body Content */}
-        <Box sx={{ p: { xs: 2.5, sm: 4 }, minHeight: 380 }}>
+        {/* Scrollable Body Content */}
+        <Box sx={{ p: { xs: 2.5, sm: 3.5 }, overflowY: "auto", flexGrow: 1 }}>
           {errorMsg && (
             <Alert severity="error" sx={{ mb: 2.5, borderRadius: "10px", fontSize: "0.82rem" }}>
               {errorMsg}
