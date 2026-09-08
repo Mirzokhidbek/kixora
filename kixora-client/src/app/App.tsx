@@ -16,6 +16,7 @@ import customTheme from "./MaterialTheme/theme";
 import { Navbar } from "./components/headers/Navbar";
 import { Footer } from "./components/footers/Footer";
 import { AuthModal } from "./components/auth/AuthModal";
+import { CheckoutModal } from "./components/checkout/CheckoutModal";
 
 import { HomePage } from "./screens/homePage";
 import { ProductsPage } from "./screens/productsPage";
@@ -33,6 +34,7 @@ export default function App() {
   const { authMember, setAuthMember, setOrderBuilder } = useGlobals();
 
   const [authOpen, setAuthOpen] = useState<boolean>(false);
+  const [checkoutOpen, setCheckoutOpen] = useState<boolean>(false);
   const [toastOpen, setToastOpen] = useState<boolean>(false);
   const [toastMsg, setToastMsg] = useState<string>("");
 
@@ -62,7 +64,7 @@ export default function App() {
     }
   };
 
-  const handleCheckout = async () => {
+  const handleCheckoutClick = () => {
     if (!authMember) {
       setToastMsg("Please sign in to place your order!");
       setToastOpen(true);
@@ -71,11 +73,15 @@ export default function App() {
     }
 
     if (cartItems.length === 0) {
-      setToastMsg("Your cart is empty!");
+      setToastMsg("Your bag is empty!");
       setToastOpen(true);
       return;
     }
 
+    setCheckoutOpen(true);
+  };
+
+  const handleConfirmOrder = async (shippingInfo: any) => {
     try {
       const orderService = new OrderService();
       await orderService.createOrder(cartItems);
@@ -83,16 +89,17 @@ export default function App() {
       setOrderBuilder(new Date());
       setToastMsg("Order placed successfully! Redirecting to orders...");
       setToastOpen(true);
-      window.location.href = "/orders";
+      setTimeout(() => {
+        window.location.href = "/orders";
+      }, 500);
     } catch (err: any) {
       if (err.response?.status === 401) {
         setAuthMember(null);
         setToastMsg("Session expired. Please sign in again.");
         setAuthOpen(true);
       } else {
-        setToastMsg(err.response?.data?.message || "Order placement failed.");
+        throw new Error(err.response?.data?.message || "Order placement failed.");
       }
-      setToastOpen(true);
     }
   };
 
@@ -107,7 +114,7 @@ export default function App() {
             onRemove={onRemove}
             onDelete={onDelete}
             onDeleteAll={onDeleteAll}
-            onCheckout={handleCheckout}
+            onCheckout={handleCheckoutClick}
             member={authMember}
             onLoginClick={() => setAuthOpen(true)}
             onLogoutClick={handleLogout}
@@ -134,6 +141,15 @@ export default function App() {
               setToastMsg(`Welcome back, ${member.memberNick}!`);
               setToastOpen(true);
             }}
+          />
+
+          {/* Luxury Checkout Wizard Modal */}
+          <CheckoutModal
+            open={checkoutOpen}
+            onClose={() => setCheckoutOpen(false)}
+            cartItems={cartItems}
+            member={authMember}
+            onConfirmOrder={handleConfirmOrder}
           />
 
           {/* Global Notification Toast */}

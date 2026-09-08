@@ -1,6 +1,6 @@
-import { Box, Typography, Card, CardContent, Button, Avatar, Chip } from "@mui/material";
+import { Box, Typography, Card, CardContent, Button, Avatar, Chip, Stack, Divider } from "@mui/material";
 import PauseCircleFilledIcon from "@mui/icons-material/PauseCircleFilled";
-import DeleteIcon from "@mui/icons-material/Delete";
+import DeleteOutlinedIcon from "@mui/icons-material/DeleteOutlined";
 import PaymentIcon from "@mui/icons-material/Payment";
 import { useSelector } from "react-redux";
 
@@ -26,108 +26,159 @@ export function PausedOrders() {
   };
 
   const getImageSrc = (img?: string) => {
-    if (!img) return "";
-    return img.startsWith("http") ? img : `${serverApi}/${img}`;
+    if (!img) return "/sample.jpg";
+    return img.startsWith("http") ? img : `${serverApi}/${img.replace("public/", "")}`;
   };
 
   if (pausedOrders.length === 0) {
     return (
       <Box sx={{ textAlign: "center", py: 8 }}>
-        <PauseCircleFilledIcon sx={{ fontSize: 60, color: "#94a3b8", mb: 2 }} />
-        <Typography variant="h6" sx={{ fontWeight: 700, mb: 1 }}>
-          No Paused Orders
+        <Box
+          sx={{
+            width: 72,
+            height: 72,
+            borderRadius: "50%",
+            bgcolor: "#fef3c7",
+            display: "inline-flex",
+            alignItems: "center",
+            justifyContent: "center",
+            mb: 2,
+          }}
+        >
+          <PauseCircleFilledIcon sx={{ fontSize: 36, color: "#d97706" }} />
+        </Box>
+        <Typography variant="h6" sx={{ fontWeight: 800, mb: 0.8, fontSize: "1.1rem" }}>
+          No Pending Payment Orders
         </Typography>
         <Typography variant="body2" color="text.secondary">
-          You don't have any unpaid or paused dining orders at the moment.
+          You have no unpaid or paused footwear orders.
         </Typography>
       </Box>
     );
   }
 
   return (
-    <Box sx={{ display: "flex", flexDirection: "column", gap: 3 }}>
+    <Box sx={{ display: "flex", flexDirection: "column", gap: 3.5 }}>
       {pausedOrders.map((order: Order) => (
         <Card
           key={order._id}
           sx={{
-            borderRadius: 4,
-            border: "1px solid #e2e8f0",
+            borderRadius: "16px",
+            border: "1px solid #e5e7eb",
             overflow: "hidden",
-            boxShadow: "0 4px 16px rgba(15, 23, 42, 0.05)",
+            boxShadow: "0 6px 20px rgba(0, 0, 0, 0.04)",
           }}
         >
           <Box
             sx={{
-              bgcolor: "#1e293b",
-              color: "#fff",
-              px: 3,
+              bgcolor: "#111827",
+              color: "#ffffff",
+              px: 3.5,
               py: 2,
               display: "flex",
               justifyContent: "space-between",
               alignItems: "center",
               flexWrap: "wrap",
-              gap: 1,
+              gap: 1.5,
             }}
           >
             <Box sx={{ display: "flex", alignItems: "center", gap: 1.5 }}>
-              <PauseCircleFilledIcon sx={{ color: "#f59e0b" }} />
-              <Typography variant="subtitle1" sx={{ fontWeight: 800 }}>
-                Order #{order._id?.slice(-6)?.toUpperCase()}
+              <PauseCircleFilledIcon sx={{ color: "#f59e0b", fontSize: 22 }} />
+              <Typography variant="subtitle1" sx={{ fontWeight: 800, fontSize: "0.95rem" }}>
+                Order #{order._id?.slice(-6)?.toUpperCase()} &bull; Awaiting Payment
               </Typography>
             </Box>
-            <Chip label="PAUSED / UNPAID" size="small" sx={{ bgcolor: "#f59e0b", color: "#000", fontWeight: 800 }} />
+            <Chip
+              label="PENDING PAYMENT"
+              size="small"
+              sx={{ bgcolor: "#f59e0b", color: "#000000", fontWeight: 800, fontSize: "0.72rem" }}
+            />
           </Box>
 
-          <CardContent sx={{ p: 3 }}>
-            {order.orderItems?.map((item: OrderItem, idx: number) => {
-              const product = order.productData?.[idx];
-              return (
-                <Box
-                  key={item._id || idx}
-                  sx={{
-                    display: "flex",
-                    justifyContent: "space-between",
-                    alignItems: "center",
-                    bgcolor: "#f8fafc",
-                    p: 1.5,
-                    borderRadius: 3,
-                    mb: 2,
-                  }}
-                >
-                  <Box sx={{ display: "flex", alignItems: "center", gap: 2 }}>
-                    <Avatar src={getImageSrc(product?.productImages?.[0])} variant="rounded" sx={{ width: 52, height: 52, borderRadius: 2 }} />
-                    <div>
-                      <Typography variant="body1" sx={{ fontWeight: 700 }}>
-                        {product?.productName || "KIXORA Signature Footwear"}
-                      </Typography>
-                      <Typography variant="caption" color="text.secondary">
-                        Qty: {item.itemQuantity}x &bull; Unit: ${item.itemPrice?.toFixed(2)}
-                      </Typography>
-                    </div>
+          <CardContent sx={{ p: 3.5 }}>
+            <Stack spacing={1.5} sx={{ mb: 2.5 }}>
+              {order.orderItems?.map((item: OrderItem, idx: number) => {
+                const product = order.productData?.[idx];
+                return (
+                  <Box
+                    key={item._id || idx}
+                    sx={{
+                      display: "flex",
+                      justifyContent: "space-between",
+                      alignItems: "center",
+                      bgcolor: "#f9fafb",
+                      p: 1.8,
+                      borderRadius: "12px",
+                      border: "1px solid #f3f4f6",
+                    }}
+                  >
+                    <Box sx={{ display: "flex", alignItems: "center", gap: 2 }}>
+                      <Avatar
+                        src={getImageSrc(product?.productImages?.[0])}
+                        variant="rounded"
+                        sx={{
+                          width: 52,
+                          height: 52,
+                          borderRadius: "10px",
+                          border: "1px solid #e5e7eb",
+                          bgcolor: "#ffffff",
+                        }}
+                      />
+                      <div>
+                        <Typography variant="body2" sx={{ fontWeight: 800, color: "#111827" }}>
+                          {product?.productName || "KIXORA Footwear Model"}
+                        </Typography>
+                        <Typography variant="caption" sx={{ color: "#6b7280" }}>
+                          Qty: {item.itemQuantity}x &bull; Unit Price: ${item.itemPrice?.toFixed(2)}
+                        </Typography>
+                      </div>
+                    </Box>
+                    <Typography variant="subtitle2" sx={{ fontWeight: 900, color: "#111827" }}>
+                      ${((item.itemPrice || 0) * (item.itemQuantity || 1)).toFixed(2)}
+                    </Typography>
                   </Box>
-                  <Typography variant="subtitle1" sx={{ fontWeight: 800, color: "#0f172a" }}>
-                    ${((item.itemPrice || 0) * (item.itemQuantity || 1)).toFixed(2)}
-                  </Typography>
-                </Box>
-              );
-            })}
+                );
+              })}
+            </Stack>
 
-            <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "center", pt: 2, borderTop: "1px solid #f1f5f9", flexWrap: "wrap", gap: 2 }}>
+            <Divider sx={{ my: 2 }} />
+
+            <Box
+              sx={{
+                display: "flex",
+                justifyContent: "space-between",
+                alignItems: "center",
+                flexWrap: "wrap",
+                gap: 2,
+              }}
+            >
               <Button
                 color="error"
-                startIcon={<DeleteIcon />}
+                startIcon={<DeleteOutlinedIcon />}
                 onClick={() => handleUpdateOrder(order._id, OrderStatus.DELETE)}
+                sx={{ fontWeight: 700, textTransform: "none" }}
               >
                 Cancel Order
               </Button>
+
               <Button
                 variant="contained"
-                color="primary"
                 startIcon={<PaymentIcon />}
                 onClick={() => handleUpdateOrder(order._id, OrderStatus.PROCESS)}
-                sx={{ fontWeight: 800, px: 3, borderRadius: 3 }}
+                sx={{
+                  bgcolor: "#111827",
+                  color: "#ffffff",
+                  borderRadius: "10px",
+                  fontWeight: 800,
+                  fontSize: "0.88rem",
+                  px: 3,
+                  py: 1,
+                  textTransform: "none",
+                  boxShadow: "none",
+                  "&:hover": { bgcolor: "#000000", boxShadow: "none" },
+                }}
               >
-                Pay & Cook (${order.orderTotal?.toFixed(2)})
+                Pay & Dispatch (${order.orderTotal?.toFixed(2)})
               </Button>
             </Box>
           </CardContent>
