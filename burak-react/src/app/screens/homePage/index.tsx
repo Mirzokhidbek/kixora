@@ -5,10 +5,9 @@ import type { Dispatch } from "@reduxjs/toolkit";
 
 import { HeroBanner } from "./HeroBanner";
 import { ValuePropsBar } from "./ValuePropsBar";
-import { PopularDishes } from "./PopularDishes";
+import { BrandVideo } from "./BrandVideo";
 import { CategoryShowcase } from "./CategoryShowcase";
 import { NewArrivalsBanner } from "./NewArrivalsBanner";
-import { NewDishes } from "./NewDishes";
 
 import ProductService from "../../services/ProductService";
 import { setPopularDishes, setNewDishes } from "./slice";
@@ -33,7 +32,6 @@ export function HomePage({ onAdd }: HomePageProps) {
   useEffect(() => {
     const productService = new ProductService();
 
-    // 1. Fetch Popular Products (Highest Views)
     productService
       .getProducts({
         page: 1,
@@ -43,7 +41,6 @@ export function HomePage({ onAdd }: HomePageProps) {
       .then((data) => setPopularDishes(data))
       .catch((err) => console.log("Popular shoes fetch error:", err));
 
-    // 2. Fetch New Products (Latest Creation)
     productService
       .getProducts({
         page: 1,
@@ -56,23 +53,20 @@ export function HomePage({ onAdd }: HomePageProps) {
 
   return (
     <Box sx={{ width: "100%", overflowX: "hidden", bgcolor: "#ffffff" }}>
-      {/* 1. Hero Section (STEP INTO MORE, Black Container, CTA) */}
+      {/* 1. Hero Section (STEP INTO MORE, Black Container, 5-Slide Auto Carousel) */}
       <HeroBanner />
 
       {/* 2. Value Props Bar (Free Shipping, Returns, Secure, Support) */}
       <ValuePropsBar />
 
-      {/* 3. Featured Shoes (Grid of dynamic shoe cards) */}
-      <PopularDishes onAdd={onAdd} />
+      {/* 3. Cinematic Brand & Shop Crafting Lab Video Showcase */}
+      <BrandVideo />
 
       {/* 4. Category Showcase (Sneakers, Running, Boots, Limited Drop) */}
       <CategoryShowcase />
 
       {/* 5. New Arrivals Banner (High impact CTA) */}
       <NewArrivalsBanner />
-
-      {/* 6. New Arrivals Product Grid */}
-      <NewDishes onAdd={onAdd} />
     </Box>
   );
 }

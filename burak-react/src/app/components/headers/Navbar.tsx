@@ -117,36 +117,21 @@ export function Navbar({
               to="/"
               sx={{
                 display: "flex",
-                flexDirection: "column",
+                alignItems: "center",
+                gap: 1.5,
                 textDecoration: "none",
               }}
             >
-              <Typography
-                variant="h4"
+              <Box
+                component="img"
+                src="/img/kixora/logo.png"
+                alt="KIXORA"
                 sx={{
-                  fontFamily: '"Outfit", sans-serif',
-                  fontWeight: 900,
-                  fontSize: { xs: "1.5rem", md: "1.85rem" },
-                  letterSpacing: "0.08em",
-                  color: "#000000",
-                  lineHeight: 1,
+                  height: { xs: 36, md: 44 },
+                  width: "auto",
+                  objectFit: "contain",
                 }}
-              >
-                KIXORA
-              </Typography>
-              <Typography
-                variant="caption"
-                sx={{
-                  fontSize: "0.62rem",
-                  fontWeight: 800,
-                  letterSpacing: "0.22em",
-                  color: "#6b7280",
-                  textTransform: "uppercase",
-                  mt: 0.3,
-                }}
-              >
-                STEP INTO MORE
-              </Typography>
+              />
             </Box>
 
             {/* Center Navigation Links */}

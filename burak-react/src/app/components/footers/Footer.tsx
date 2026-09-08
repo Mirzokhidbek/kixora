@@ -117,34 +117,21 @@ export function Footer() {
           <Grid size={{ xs: 12, md: 4 }}>
             <Box
               onClick={() => navigate("/")}
-              sx={{ display: "flex", flexDirection: "column", mb: 2, cursor: "pointer" }}
+              sx={{ display: "flex", alignItems: "center", gap: 1.5, mb: 2, cursor: "pointer" }}
             >
-              <Typography
-                variant="h4"
+              <Box
+                component="img"
+                src="/img/kixora/logo.png"
+                alt="KIXORA"
                 sx={{
-                  fontFamily: '"Outfit", sans-serif',
-                  fontWeight: 900,
-                  fontSize: "1.7rem",
-                  color: "#ffffff",
-                  letterSpacing: "0.08em",
-                  lineHeight: 1,
+                  height: 40,
+                  width: "auto",
+                  objectFit: "contain",
+                  bgcolor: "#ffffff",
+                  p: 0.6,
+                  borderRadius: 2,
                 }}
-              >
-                KIXORA
-              </Typography>
-              <Typography
-                variant="caption"
-                sx={{
-                  fontSize: "0.62rem",
-                  fontWeight: 800,
-                  letterSpacing: "0.22em",
-                  color: "#6b7280",
-                  textTransform: "uppercase",
-                  mt: 0.3,
-                }}
-              >
-                STEP INTO MORE
-              </Typography>
+              />
             </Box>
 
             <Typography variant="body2" sx={{ lineHeight: 1.8, mb: 3, maxWidth: 320, color: "#9ca3af" }}>

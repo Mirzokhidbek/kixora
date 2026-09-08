@@ -8,43 +8,48 @@ import { useNavigate } from "react-router-dom";
 export function HeroBanner() {
   const navigate = useNavigate();
   const [activeSlide, setActiveSlide] = useState(0);
-  const [isPaused, setIsPaused] = useState(false);
 
+  // 5 Dedicated Permanent High-End Brand Slides (Pure Black Background)
   const heroSlides = [
     {
       tag: "FLAGSHIP PERFORMANCE",
       title: "Velocity Air Pro",
       desc: "Engineered with aerodynamic carbon plates and responsive cushioning for unstoppable motion.",
-      image: "/img/kixora/hero.jpg",
+      image: "/img/kixora/slide1.jpg",
     },
     {
       tag: "STREETWEAR LUXURY",
       title: "Street Low Classic",
       desc: "Clean minimalist silhouettes crafted from premium calfskin leather and cushioned gum sole.",
-      image: "/img/kixora/sneakers.jpg",
+      image: "/img/kixora/slide2.jpg",
     },
     {
       tag: "ATHLETIC INNOVATION",
       title: "Aero-Flow 8K",
       desc: "Ultra lightweight running shoes designed for marathon endurance and explosive energy return.",
-      image: "/img/kixora/running.jpg",
+      image: "/img/kixora/slide3.jpg",
+    },
+    {
+      tag: "TACTICAL LUXURY",
+      title: "Tactical High-Top Boot",
+      desc: "Matte black ballistic Italian leather with all-weather traction sole for rugged urban dominance.",
+      image: "/img/kixora/slide4.jpg",
     },
     {
       tag: "LIMITED CONCEPT",
-      title: "Aether VIP Drop",
-      desc: "Rare limited release featuring iridescent chrome accents and futuristic air chamber sole.",
-      image: "/img/kixora/limited.jpg",
+      title: "Futr Cyber Low",
+      desc: "Next-gen concept sneaker with dual neon accents and dynamic impact absorption chassis.",
+      image: "/img/kixora/slide5.jpg",
     },
   ];
 
-  // Auto-play carousel every 4.5 seconds
+  // Auto-play carousel every 3.8 seconds
   useEffect(() => {
-    if (isPaused) return;
     const interval = setInterval(() => {
       setActiveSlide((prev) => (prev + 1) % heroSlides.length);
-    }, 4500);
+    }, 3800);
     return () => clearInterval(interval);
-  }, [isPaused, heroSlides.length]);
+  }, [heroSlides.length]);
 
   const currentSlide = heroSlides[activeSlide];
 
@@ -65,10 +70,8 @@ export function HeroBanner() {
       }}
     >
       <Container maxWidth="lg">
-        {/* Main Hero Carousel Container */}
+        {/* Main Hero Container - Pure Solid Black */}
         <Box
-          onMouseEnter={() => setIsPaused(true)}
-          onMouseLeave={() => setIsPaused(false)}
           sx={{
             bgcolor: "#000000",
             color: "#ffffff",
@@ -81,15 +84,15 @@ export function HeroBanner() {
             alignItems: "center",
           }}
         >
-          {/* Ambient Lighting Background */}
+          {/* Subtle Ambient Radial Lighting */}
           <Box
             sx={{
               position: "absolute",
-              top: "-15%",
+              top: "-20%",
               right: "-10%",
-              width: "55%",
-              height: "130%",
-              background: "radial-gradient(circle, rgba(255, 255, 255, 0.09) 0%, transparent 65%)",
+              width: "60%",
+              height: "140%",
+              background: "radial-gradient(circle, rgba(255, 255, 255, 0.06) 0%, transparent 70%)",
               filter: "blur(60px)",
               pointerEvents: "none",
             }}
@@ -157,7 +160,7 @@ export function HeroBanner() {
                   {currentSlide.desc}
                 </Typography>
 
-                {/* Single Clean Call To Action Button (No Price / No Dish) */}
+                {/* CTA Button */}
                 <Button
                   variant="contained"
                   size="large"
@@ -185,7 +188,7 @@ export function HeroBanner() {
               </Box>
             </Grid>
 
-            {/* Right Column: Interactive Image Carousel */}
+            {/* Right Column: 5 Pure Black Seamless Floating Shoes */}
             <Grid size={{ xs: 12, md: 6 }}>
               <Box
                 sx={{
@@ -196,32 +199,32 @@ export function HeroBanner() {
                   minHeight: { xs: 240, sm: 320, md: 380 },
                 }}
               >
-                <Box
-                  component="img"
-                  key={activeSlide}
-                  src={currentSlide.image}
-                  alt={currentSlide.title}
-                  onError={(e: any) => {
-                    e.target.src = "/img/kixora/hero.jpg";
-                  }}
-                  sx={{
-                    width: "100%",
-                    maxWidth: { xs: 320, sm: 420, md: 480 },
-                    maxHeight: { xs: 250, sm: 330, md: 370 },
-                    objectFit: "contain",
-                    filter: "drop-shadow(0 20px 30px rgba(0, 0, 0, 0.7))",
-                    transform: "rotate(-10deg)",
-                    animation: "fadeIn 0.5s ease-in-out",
-                    cursor: "pointer",
-                    transition: "transform 0.4s ease",
-                    "&:hover": { transform: "rotate(-5deg) scale(1.04)" },
-                    "@keyframes fadeIn": {
-                      from: { opacity: 0.2, transform: "scale(0.95) rotate(-14deg)" },
-                      to: { opacity: 1, transform: "scale(1) rotate(-10deg)" },
-                    },
-                  }}
-                  onClick={() => navigate("/products")}
-                />
+                {heroSlides.map((slide, idx) => (
+                  <Box
+                    key={idx}
+                    component="img"
+                    src={slide.image}
+                    alt={slide.title}
+                    onError={(e: any) => {
+                      e.target.src = "/img/kixora/slide1.jpg";
+                    }}
+                    sx={{
+                      position: idx === activeSlide ? "relative" : "absolute",
+                      width: "100%",
+                      maxWidth: { xs: 340, sm: 440, md: 500 },
+                      maxHeight: { xs: 260, sm: 340, md: 380 },
+                      objectFit: "contain",
+                      opacity: idx === activeSlide ? 1 : 0,
+                      transform: idx === activeSlide ? "scale(1) rotate(0deg)" : "scale(0.92) rotate(-5deg)",
+                      transition: "opacity 0.7s ease-in-out, transform 0.7s ease-in-out",
+                      filter: "drop-shadow(0 15px 25px rgba(0, 0, 0, 0.9))",
+                      pointerEvents: idx === activeSlide ? "auto" : "none",
+                      cursor: "pointer",
+                      "&:hover": { transform: "scale(1.04)" },
+                    }}
+                    onClick={() => navigate("/products")}
+                  />
+                ))}
               </Box>
             </Grid>
           </Grid>
@@ -238,7 +241,7 @@ export function HeroBanner() {
               zIndex: 2,
             }}
           >
-            {/* Dots */}
+            {/* Dots Indicator */}
             <Box sx={{ display: { xs: "none", sm: "flex" }, gap: 1, mr: 1 }}>
               {heroSlides.map((_, idx) => (
                 <Box
@@ -256,7 +259,7 @@ export function HeroBanner() {
               ))}
             </Box>
 
-            {/* Slide Index (01 / 04) */}
+            {/* Slide Index (01 / 05) */}
             <Typography variant="caption" sx={{ color: "#9ca3af", fontWeight: 800, letterSpacing: 2 }}>
               0{activeSlide + 1} / 0{heroSlides.length}
             </Typography>
