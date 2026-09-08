@@ -1,0 +1,212 @@
+<%- include('includes/header') %>
+
+<main class="container-fluid px-lg-5 my-5 flex-grow-1">
+  <!-- Title Bar & Order Metrics -->
+  <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3 mb-4">
+    <div>
+      <div class="d-flex align-items-center gap-2 mb-1">
+        <h2 class="fw-bold text-dark mb-0">Footwear Orders & Logistics</h2>
+        <span class="badge bg-dark rounded-pill px-3 py-1 fw-bold text-warning">
+          <%= orders ? orders.length : 0 %> Total Orders
+        </span>
+      </div>
+      <p class="text-muted mb-0">
+        Review real-time luxury footwear shipments, customer delivery destinations, and transition order fulfillment states.
+      </p>
+    </div>
+
+    <!-- Quick Filter Stat Counters -->
+    <div class="d-flex gap-2 flex-wrap">
+      <% 
+        const pauseCount = orders ? orders.filter(o => o.orderStatus === 'PAUSE').length : 0;
+        const processCount = orders ? orders.filter(o => o.orderStatus === 'PROCESS').length : 0;
+        const finishCount = orders ? orders.filter(o => o.orderStatus === 'FINISH').length : 0;
+      %>
+      <span class="badge bg-warning bg-opacity-25 text-dark border border-warning border-opacity-50 px-3 py-2 fw-bold">
+        <i class="fa-solid fa-hourglass-half text-warning me-1"></i> <%= pauseCount %> Pending
+      </span>
+      <span class="badge bg-primary bg-opacity-25 text-primary border border-primary border-opacity-50 px-3 py-2 fw-bold">
+        <i class="fa-solid fa-truck-fast text-primary me-1"></i> <%= processCount %> In Transit
+      </span>
+      <span class="badge bg-success bg-opacity-25 text-success border border-success border-opacity-50 px-3 py-2 fw-bold">
+        <i class="fa-solid fa-circle-check text-success me-1"></i> <%= finishCount %> Delivered
+      </span>
+    </div>
+  </div>
+
+  <!-- Orders Table Container -->
+  <div class="admin-table-container">
+    <div class="table-responsive">
+      <table class="table admin-table align-middle mb-0">
+        <thead>
+          <tr>
+            <th scope="col" class="ps-4">Order ID & Date</th>
+            <th scope="col">Customer Info</th>
+            <th scope="col">Ordered Footwear & Size</th>
+            <th scope="col">Total Amount</th>
+            <th scope="col">Status</th>
+            <th scope="col" class="text-center pe-4">1-Click Fulfillment Action</th>
+          </tr>
+        </thead>
+        <tbody>
+          <% if (orders && orders.length) { %>
+            <% orders.forEach((order, index) => { %>
+              <tr>
+                <!-- Order ID & Date -->
+                <td class="ps-4">
+                  <div class="fw-bold text-dark font-monospace">
+                    #KX-<%= String(order._id).slice(-6).toUpperCase() %>
+                  </div>
+                  <div class="small text-muted">
+                    <i class="fa-regular fa-clock me-1"></i>
+                    <%= new Date(order.createdAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric', hour: '2-digit', minute: '2-digit' }) %>
+                  </div>
+                </td>
+
+                <!-- Customer Details -->
+                <td>
+                  <div class="d-flex align-items-center gap-2 mb-1">
+                    <div class="rounded-circle bg-dark text-white fw-bold d-flex align-items-center justify-content-center" style="width: 32px; height: 32px; font-size: 0.85rem;">
+                      <%= order.memberData ? order.memberData.memberNick.charAt(0).toUpperCase() : 'U' %>
+                    </div>
+                    <div>
+                      <div class="fw-bold text-dark"><%= order.memberData ? order.memberData.memberNick : 'Guest Customer' %></div>
+                      <div class="small text-muted">
+                        <i class="fa-solid fa-phone text-muted me-1"></i> <%= order.memberData ? order.memberData.memberPhone : 'N/A' %>
+                      </div>
+                    </div>
+                  </div>
+                  <% if (order.memberData && order.memberData.memberAddress) { %>
+                    <div class="small text-muted" style="max-width: 220px; font-size: 0.78rem;">
+                      <i class="fa-solid fa-location-dot text-danger me-1"></i> <%= order.memberData.memberAddress %>
+                    </div>
+                  <% } else { %>
+                    <div class="small text-muted" style="max-width: 220px; font-size: 0.78rem;">
+                      <i class="fa-solid fa-location-dot text-danger me-1"></i> Express Courier (Standard)
+                    </div>
+                  <% } %>
+                </td>
+
+                <!-- Ordered Footwear Items -->
+                <td>
+                  <div class="d-flex flex-column gap-2" style="max-width: 320px;">
+                    <% if (order.orderItems && order.orderItems.length) { %>
+                      <% order.orderItems.forEach((item, itemIdx) => { %>
+                        <% 
+                          const product = order.productData ? order.productData.find(p => String(p._id) === String(item.productId)) : null;
+                          const shoeImg = product && product.productImages && product.productImages[0] 
+                            ? (product.productImages[0].startsWith('http') ? product.productImages[0] : '/' + product.productImages[0].replace('public/', ''))
+                            : '/img/kixora/slide1.jpg';
+                          const shoeName = product ? product.productName : 'KIXORA Footwear';
+                          const shoeSizes = product && product.productSizes && product.productSizes.length ? product.productSizes[0] : 42;
+                        %>
+                        <div class="d-flex align-items-center gap-2 p-1 rounded bg-light border border-light-subtle">
+                          <img 
+                            src="<%= shoeImg %>" 
+                            alt="<%= shoeName %>" 
+                            class="rounded" 
+                            style="width: 40px; height: 40px; object-fit: contain; background: #fff; padding: 2px; border: 1px solid #e5e7eb;"
+                            onerror="this.src='/img/kixora/slide1.jpg'"
+                          />
+                          <div class="flex-grow-1" style="line-height: 1.2;">
+                            <div class="fw-bold text-dark small text-truncate" style="max-width: 170px;"><%= shoeName %></div>
+                            <div class="d-flex align-items-center gap-1 mt-1">
+                              <span class="badge bg-dark text-white rounded px-1 py-0 fw-bold" style="font-size: 0.68rem;">EU <%= shoeSizes %></span>
+                              <span class="small text-muted" style="font-size: 0.72rem;">Qty: <%= item.itemQuantity %> &bull; $<%= item.itemPrice %></span>
+                            </div>
+                          </div>
+                        </div>
+                      <% }) %>
+                    <% } else { %>
+                      <span class="text-muted small">Standard Package</span>
+                    <% } %>
+                  </div>
+                </td>
+
+                <!-- Total Amount & Shipping -->
+                <td>
+                  <div class="fw-bold text-dark fs-6">$<%= Number(order.orderTotal).toFixed(2) %></div>
+                  <div class="small <%= order.orderDelivery === 0 ? 'text-success fw-bold' : 'text-muted' %>">
+                    <%= order.orderDelivery === 0 ? 'Free Shipping' : '+$' + order.orderDelivery + ' Delivery' %>
+                  </div>
+                </td>
+
+                <!-- Status Badge -->
+                <td>
+                  <% 
+                    let statusClass = 'badge-warning';
+                    let statusLabel = 'PAUSED';
+                    if (order.orderStatus === 'PROCESS') {
+                      statusClass = 'bg-primary text-white';
+                      statusLabel = 'IN TRANSIT (PROCESS)';
+                    } else if (order.orderStatus === 'FINISH') {
+                      statusClass = 'bg-success text-white';
+                      statusLabel = 'DELIVERED (FINISH)';
+                    } else if (order.orderStatus === 'DELETE') {
+                      statusClass = 'bg-danger text-white';
+                      statusLabel = 'CANCELLED';
+                    } else {
+                      statusClass = 'bg-warning text-dark';
+                      statusLabel = 'PENDING (PAUSE)';
+                    }
+                  %>
+                  <span id="order-badge-<%= order._id %>" class="badge <%= statusClass %> px-2.5 py-1.5 fw-bold" style="font-size: 0.75rem; border-radius: 8px;">
+                    <%= statusLabel %>
+                  </span>
+                </td>
+
+                <!-- 1-Click Status Action Dropdown & Quick Dispatch Button -->
+                <td class="text-center pe-4">
+                  <div class="d-flex align-items-center justify-content-center gap-2">
+                    <select class="form-select-modern form-select-sm order-status-select" data-id="<%= order._id %>" style="min-width: 140px; font-weight: 700;">
+                      <option value="PAUSE" <%= order.orderStatus === 'PAUSE' ? 'selected' : '' %>>PAUSE (Pending)</option>
+                      <option value="PROCESS" <%= order.orderStatus === 'PROCESS' ? 'selected' : '' %>>PROCESS (In Transit)</option>
+                      <option value="FINISH" <%= order.orderStatus === 'FINISH' ? 'selected' : '' %>>FINISH (Delivered)</option>
+                      <option value="DELETE" <%= order.orderStatus === 'DELETE' ? 'selected' : '' %>>DELETE (Cancelled)</option>
+                    </select>
+
+                    <% if (order.orderStatus === 'PAUSE') { %>
+                      <button 
+                        class="btn btn-dark btn-sm rounded-pill px-2.5 py-1 quick-status-btn" 
+                        data-id="<%= order._id %>" 
+                        data-status="PROCESS"
+                        title="Dispatch to Courier"
+                      >
+                        <i class="fa-solid fa-truck-fast text-warning me-1"></i> Dispatch
+                      </button>
+                    <% } else if (order.orderStatus === 'PROCESS') { %>
+                      <button 
+                        class="btn btn-success btn-sm rounded-pill px-2.5 py-1 quick-status-btn" 
+                        data-id="<%= order._id %>" 
+                        data-status="FINISH"
+                        title="Mark Delivered"
+                      >
+                        <i class="fa-solid fa-check me-1"></i> Deliver
+                      </button>
+                    <% } %>
+                  </div>
+                </td>
+              </tr>
+            <% }) %>
+          <% } else { %>
+            <tr>
+              <td colspan="6" class="text-center py-5 text-muted">
+                <div class="p-4">
+                  <i class="fa-solid fa-box-open fa-3x mb-3 text-secondary d-block"></i>
+                  <h5 class="fw-bold text-dark">No Footwear Orders Found</h5>
+                  <p class="small text-muted mb-0">
+                    When customers place footwear orders on the KIXORA store, they will be listed here in real-time for dispatch and tracking.
+                  </p>
+                </div>
+              </td>
+            </tr>
+          <% } %>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</main>
+
+<script src="/js/orders.js"></script>
+
+<%- include('includes/footer') %>

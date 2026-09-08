@@ -47,4 +47,16 @@ routerAdmin.post(
   restaurantController.updateChosenUser
 );
 
+/** Order Routes **/
+routerAdmin.get(
+  "/order/all",
+  restaurantController.verifyRestaurant,
+  restaurantController.getAllOrders
+);
+routerAdmin.post(
+  "/order/edit",
+  restaurantController.verifyRestaurant,
+  restaurantController.updateChosenOrder
+);
+
 export default routerAdmin;
