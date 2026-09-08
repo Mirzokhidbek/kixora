@@ -64,9 +64,9 @@ memberController.signup = async (req: Request, res: Response) => {
 
     res.cookie("accessToken", token, {
       maxAge: AUTH_TIMER * 3600 * 1000,
-      httpOnly: false,
+      httpOnly: true, // XSS attack protection
       sameSite: isProduction ? "none" : "lax",
-      secure: isProduction,
+      secure: isProduction, // HTTPS only in production
     });
 
     res.status(HTTPCode.CREATED).json({ member: result, accessToken: token });
@@ -87,9 +87,9 @@ memberController.login = async (req: Request, res: Response) => {
 
     res.cookie("accessToken", token, {
       maxAge: AUTH_TIMER * 3600 * 1000,
-      httpOnly: false,
+      httpOnly: true, // XSS attack protection
       sameSite: isProduction ? "none" : "lax",
-      secure: isProduction,
+      secure: isProduction, // HTTPS only in production
     });
 
     res.status(HTTPCode.OK).json({ member: result, accessToken: token });
@@ -142,9 +142,9 @@ memberController.googleLogin = async (req: Request, res: Response) => {
 
     res.cookie("accessToken", token, {
       maxAge: AUTH_TIMER * 3600 * 1000,
-      httpOnly: false,
+      httpOnly: true, // XSS attack protection
       sameSite: isProduction ? "none" : "lax",
-      secure: isProduction,
+      secure: isProduction, // HTTPS only in production
     });
 
     res.status(HTTPCode.OK).json({ member: result, accessToken: token });
@@ -161,7 +161,7 @@ memberController.logout = (req: Request, res: Response) => {
     console.log("logout");
     res.cookie("accessToken", null, {
       maxAge: 0,
-      httpOnly: false,
+      httpOnly: true,
       sameSite: isProduction ? "none" : "lax",
       secure: isProduction,
     });
