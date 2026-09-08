@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import type { Product } from "../../lib/types/product";
+import { sweetTopSmallSuccessAlert } from "../../lib/sweetAlert";
 
 export function useWishlist() {
   const [wishlist, setWishlist] = useState<Product[]>(() => {
@@ -24,6 +25,7 @@ export function useWishlist() {
       if (prev.some((p) => p._id === product._id)) return prev;
       return [...prev, product];
     });
+    sweetTopSmallSuccessAlert(`Saved "${product.productName}" to your Wishlist ❤️`);
   };
 
   const removeFromWishlist = (productId: string) => {
@@ -33,6 +35,7 @@ export function useWishlist() {
   const toggleWishlist = (product: Product) => {
     if (wishlist.some((p) => p._id === product._id)) {
       removeFromWishlist(product._id);
+      sweetTopSmallSuccessAlert(`Removed from Wishlist`);
       return false; // Removed
     } else {
       addToWishlist(product);

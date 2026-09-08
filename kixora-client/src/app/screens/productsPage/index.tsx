@@ -9,7 +9,7 @@ import MemberService from "../../services/MemberService";
 import { setRestaurant } from "./slice";
 
 interface ProductsPageProps {
-  onAdd?: (item: any, quantity?: number) => void;
+  onAdd?: (item: any, quantity?: number, size?: number, color?: string) => void;
 }
 
 /** REDUX DISPATCH SETUP **/

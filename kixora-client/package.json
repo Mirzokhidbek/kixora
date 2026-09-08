@@ -24,7 +24,8 @@
     "react-dom": "^19.2.8",
     "react-redux": "^9.3.0",
     "react-router-dom": "^7.18.3",
-    "serve": "^14.2.4"
+    "serve": "^14.2.4",
+    "sweetalert2": "^11.26.25"
   },
   "devDependencies": {
     "@types/node": "^24.13.3",

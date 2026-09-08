@@ -35,7 +35,7 @@ import type { Member } from "../../../lib/types/member";
 
 interface NavbarProps {
   cartItems: CartItem[];
-  onAdd: (item: any) => void;
+  onAdd: (item: any, quantity?: number, size?: number, color?: string) => void;
   onRemove: (item: CartItem) => void;
   onDelete: (item: CartItem) => void;
   onDeleteAll: () => void;

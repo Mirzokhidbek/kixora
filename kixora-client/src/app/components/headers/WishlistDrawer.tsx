@@ -22,7 +22,7 @@ interface WishlistDrawerProps {
   wishlist: Product[];
   onRemove: (productId: string) => void;
   onClear: () => void;
-  onAddToCart: (product: any) => void;
+  onAddToCart: (product: any, quantity?: number, size?: number, color?: string) => void;
 }
 
 export function WishlistDrawer({
@@ -42,13 +42,7 @@ export function WishlistDrawer({
 
   const handleMoveAllToBag = () => {
     wishlist.forEach((item) => {
-      onAddToCart({
-        _id: item._id,
-        quantity: 1,
-        name: item.productName,
-        price: item.productPrice,
-        image: item.productImages?.[0] || "/sample.jpg",
-      });
+      onAddToCart(item, 1, item.productSizes?.[0] || 42, "Standard");
     });
     onClear();
     onClose();
@@ -250,13 +244,7 @@ export function WishlistDrawer({
                       variant="contained"
                       startIcon={<AddShoppingCartIcon sx={{ fontSize: 14 }} />}
                       onClick={() => {
-                        onAddToCart({
-                          _id: item._id,
-                          quantity: 1,
-                          name: item.productName,
-                          price: item.productPrice,
-                          image: item.productImages?.[0] || "/sample.jpg",
-                        });
+                        onAddToCart(item, 1, item.productSizes?.[0] || 42, "Standard");
                         onRemove(item._id);
                       }}
                       sx={{
