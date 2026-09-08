@@ -11,7 +11,7 @@ export function FinishedOrders() {
   const finishedOrders = useSelector(retrieveFinishedOrders);
 
   const getImageSrc = (img?: string) => {
-    if (!img) return "https://images.unsplash.com/photo-1519869325930-281384150729?auto=format&fit=crop&w=150&q=80";
+    if (!img) return "";
     return img.startsWith("http") ? img : `${serverApi}/${img}`;
   };
 

@@ -1,36 +1,37 @@
+import { useSelector } from "react-redux";
 import { Box, Container, Typography, Button, Grid } from "@mui/material";
 import ShoppingCartOutlinedIcon from "@mui/icons-material/ShoppingCartOutlined";
+import RestaurantIcon from "@mui/icons-material/Restaurant";
 import { useNavigate } from "react-router-dom";
+import { retrievePopularDishes } from "./selector";
+import { serverApi } from "../../../lib/config";
 
 export function HeroBanner() {
   const navigate = useNavigate();
+  const popularDishes = useSelector(retrievePopularDishes);
 
-  const satelliteDishes = [
-    {
-      img: "https://images.unsplash.com/photo-1555939594-58d7cb561ad1?auto=format&fit=crop&w=300&q=80",
-      top: "8%",
-      right: "2%",
-      size: 100,
-    },
-    {
-      img: "https://images.unsplash.com/photo-1544025162-d76694265947?auto=format&fit=crop&w=300&q=80",
-      top: "28%",
-      left: "2%",
-      size: 90,
-    },
-    {
-      img: "https://images.unsplash.com/photo-1568901346375-23c9450c58cd?auto=format&fit=crop&w=300&q=80",
-      bottom: "28%",
-      left: "4%",
-      size: 85,
-    },
-    {
-      img: "https://images.unsplash.com/photo-1519869325930-281384150729?auto=format&fit=crop&w=300&q=80",
-      bottom: "4%",
-      left: "22%",
-      size: 90,
-    },
+  const getImageSrc = (img?: string) => {
+    if (!img) return "";
+    return img.startsWith("http") ? img : `${serverApi}/${img}`;
+  };
+
+  const mainDish = popularDishes?.[0];
+  const mainImage = mainDish?.productImages?.[0] ? getImageSrc(mainDish.productImages[0]) : "";
+
+  const satellitePositions = [
+    { top: "8%", right: "2%", size: 100 },
+    { top: "28%", left: "2%", size: 90 },
+    { bottom: "28%", left: "4%", size: 85 },
+    { bottom: "4%", left: "22%", size: 90 },
   ];
+
+  const satelliteDishes = (popularDishes?.slice(1, 5) || [])
+    .filter((d) => d.productImages?.[0])
+    .map((dish, i) => ({
+      ...satellitePositions[i % satellitePositions.length],
+      img: getImageSrc(dish.productImages[0]),
+      dish,
+    }));
 
   return (
     <Box
@@ -132,44 +133,69 @@ export function HeroBanner() {
                   "&:hover": { transform: "scale(1.03)" },
                 }}
               >
-                <Box
-                  component="img"
-                  src="https://images.unsplash.com/photo-1558030006-450675393462?auto=format&fit=crop&w=800&q=80"
-                  alt="Burak Signature Dish"
-                  sx={{
-                    width: "100%",
-                    height: "100%",
-                    objectFit: "cover",
-                  }}
-                />
+                {mainImage ? (
+                  <Box
+                    component="img"
+                    src={mainImage}
+                    alt={mainDish?.productName || "Burak Signature Dish"}
+                    onClick={() => mainDish?._id && navigate(`/products/${mainDish._id}`)}
+                    sx={{
+                      width: "100%",
+                      height: "100%",
+                      objectFit: "cover",
+                      cursor: mainDish?._id ? "pointer" : "default",
+                    }}
+                  />
+                ) : (
+                  <Box
+                    sx={{
+                      width: "100%",
+                      height: "100%",
+                      bgcolor: "#fffbeb",
+                      display: "flex",
+                      flexDirection: "column",
+                      alignItems: "center",
+                      justifyContent: "center",
+                      p: 3,
+                      textAlign: "center",
+                    }}
+                  >
+                    <RestaurantIcon sx={{ fontSize: 64, color: "#f59e0b", mb: 1 }} />
+                    <Typography variant="h6" sx={{ fontWeight: 800, color: "#0f172a" }}>
+                      BURAK RESTAURANT
+                    </Typography>
+                  </Box>
+                )}
               </Box>
 
               {/* Orbiting Satellite Miniature Plates */}
-              {satelliteDishes.map((dish, idx) => (
+              {satelliteDishes.map((satellite, idx) => (
                 <Box
                   key={idx}
+                  onClick={() => satellite.dish?._id && navigate(`/products/${satellite.dish._id}`)}
                   sx={{
                     position: "absolute",
-                    top: dish.top,
-                    bottom: dish.bottom,
-                    left: dish.left,
-                    right: dish.right,
-                    width: { xs: dish.size * 0.65, sm: dish.size * 0.85, md: dish.size },
-                    height: { xs: dish.size * 0.65, sm: dish.size * 0.85, md: dish.size },
+                    top: satellite.top,
+                    bottom: satellite.bottom,
+                    left: satellite.left,
+                    right: satellite.right,
+                    width: { xs: satellite.size * 0.65, sm: satellite.size * 0.85, md: satellite.size },
+                    height: { xs: satellite.size * 0.65, sm: satellite.size * 0.85, md: satellite.size },
                     borderRadius: "50%",
                     overflow: "hidden",
                     border: { xs: "2.5px solid #ffffff", sm: "4px solid #ffffff" },
                     boxShadow: "0 8px 20px rgba(0,0,0,0.12)",
                     zIndex: 3,
                     bgcolor: "#fff",
+                    cursor: "pointer",
                     transition: "transform 0.3s ease",
                     "&:hover": { transform: "scale(1.12)" },
                   }}
                 >
                   <Box
                     component="img"
-                    src={dish.img}
-                    alt="Satellite Dish"
+                    src={satellite.img}
+                    alt={satellite.dish?.productName || "Dish"}
                     sx={{ width: "100%", height: "100%", objectFit: "cover" }}
                   />
                 </Box>

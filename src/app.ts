@@ -51,15 +51,9 @@ app.use("/uploads", express.static(path.resolve("uploads")));
 app.use("/public/uploads", express.static(path.resolve("public/uploads")));
 app.use("/public/uploads", express.static(path.resolve("src/public/uploads")));
 
-// Fallback for missing uploaded images in production
-app.use("/uploads/products", (req, res) => {
-  res.redirect("https://images.unsplash.com/photo-1544025162-d76694265947?auto=format&fit=crop&w=800&q=80");
-});
-app.use("/uploads/members", (req, res) => {
-  res.redirect("https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=400&q=80");
-});
+// Return 404 for missing static uploads
 app.use("/uploads", (req, res) => {
-  res.redirect("https://images.unsplash.com/photo-1558030006-450675393462?auto=format&fit=crop&w=800&q=80");
+  res.status(404).send("File not found");
 });
 
 app.use(express.urlencoded({ extended: true }));
