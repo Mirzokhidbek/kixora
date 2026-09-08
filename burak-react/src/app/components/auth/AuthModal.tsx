@@ -141,8 +141,15 @@ export function AuthModal({ open, onClose, onSuccess }: AuthModalProps) {
     } catch (err: any) {
       setLoading(false);
       const msg = err.response?.data?.message || "";
-      if (msg.includes("already used") || msg.includes("USED_NICK_PHONE")) {
-        setErrorMsg(`Nickname "${cleanNick}" or this phone is already registered. Please Login.`);
+      if (
+        msg.includes("already used") ||
+        msg.includes("USED_NICK_PHONE") ||
+        msg.includes("nick or phone") ||
+        err.response?.status === 400
+      ) {
+        setErrorMsg(
+          `Nickname "${cleanNick}" or Phone "${cleanPhone}" is already registered. Switch to Login to sign in!`
+        );
         setLoginNick(cleanNick);
       } else {
         setErrorMsg(msg || "Registration failed. Please check your details and try again.");
