@@ -13,7 +13,7 @@ const productController: T = {};
 productController.getProducts = async (req: Request, res: Response) => {
   try {
     console.log("getProducts");
-    const { page, limit, order, productCollection, search } = req.query;
+    const { page, limit, order, productCollection, search, size, color } = req.query;
     const inquiry: ProductInquiry = {
       order: String(order || "createdAt"),
       page: Number(page || 1),
@@ -23,6 +23,8 @@ productController.getProducts = async (req: Request, res: Response) => {
       inquiry.productCollection = productCollection as ProductCollection;
     }
     if (search) inquiry.search = String(search);
+    if (size) inquiry.size = Number(size);
+    if (color) inquiry.color = String(color);
 
     const result = await productService.getProducts(inquiry);
     res.status(HTTPCode.OK).json(result);
@@ -75,6 +77,32 @@ productController.createNewProduct = async (req: Request, res: Response) => {
     data.productImages = (req.files as Express.Multer.File[]).map((ele) => {
       return ele.path.replace(/\\/g, "/");
     });
+
+    if (req.body.productSizes) {
+      if (typeof req.body.productSizes === "string") {
+        data.productSizes = req.body.productSizes
+          .split(",")
+          .map((s: string) => Number(s.trim()))
+          .filter((n: number) => !isNaN(n));
+      } else if (Array.isArray(req.body.productSizes)) {
+        data.productSizes = req.body.productSizes.map(Number);
+      }
+    } else {
+      data.productSizes = [38, 39, 40, 41, 42, 43, 44, 45];
+    }
+
+    if (req.body.productColors) {
+      if (typeof req.body.productColors === "string") {
+        data.productColors = req.body.productColors
+          .split(",")
+          .map((c: string) => c.trim())
+          .filter(Boolean);
+      } else if (Array.isArray(req.body.productColors)) {
+        data.productColors = req.body.productColors;
+      }
+    } else {
+      data.productColors = ["Black", "White"];
+    }
 
     await productService.createNewProduct(data);
     res.send(

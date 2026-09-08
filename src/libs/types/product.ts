@@ -13,6 +13,8 @@ export interface Product {
   productName: string;
   productPrice: number;
   productLeftCount: number;
+  productSizes: number[];
+  productColors: string[];
   productSize?: ProductSize;
   productVolume?: ProductVolume;
   productDesc?: string;
@@ -28,6 +30,8 @@ export interface ProductInput {
   productName: string;
   productPrice: number;
   productLeftCount: number;
+  productSizes?: number[];
+  productColors?: string[];
   productSize?: ProductSize;
   productVolume?: ProductVolume;
   productDesc?: string;
@@ -41,4 +45,7 @@ export interface ProductInquiry {
   limit: number;
   productCollection?: ProductCollection;
   search?: string;
+  size?: number;
+  color?: string;
 }
+

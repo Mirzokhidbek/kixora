@@ -30,6 +30,14 @@ class ProductService {
       match.productName = { $regex: new RegExp(inquiry.search, "i") };
     }
 
+    if (inquiry.size) {
+      match.productSizes = { $in: [Number(inquiry.size)] };
+    }
+
+    if (inquiry.color) {
+      match.productColors = { $in: [String(inquiry.color)] };
+    }
+
     const sort: T =
       inquiry.order === "productPrice"
         ? { [inquiry.order]: 1 }
