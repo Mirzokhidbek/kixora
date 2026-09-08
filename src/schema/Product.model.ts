@@ -30,6 +30,14 @@ const productSchema = new Schema(
       type: Number,
       required: true,
     },
+    productSizes: {
+      type: [Number],
+      default: [38, 39, 40, 41, 42, 43, 44, 45],
+    },
+    productColors: {
+      type: [String],
+      default: ["Black", "White"],
+    },
     productSize: {
       type: String,
       enum: ProductSize,
@@ -56,8 +64,9 @@ const productSchema = new Schema(
 );
 
 productSchema.index(
-  { productName: 1, productSize: 1, productVolume: 1 },
-  { unique: true }
+  { productName: 1, productCollection: 1 },
+  { unique: false }
 );
 
 export default mongoose.model("Product", productSchema);
+
