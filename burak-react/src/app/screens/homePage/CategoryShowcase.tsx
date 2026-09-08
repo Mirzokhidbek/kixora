@@ -11,29 +11,25 @@ export function CategoryShowcase() {
       title: "Sneakers",
       tagline: "Street & Performance",
       collection: ProductCollection.SNEAKERS,
-      bgColor: "#111827",
-      textColor: "#ffffff",
+      image: "/img/kixora/sneakers.jpg",
     },
     {
       title: "Running",
-      tagline: "Ultra Lightweight",
+      tagline: "Ultra Lightweight Foam",
       collection: ProductCollection.RUNNING,
-      bgColor: "#f3f4f6",
-      textColor: "#111827",
+      image: "/img/kixora/running.jpg",
     },
     {
       title: "Boots",
-      tagline: "All-Weather Durability",
+      tagline: "Tactical & All-Weather",
       collection: ProductCollection.BOOTS,
-      bgColor: "#1f2937",
-      textColor: "#ffffff",
+      image: "/img/kixora/boots.jpg",
     },
     {
       title: "Limited Drop",
-      tagline: "Exclusive Releases",
+      tagline: "Rare Concepts & VIP",
       collection: ProductCollection.LIMITED_DROP,
-      bgColor: "#000000",
-      textColor: "#ffffff",
+      image: "/img/kixora/limited.jpg",
     },
   ];
 
@@ -51,7 +47,7 @@ export function CategoryShowcase() {
               fontSize: "0.78rem",
             }}
           >
-            COLLECTIONS
+            CURATED COLLECTIONS
           </Typography>
           <Typography
             variant="h3"
@@ -73,35 +69,71 @@ export function CategoryShowcase() {
               <Card
                 onClick={() => navigate(`/products`)}
                 sx={{
-                  bgcolor: cat.bgColor,
-                  color: cat.textColor,
+                  position: "relative",
                   borderRadius: 4,
-                  p: 3.5,
-                  minHeight: 180,
+                  minHeight: 260,
                   display: "flex",
                   flexDirection: "column",
-                  justifyContent: "space-between",
+                  justifyContent: "flex-end",
+                  p: 3,
                   cursor: "pointer",
-                  transition: "all 0.25s ease",
-                  border: cat.bgColor === "#ffffff" ? "1px solid #e5e7eb" : "none",
+                  overflow: "hidden",
+                  border: "1px solid #e5e7eb",
+                  boxShadow: "0 4px 14px rgba(0,0,0,0.04)",
+                  transition: "all 0.3s ease",
                   "&:hover": {
-                    transform: "translateY(-4px)",
-                    boxShadow: "0 12px 30px rgba(0,0,0,0.15)",
+                    transform: "translateY(-6px)",
+                    boxShadow: "0 16px 36px rgba(0,0,0,0.18)",
+                    "& .cat-bg": {
+                      transform: "scale(1.08)",
+                    },
                   },
                 }}
               >
-                <Box>
-                  <Typography variant="caption" sx={{ opacity: 0.7, fontWeight: 700, letterSpacing: "0.08em" }}>
+                {/* Background High-Res Image */}
+                <Box
+                  className="cat-bg"
+                  component="img"
+                  src={cat.image}
+                  alt={cat.title}
+                  sx={{
+                    position: "absolute",
+                    top: 0,
+                    left: 0,
+                    width: "100%",
+                    height: "100%",
+                    objectFit: "cover",
+                    transition: "transform 0.4s ease",
+                    zIndex: 0,
+                  }}
+                />
+
+                {/* Dark Vignette Overlay for Text Readability */}
+                <Box
+                  sx={{
+                    position: "absolute",
+                    top: 0,
+                    left: 0,
+                    width: "100%",
+                    height: "100%",
+                    background: "linear-gradient(to top, rgba(0,0,0,0.85) 0%, rgba(0,0,0,0.2) 60%, transparent 100%)",
+                    zIndex: 1,
+                  }}
+                />
+
+                {/* Foreground Content */}
+                <Box sx={{ position: "relative", zIndex: 2, color: "#ffffff" }}>
+                  <Typography variant="caption" sx={{ color: "#d1d5db", fontWeight: 700, letterSpacing: "0.08em", fontSize: "0.75rem" }}>
                     {cat.tagline}
                   </Typography>
-                  <Typography variant="h5" sx={{ fontWeight: 900, mt: 0.5 }}>
+                  <Typography variant="h5" sx={{ fontWeight: 900, mb: 1, textShadow: "0 2px 8px rgba(0,0,0,0.6)" }}>
                     {cat.title}
                   </Typography>
-                </Box>
 
-                <Box sx={{ display: "flex", alignItems: "center", gap: 0.8, fontWeight: 800, fontSize: "0.88rem" }}>
-                  <span>Explore</span>
-                  <ArrowForwardIcon sx={{ fontSize: 16 }} />
+                  <Box sx={{ display: "flex", alignItems: "center", gap: 0.8, fontWeight: 800, fontSize: "0.85rem", color: "#ffffff" }}>
+                    <span>Explore Drop</span>
+                    <ArrowForwardIcon sx={{ fontSize: 16 }} />
+                  </Box>
                 </Box>
               </Card>
             </Grid>
