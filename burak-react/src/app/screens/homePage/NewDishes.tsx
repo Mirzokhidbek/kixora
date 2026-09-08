@@ -24,51 +24,14 @@ export function NewDishes({ onAdd }: NewDishesProps) {
   const navigate = useNavigate();
   const newDishes = useSelector(retrieveNewDishes);
 
-  const defaultNewDishes = [
-    {
-      _id: "new-1",
-      productName: "Hatay Kunefe with Buffalo Cream",
-      productPrice: 16.5,
-      productImages: [
-        "https://images.unsplash.com/photo-1579372786545-d24232daf58c?auto=format&fit=crop&w=800&q=80",
-      ],
-      productDesc: "Crisp shredded phyllo dough layered with molten Hatay cheese, soaked in warm syrup.",
-    },
-    {
-      _id: "new-2",
-      productName: "Traditional Ottoman Foamy Ayran",
-      productPrice: 5.0,
-      productImages: [
-        "https://images.unsplash.com/photo-1628088062854-d1870b4553da?auto=format&fit=crop&w=800&q=80",
-      ],
-      productDesc: "Served chilled in handcrafted authentic copper mugs with rich mountain mint.",
-    },
-    {
-      _id: "new-3",
-      productName: "Aegean Cold Mezze Platter",
-      productPrice: 22.0,
-      productImages: [
-        "https://images.unsplash.com/photo-1541544741938-0af808871cc0?auto=format&fit=crop&w=800&q=80",
-      ],
-      productDesc: "Hummus with pastirma, smoky mutabal, spicy ezme, and freshly baked lavash.",
-    },
-    {
-      _id: "new-4",
-      productName: "Black Sea Saffron Brewed Tea",
-      productPrice: 4.0,
-      productImages: [
-        "https://images.unsplash.com/photo-1576092768241-dec231879fc3?auto=format&fit=crop&w=800&q=80",
-      ],
-      productDesc: "Double-tiered samovar brewed Turkish tea with natural saffron and sugar crystals.",
-    },
-  ];
-
-  const dishes = newDishes.length ? newDishes : defaultNewDishes;
-
-  const getImageSrc = (img: string) => {
-    if (!img) return "https://images.unsplash.com/photo-1544025162-d76694265947?auto=format&fit=crop&w=800&q=80";
+  const getImageSrc = (img?: string) => {
+    if (!img) return "";
     return img.startsWith("http") ? img : `${serverApi}/${img}`;
   };
+
+  if (!newDishes || newDishes.length === 0) {
+    return null;
+  }
 
   return (
     <Box sx={{ py: 9, bgcolor: "#fbfbfe" }}>
@@ -91,7 +54,7 @@ export function NewDishes({ onAdd }: NewDishesProps) {
 
         {/* Dishes Grid */}
         <Grid container spacing={3.5}>
-          {dishes.map((dish) => (
+          {newDishes.map((dish) => (
             <Grid key={dish._id} size={{ xs: 12, sm: 6, md: 3 }}>
               <Card
                 sx={{

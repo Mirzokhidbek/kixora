@@ -1,8 +1,20 @@
+import { useSelector } from "react-redux";
 import { Box, Container, Typography, Button, Grid } from "@mui/material";
 import PlayCircleFilledWhiteIcon from "@mui/icons-material/PlayCircleFilledWhite";
 import WhatsAppIcon from "@mui/icons-material/WhatsApp";
+import LocalFireDepartmentIcon from "@mui/icons-material/LocalFireDepartment";
+import { retrievePopularDishes } from "./selector";
+import { serverApi } from "../../../lib/config";
 
 export function Advertisement() {
+  const popularDishes = useSelector(retrievePopularDishes);
+  const featuredDish = popularDishes?.[0];
+  const featuredImage = featuredDish?.productImages?.[0]
+    ? featuredDish.productImages[0].startsWith("http")
+      ? featuredDish.productImages[0]
+      : `${serverApi}/${featuredDish.productImages[0]}`
+    : "";
+
   return (
     <Box sx={{ py: 8 }}>
       <Container maxWidth="lg">
@@ -60,14 +72,31 @@ export function Advertisement() {
                   overflow: "hidden",
                   boxShadow: "0 16px 40px rgba(0,0,0,0.5)",
                   border: "2px solid rgba(255,255,255,0.1)",
+                  height: 320,
+                  bgcolor: "#0f172a",
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
                 }}
               >
-                <Box
-                  component="img"
-                  src="https://images.unsplash.com/photo-1544025162-d76694265947?auto=format&fit=crop&w=800&q=80"
-                  alt="Burak Fire Show"
-                  sx={{ width: "100%", height: 320, objectFit: "cover" }}
-                />
+                {featuredImage ? (
+                  <Box
+                    component="img"
+                    src={featuredImage}
+                    alt={featuredDish?.productName || "Burak Fire Show"}
+                    sx={{ width: "100%", height: "100%", objectFit: "cover" }}
+                  />
+                ) : (
+                  <Box sx={{ textAlign: "center", p: 3 }}>
+                    <LocalFireDepartmentIcon sx={{ fontSize: 64, color: "#f59e0b", mb: 1.5 }} />
+                    <Typography variant="h6" sx={{ fontWeight: 800, color: "#fff" }}>
+                      BURAK SIGNATURE SHOW
+                    </Typography>
+                    <Typography variant="body2" sx={{ color: "#94a3b8", mt: 0.5 }}>
+                      Live Open-Fire Turkish Gastronomy
+                    </Typography>
+                  </Box>
+                )}
               </Box>
             </Grid>
           </Grid>

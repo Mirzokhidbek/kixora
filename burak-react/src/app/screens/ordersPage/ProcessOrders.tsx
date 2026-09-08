@@ -25,7 +25,7 @@ export function ProcessOrders() {
   };
 
   const getImageSrc = (img?: string) => {
-    if (!img) return "https://images.unsplash.com/photo-1558030006-450675393462?auto=format&fit=crop&w=150&q=80";
+    if (!img) return "";
     return img.startsWith("http") ? img : `${serverApi}/${img}`;
   };
 

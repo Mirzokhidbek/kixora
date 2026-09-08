@@ -44,8 +44,8 @@ export function BasketDrawer({
   const delivery = subtotal > 0 && subtotal < 100 ? 5 : 0;
   const grandTotal = subtotal + delivery;
 
-  const getImageSrc = (img: string) => {
-    if (!img) return "https://images.unsplash.com/photo-1558030006-450675393462?auto=format&fit=crop&w=150&q=80";
+  const getImageSrc = (img?: string) => {
+    if (!img) return "";
     return img.startsWith("http") ? img : `${serverApi}/${img}`;
   };
 

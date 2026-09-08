@@ -16,13 +16,9 @@
         - `cors({ credentials: true, origin: true })`
         - Brauzer xavfsizlik siyosati tufayli turli xil portlardagi (React `http://localhost:8080` va Node backend `http://localhost:3001`) so'rovlarning cookie va headerlar bilan to'siqsiz almashinishini ta'minlaydi.
 
-  - Standard Registration & Authentication System (Dars 101):
-      1. Clean Standard Login (`Login`):
-         - `memberNick` va `memberPassword` bilan kirish.
-         - Parol ko'rinishini boshqarish (`VisibilityToggle`).
-         - `Enter` tugmasi bilan tezkor tasdiqlash.
-      2. Clean Standard Registration (`Signup`):
-         - `memberNick`, `memberPhone`, `memberPassword` va `confirmPassword`.
-         - Validatsiyalar: Bo'sh maydonlar, minimal 4 belgili parol va parollar mosligi tekshiriladi.
-         - Agar telefon yoki taxallus bazada oldin mavjud bo'lsa (`400 Duplicate Key`), tizim buni xushmuomala xabar bilan ko'rsatib, to'g'ridan-to'g'ri `Login` tabiga o'tish tugmasini chiqaradi.
+  - 100% Database-Driven Dynamic Menu Architecture (Dars 103):
+      1. Zero Hardcoded Dummy Data:
+         - Barcha frontend sahifalaridagi (`PopularDishes.tsx`, `NewDishes.tsx`, `Products.tsx`) qo'lda yozilgan `defaultDishes` va `defaultProducts` massivlari to'liq olib tashlandi.
+      2. Pure Live Database Fetching:
+         - Frontend faqat va faqat Admin panel (`http://localhost:3001/admin`) orqali MongoDB Atlas bazasiga kiritilgan haqiqiy taomlarni API orqali olib keladi va namoyish etadi.
 */

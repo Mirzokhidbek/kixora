@@ -18,31 +18,11 @@ import { serverApi } from "../../../lib/config";
 export function ActiveUsers() {
   const topUsers = useSelector(retrieveTopUsers);
 
-  const defaultUsers = [
-    {
-      _id: "u-1",
-      memberNick: "Alexandr Petrov",
-      memberPoints: 850,
-      memberDesc: "The 45-day dry-aged Tomahawk show is unbelievable. The texture and butter aroma are unmatched!",
-      memberImage: "https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=150&q=80",
-    },
-    {
-      _id: "u-2",
-      memberNick: "Malika Karimova",
-      memberPoints: 620,
-      memberDesc: "Baklava with fresh Gaziantep pistachios and Maraş ice cream is the best dessert in town.",
-      memberImage: "https://images.unsplash.com/photo-1517841905240-472988babdf9?auto=format&fit=crop&w=150&q=80",
-    },
-    {
-      _id: "u-3",
-      memberNick: "Sardor Rakhimov",
-      memberPoints: 490,
-      memberDesc: "Fast VIP delivery, food arrived piping hot in thermal packaging. 10/10 service!",
-      memberImage: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=150&q=80",
-    },
-  ];
+  if (!topUsers || topUsers.length === 0) {
+    return null;
+  }
 
-  const users = topUsers.length ? topUsers : defaultUsers;
+  const users = topUsers;
 
   const getImageSrc = (img?: string) => {
     if (!img) return "";
