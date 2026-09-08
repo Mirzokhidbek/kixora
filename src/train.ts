@@ -24,5 +24,5 @@
       2. Clean Standard Registration (`Signup`):
          - `memberNick`, `memberPhone`, `memberPassword` va `confirmPassword`.
          - Validatsiyalar: Bo'sh maydonlar, minimal 4 belgili parol va parollar mosligi tekshiriladi.
-         - Agar Nickname band bo'lsa, xato xabari ostida to'g'ridan-to'g'ri `Login` tugmasi orqali kirishga o'tkazadi.
+         - Agar telefon yoki taxallus bazada oldin mavjud bo'lsa (`400 Duplicate Key`), tizim buni xushmuomala xabar bilan ko'rsatib, to'g'ridan-to'g'ri `Login` tabiga o'tish tugmasini chiqaradi.
 */

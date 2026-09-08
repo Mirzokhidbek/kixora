@@ -68,49 +68,34 @@ class MemberService {
   }
 
   public async login(input: LoginInput): Promise<Member> {
-    try {
-      const url = `${this.path}/member/login`;
-      const result = await axios.post(url, input, { withCredentials: true });
-      if (result.data.accessToken) {
-        localStorage.setItem("access_token", result.data.accessToken);
-      }
-      return result.data.member;
-    } catch (err) {
-      console.log("Error, login:", err);
-      throw err;
+    const url = `${this.path}/member/login`;
+    const result = await axios.post(url, input, { withCredentials: true });
+    if (result.data.accessToken) {
+      localStorage.setItem("access_token", result.data.accessToken);
     }
+    return result.data.member;
   }
 
   public async googleLogin(credential: string, userData?: any): Promise<Member> {
-    try {
-      const url = `${this.path}/member/google-login`;
-      const result = await axios.post(
-        url,
-        { credential, userData },
-        { withCredentials: true }
-      );
-      if (result.data.accessToken) {
-        localStorage.setItem("access_token", result.data.accessToken);
-      }
-      return result.data.member;
-    } catch (err) {
-      console.log("Error, googleLogin:", err);
-      throw err;
+    const url = `${this.path}/member/google-login`;
+    const result = await axios.post(
+      url,
+      { credential, userData },
+      { withCredentials: true }
+    );
+    if (result.data.accessToken) {
+      localStorage.setItem("access_token", result.data.accessToken);
     }
+    return result.data.member;
   }
 
   public async signup(input: MemberInput): Promise<Member> {
-    try {
-      const url = `${this.path}/member/signup`;
-      const result = await axios.post(url, input, { withCredentials: true });
-      if (result.data.accessToken) {
-        localStorage.setItem("access_token", result.data.accessToken);
-      }
-      return result.data.member;
-    } catch (err) {
-      console.log("Error, signup:", err);
-      throw err;
+    const url = `${this.path}/member/signup`;
+    const result = await axios.post(url, input, { withCredentials: true });
+    if (result.data.accessToken) {
+      localStorage.setItem("access_token", result.data.accessToken);
     }
+    return result.data.member;
   }
 
   public async logout(): Promise<boolean> {
@@ -119,10 +104,9 @@ class MemberService {
       const url = `${this.path}/member/logout`;
       const result = await axios.post(url, {}, { withCredentials: true });
       return result.data.logout;
-    } catch (err) {
+    } catch {
       localStorage.removeItem("access_token");
-      console.log("Error, logout:", err);
-      throw err;
+      return true;
     }
   }
 }
