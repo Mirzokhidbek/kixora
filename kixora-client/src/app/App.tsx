@@ -10,7 +10,7 @@
 
 import { useState, useEffect } from "react";
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
-import { ThemeProvider, CssBaseline, Box, Snackbar, Alert } from "@mui/material";
+import { ThemeProvider, CssBaseline, Box } from "@mui/material";
 import customTheme from "./MaterialTheme/theme";
 
 import { Navbar } from "./components/headers/Navbar";

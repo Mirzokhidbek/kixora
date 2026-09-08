@@ -273,21 +273,29 @@ export function Navbar({
                           color: "#111827",
                           borderRadius: 3,
                           border: "1px solid #e5e7eb",
-                          minWidth: 190,
+                          minWidth: 210,
                           boxShadow: "0 10px 30px rgba(0,0,0,0.08)",
-                          p: 0.5,
+                          p: 1,
                         },
                       },
                     }}
                   >
+                    <Box sx={{ px: 1.5, py: 1, borderBottom: "1px solid #f3f4f6", mb: 0.5 }}>
+                      <Typography variant="subtitle2" sx={{ fontWeight: 800, color: "#111827", lineHeight: 1.2 }}>
+                        {member.memberNick}
+                      </Typography>
+                      <Typography variant="caption" sx={{ color: "#6b7280", display: "block", mt: 0.2 }}>
+                        {member.memberEmail || member.memberPhone || ""}
+                      </Typography>
+                    </Box>
                     <MenuItem
                       onClick={() => {
                         handleMenuClose();
                         navigate("/user");
                       }}
-                      sx={{ borderRadius: 2, fontWeight: 600, fontSize: "0.9rem", py: 1 }}
+                      sx={{ borderRadius: 2, fontWeight: 600, fontSize: "0.88rem", py: 1 }}
                     >
-                      <PersonOutlineOutlinedIcon sx={{ mr: 1.5, fontSize: 20 }} /> My Profile
+                      <PersonOutlineOutlinedIcon sx={{ mr: 1.5, fontSize: 19 }} /> My Profile
                     </MenuItem>
                     <MenuItem
                       onClick={() => {
