@@ -172,33 +172,33 @@ export function AuthModal({ open, onClose, onSuccess }: AuthModalProps) {
     <Dialog
       open={open}
       onClose={loading ? undefined : onClose}
-      maxWidth="md"
+      maxWidth="sm"
       fullWidth
       slotProps={{
         paper: {
           sx: {
-            borderRadius: "20px",
+            borderRadius: "16px",
             bgcolor: "#ffffff",
             color: "#111827",
             overflow: "hidden",
-            boxShadow: "0 30px 90px rgba(0, 0, 0, 0.35)",
-            maxWidth: 890,
-            m: { xs: 2, sm: 3 },
+            boxShadow: "0 25px 70px rgba(0, 0, 0, 0.3)",
+            maxWidth: 720,
+            m: { xs: 1.5, sm: 2 },
           },
         },
       }}
     >
       <DialogContent sx={{ p: 0, overflow: "hidden" }} onKeyDown={handleKeyDown}>
-        <Box sx={{ display: "flex", minHeight: { xs: "auto", md: 590 } }}>
+        <Box sx={{ display: "flex", minHeight: { xs: "auto", md: 470 } }}>
           {/* Left Column: Dark Sneaker Brand Showcase */}
           <Box
             sx={{
               display: { xs: "none", md: "flex" },
-              width: "44%",
+              width: "42%",
               position: "relative",
               flexDirection: "column",
               justifyContent: "space-between",
-              p: 4.5,
+              p: 3,
               bgcolor: "#050505",
               color: "#ffffff",
               overflow: "hidden",
@@ -242,7 +242,7 @@ export function AuthModal({ open, onClose, onSuccess }: AuthModalProps) {
                 src="/img/kixora/logo.png"
                 alt="KIXORA"
                 sx={{
-                  height: 36,
+                  height: 26,
                   width: "auto",
                   objectFit: "contain",
                   filter: "brightness(0) invert(1)",
@@ -257,11 +257,11 @@ export function AuthModal({ open, onClose, onSuccess }: AuthModalProps) {
                 sx={{
                   fontFamily: '"Outfit", sans-serif',
                   fontWeight: 900,
-                  fontSize: "2rem",
+                  fontSize: "1.45rem",
                   lineHeight: 1.15,
                   letterSpacing: "-0.02em",
                   color: "#ffffff",
-                  mb: 1.2,
+                  mb: 0.6,
                 }}
               >
                 Step Into <br /> More
@@ -271,10 +271,10 @@ export function AuthModal({ open, onClose, onSuccess }: AuthModalProps) {
                 variant="body2"
                 sx={{
                   color: "#9ca3af",
-                  lineHeight: 1.6,
-                  fontSize: "0.88rem",
-                  mb: 3.5,
-                  maxWidth: 260,
+                  lineHeight: 1.45,
+                  fontSize: "0.76rem",
+                  mb: 2,
+                  maxWidth: 220,
                 }}
               >
                 Premium shoes for every journey. Style. Comfort. Performance.
@@ -285,10 +285,10 @@ export function AuthModal({ open, onClose, onSuccess }: AuthModalProps) {
                 sx={{
                   display: "inline-flex",
                   alignItems: "center",
-                  gap: 1.2,
+                  gap: 1,
                   color: "#ffffff",
                   fontWeight: 600,
-                  fontSize: "0.85rem",
+                  fontSize: "0.78rem",
                   cursor: "pointer",
                   transition: "opacity 0.2s ease",
                   "&:hover": { opacity: 0.8 },
@@ -297,8 +297,8 @@ export function AuthModal({ open, onClose, onSuccess }: AuthModalProps) {
                 <span>&mdash; Explore Collection</span>
                 <Box
                   sx={{
-                    width: 26,
-                    height: 26,
+                    width: 22,
+                    height: 22,
                     borderRadius: "50%",
                     border: "1px solid rgba(255,255,255,0.4)",
                     display: "flex",
@@ -306,7 +306,7 @@ export function AuthModal({ open, onClose, onSuccess }: AuthModalProps) {
                     justifyContent: "center",
                   }}
                 >
-                  <ArrowForwardIcon sx={{ fontSize: 13 }} />
+                  <ArrowForwardIcon sx={{ fontSize: 11 }} />
                 </Box>
               </Box>
             </Box>
@@ -315,8 +315,8 @@ export function AuthModal({ open, onClose, onSuccess }: AuthModalProps) {
           {/* Right Column: Clean Auth Form */}
           <Box
             sx={{
-              width: { xs: "100%", md: "56%" },
-              p: { xs: 3.5, sm: 5 },
+              width: { xs: "100%", md: "58%" },
+              p: { xs: 2.5, sm: 3 },
               display: "flex",
               flexDirection: "column",
               justifyContent: "space-between",
@@ -330,11 +330,11 @@ export function AuthModal({ open, onClose, onSuccess }: AuthModalProps) {
                 display: "flex",
                 justifyContent: "flex-end",
                 alignItems: "center",
-                gap: 2,
-                mb: 3,
+                gap: 1.5,
+                mb: 1.5,
               }}
             >
-              <Typography variant="body2" sx={{ color: "#6b7280", fontSize: "0.82rem" }}>
+              <Typography variant="body2" sx={{ color: "#6b7280", fontSize: "0.78rem" }}>
                 {activeTab === "login" ? "Don't have an account? " : "Already have an account? "}
                 <Typography
                   component="span"
@@ -342,7 +342,7 @@ export function AuthModal({ open, onClose, onSuccess }: AuthModalProps) {
                     color: "#a67c52",
                     cursor: "pointer",
                     fontWeight: 700,
-                    fontSize: "0.82rem",
+                    fontSize: "0.78rem",
                     "&:hover": { textDecoration: "underline" },
                   }}
                   onClick={() => handleTabSwitch(activeTab === "login" ? "signup" : "login")}
@@ -357,37 +357,38 @@ export function AuthModal({ open, onClose, onSuccess }: AuthModalProps) {
                 size="small"
                 sx={{
                   color: "#9ca3af",
+                  p: 0.5,
                   "&:hover": { color: "#000000", bgcolor: "#f3f4f6" },
                 }}
               >
-                <CloseIcon fontSize="small" />
+                <CloseIcon sx={{ fontSize: 18 }} />
               </IconButton>
             </Box>
 
             {/* Form Inner Content */}
-            <Box sx={{ maxWidth: 360, width: "100%", mx: "auto" }}>
+            <Box sx={{ maxWidth: 310, width: "100%", mx: "auto" }}>
               {/* Heading */}
-              <Box sx={{ mb: 3 }}>
+              <Box sx={{ mb: 1.8 }}>
                 <Typography
                   variant="h4"
                   sx={{
                     fontFamily: '"Outfit", sans-serif',
                     fontWeight: 800,
                     color: "#111827",
-                    fontSize: "1.75rem",
+                    fontSize: "1.35rem",
                     letterSpacing: "-0.02em",
-                    mb: 0.6,
+                    mb: 0.3,
                   }}
                 >
                   {activeTab === "login" ? "Welcome Back" : "Create Account"}
                 </Typography>
                 <Typography
                   variant="body2"
-                  sx={{ color: "#6b7280", fontSize: "0.86rem", lineHeight: 1.5 }}
+                  sx={{ color: "#6b7280", fontSize: "0.78rem", lineHeight: 1.4 }}
                 >
                   {activeTab === "login"
                     ? "Log in to your Kixora account"
-                    : "Join Kixora and get exclusive offers, new arrivals and more."}
+                    : "Join Kixora and get exclusive offers and new arrivals."}
                 </Typography>
               </Box>
 
@@ -395,7 +396,7 @@ export function AuthModal({ open, onClose, onSuccess }: AuthModalProps) {
               {errorMsg && (
                 <Alert
                   severity={errorMsg.includes("registered") ? "info" : "error"}
-                  sx={{ mb: 2, borderRadius: "10px", fontSize: "0.82rem", fontWeight: 600 }}
+                  sx={{ mb: 1.5, py: 0.2, px: 1.2, borderRadius: "8px", fontSize: "0.76rem", fontWeight: 600 }}
                 >
                   {errorMsg}
                 </Alert>
@@ -405,7 +406,7 @@ export function AuthModal({ open, onClose, onSuccess }: AuthModalProps) {
                 <Alert
                   icon={<CheckCircleIcon fontSize="inherit" />}
                   severity="success"
-                  sx={{ mb: 2, borderRadius: "10px", fontSize: "0.84rem", fontWeight: 700 }}
+                  sx={{ mb: 1.5, py: 0.2, px: 1.2, borderRadius: "8px", fontSize: "0.78rem", fontWeight: 700 }}
                 >
                   {successMsg}
                 </Alert>
@@ -413,11 +414,11 @@ export function AuthModal({ open, onClose, onSuccess }: AuthModalProps) {
 
               {/* 1. LOGIN FORM */}
               {activeTab === "login" && (
-                <Stack spacing={2}>
+                <Stack spacing={1.4}>
                   <Box>
                     <Typography
                       variant="caption"
-                      sx={{ fontWeight: 600, color: "#374151", mb: 0.6, display: "block", fontSize: "0.82rem" }}
+                      sx={{ fontWeight: 600, color: "#374151", mb: 0.3, display: "block", fontSize: "0.76rem" }}
                     >
                       Email address
                     </Typography>
@@ -431,19 +432,20 @@ export function AuthModal({ open, onClose, onSuccess }: AuthModalProps) {
                       autoFocus
                       sx={{
                         "& .MuiOutlinedInput-root": {
-                          borderRadius: "10px",
+                          borderRadius: "8px",
                           bgcolor: "#fcfcfd",
-                          fontSize: "0.88rem",
+                          fontSize: "0.82rem",
                           "& fieldset": { borderColor: "#e5e7eb" },
                           "&:hover fieldset": { borderColor: "#d1d5db" },
                           "&.Mui-focused fieldset": { borderColor: "#111827" },
                         },
+                        "& .MuiInputBase-input": { py: 0.8 },
                       }}
                       slotProps={{
                         input: {
                           startAdornment: (
                             <InputAdornment position="start">
-                              <EmailOutlinedIcon sx={{ color: "#9ca3af", fontSize: 18 }} />
+                              <EmailOutlinedIcon sx={{ color: "#9ca3af", fontSize: 16 }} />
                             </InputAdornment>
                           ),
                         },
@@ -454,7 +456,7 @@ export function AuthModal({ open, onClose, onSuccess }: AuthModalProps) {
                   <Box>
                     <Typography
                       variant="caption"
-                      sx={{ fontWeight: 600, color: "#374151", mb: 0.6, display: "block", fontSize: "0.82rem" }}
+                      sx={{ fontWeight: 600, color: "#374151", mb: 0.3, display: "block", fontSize: "0.76rem" }}
                     >
                       Password
                     </Typography>
@@ -468,19 +470,20 @@ export function AuthModal({ open, onClose, onSuccess }: AuthModalProps) {
                       disabled={loading}
                       sx={{
                         "& .MuiOutlinedInput-root": {
-                          borderRadius: "10px",
+                          borderRadius: "8px",
                           bgcolor: "#fcfcfd",
-                          fontSize: "0.88rem",
+                          fontSize: "0.82rem",
                           "& fieldset": { borderColor: "#e5e7eb" },
                           "&:hover fieldset": { borderColor: "#d1d5db" },
                           "&.Mui-focused fieldset": { borderColor: "#111827" },
                         },
+                        "& .MuiInputBase-input": { py: 0.8 },
                       }}
                       slotProps={{
                         input: {
                           startAdornment: (
                             <InputAdornment position="start">
-                              <LockOutlinedIcon sx={{ color: "#9ca3af", fontSize: 18 }} />
+                              <LockOutlinedIcon sx={{ color: "#9ca3af", fontSize: 16 }} />
                             </InputAdornment>
                           ),
                           endAdornment: (
@@ -489,12 +492,12 @@ export function AuthModal({ open, onClose, onSuccess }: AuthModalProps) {
                                 onClick={() => setShowPassword(!showPassword)}
                                 edge="end"
                                 size="small"
-                                sx={{ color: "#9ca3af" }}
+                                sx={{ color: "#9ca3af", p: 0.4 }}
                               >
                                 {showPassword ? (
-                                  <VisibilityOffOutlinedIcon fontSize="small" />
+                                  <VisibilityOffOutlinedIcon sx={{ fontSize: 16 }} />
                                 ) : (
-                                  <VisibilityOutlinedIcon fontSize="small" />
+                                  <VisibilityOutlinedIcon sx={{ fontSize: 16 }} />
                                 )}
                               </IconButton>
                             </InputAdornment>
@@ -502,14 +505,14 @@ export function AuthModal({ open, onClose, onSuccess }: AuthModalProps) {
                         },
                       }}
                     />
-                    <Box sx={{ textAlign: "right", mt: 0.8 }}>
+                    <Box sx={{ textAlign: "right", mt: 0.4 }}>
                       <Typography
                         variant="caption"
                         sx={{
                           color: "#6b7280",
                           cursor: "pointer",
                           fontWeight: 500,
-                          fontSize: "0.78rem",
+                          fontSize: "0.72rem",
                           "&:hover": { color: "#111827" },
                         }}
                       >
@@ -524,10 +527,10 @@ export function AuthModal({ open, onClose, onSuccess }: AuthModalProps) {
                     onClick={handleLogin}
                     disabled={loading}
                     sx={{
-                      py: 1.3,
-                      borderRadius: "10px",
+                      py: 0.9,
+                      borderRadius: "8px",
                       fontWeight: 700,
-                      fontSize: "0.92rem",
+                      fontSize: "0.85rem",
                       bgcolor: "#111827",
                       color: "#ffffff",
                       textTransform: "none",
@@ -535,18 +538,18 @@ export function AuthModal({ open, onClose, onSuccess }: AuthModalProps) {
                       "&:hover": { bgcolor: "#000000", boxShadow: "none" },
                     }}
                   >
-                    {loading ? <CircularProgress size={22} color="inherit" /> : "Log In"}
+                    {loading ? <CircularProgress size={18} color="inherit" /> : "Log In"}
                   </Button>
                 </Stack>
               )}
 
               {/* 2. SIGNUP FORM */}
               {activeTab === "signup" && (
-                <Stack spacing={1.8}>
+                <Stack spacing={1.2}>
                   <Box>
                     <Typography
                       variant="caption"
-                      sx={{ fontWeight: 600, color: "#374151", mb: 0.5, display: "block", fontSize: "0.82rem" }}
+                      sx={{ fontWeight: 600, color: "#374151", mb: 0.3, display: "block", fontSize: "0.76rem" }}
                     >
                       Full name
                     </Typography>
@@ -560,19 +563,20 @@ export function AuthModal({ open, onClose, onSuccess }: AuthModalProps) {
                       autoFocus
                       sx={{
                         "& .MuiOutlinedInput-root": {
-                          borderRadius: "10px",
+                          borderRadius: "8px",
                           bgcolor: "#fcfcfd",
-                          fontSize: "0.88rem",
+                          fontSize: "0.82rem",
                           "& fieldset": { borderColor: "#e5e7eb" },
                           "&:hover fieldset": { borderColor: "#d1d5db" },
                           "&.Mui-focused fieldset": { borderColor: "#111827" },
                         },
+                        "& .MuiInputBase-input": { py: 0.8 },
                       }}
                       slotProps={{
                         input: {
                           startAdornment: (
                             <InputAdornment position="start">
-                              <PersonOutlineOutlinedIcon sx={{ color: "#9ca3af", fontSize: 18 }} />
+                              <PersonOutlineOutlinedIcon sx={{ color: "#9ca3af", fontSize: 16 }} />
                             </InputAdornment>
                           ),
                         },
@@ -583,7 +587,7 @@ export function AuthModal({ open, onClose, onSuccess }: AuthModalProps) {
                   <Box>
                     <Typography
                       variant="caption"
-                      sx={{ fontWeight: 600, color: "#374151", mb: 0.5, display: "block", fontSize: "0.82rem" }}
+                      sx={{ fontWeight: 600, color: "#374151", mb: 0.3, display: "block", fontSize: "0.76rem" }}
                     >
                       Email address
                     </Typography>
@@ -596,19 +600,20 @@ export function AuthModal({ open, onClose, onSuccess }: AuthModalProps) {
                       disabled={loading}
                       sx={{
                         "& .MuiOutlinedInput-root": {
-                          borderRadius: "10px",
+                          borderRadius: "8px",
                           bgcolor: "#fcfcfd",
-                          fontSize: "0.88rem",
+                          fontSize: "0.82rem",
                           "& fieldset": { borderColor: "#e5e7eb" },
                           "&:hover fieldset": { borderColor: "#d1d5db" },
                           "&.Mui-focused fieldset": { borderColor: "#111827" },
                         },
+                        "& .MuiInputBase-input": { py: 0.8 },
                       }}
                       slotProps={{
                         input: {
                           startAdornment: (
                             <InputAdornment position="start">
-                              <EmailOutlinedIcon sx={{ color: "#9ca3af", fontSize: 18 }} />
+                              <EmailOutlinedIcon sx={{ color: "#9ca3af", fontSize: 16 }} />
                             </InputAdornment>
                           ),
                         },
@@ -619,7 +624,7 @@ export function AuthModal({ open, onClose, onSuccess }: AuthModalProps) {
                   <Box>
                     <Typography
                       variant="caption"
-                      sx={{ fontWeight: 600, color: "#374151", mb: 0.5, display: "block", fontSize: "0.82rem" }}
+                      sx={{ fontWeight: 600, color: "#374151", mb: 0.3, display: "block", fontSize: "0.76rem" }}
                     >
                       Password
                     </Typography>
@@ -633,19 +638,20 @@ export function AuthModal({ open, onClose, onSuccess }: AuthModalProps) {
                       disabled={loading}
                       sx={{
                         "& .MuiOutlinedInput-root": {
-                          borderRadius: "10px",
+                          borderRadius: "8px",
                           bgcolor: "#fcfcfd",
-                          fontSize: "0.88rem",
+                          fontSize: "0.82rem",
                           "& fieldset": { borderColor: "#e5e7eb" },
                           "&:hover fieldset": { borderColor: "#d1d5db" },
                           "&.Mui-focused fieldset": { borderColor: "#111827" },
                         },
+                        "& .MuiInputBase-input": { py: 0.8 },
                       }}
                       slotProps={{
                         input: {
                           startAdornment: (
                             <InputAdornment position="start">
-                              <LockOutlinedIcon sx={{ color: "#9ca3af", fontSize: 18 }} />
+                              <LockOutlinedIcon sx={{ color: "#9ca3af", fontSize: 16 }} />
                             </InputAdornment>
                           ),
                           endAdornment: (
@@ -654,12 +660,12 @@ export function AuthModal({ open, onClose, onSuccess }: AuthModalProps) {
                                 onClick={() => setShowPassword(!showPassword)}
                                 edge="end"
                                 size="small"
-                                sx={{ color: "#9ca3af" }}
+                                sx={{ color: "#9ca3af", p: 0.4 }}
                               >
                                 {showPassword ? (
-                                  <VisibilityOffOutlinedIcon fontSize="small" />
+                                  <VisibilityOffOutlinedIcon sx={{ fontSize: 16 }} />
                                 ) : (
-                                  <VisibilityOutlinedIcon fontSize="small" />
+                                  <VisibilityOutlinedIcon sx={{ fontSize: 16 }} />
                                 )}
                               </IconButton>
                             </InputAdornment>
@@ -675,10 +681,10 @@ export function AuthModal({ open, onClose, onSuccess }: AuthModalProps) {
                     onClick={handleSignup}
                     disabled={loading}
                     sx={{
-                      py: 1.3,
-                      borderRadius: "10px",
+                      py: 0.9,
+                      borderRadius: "8px",
                       fontWeight: 700,
-                      fontSize: "0.92rem",
+                      fontSize: "0.85rem",
                       bgcolor: "#111827",
                       color: "#ffffff",
                       textTransform: "none",
@@ -686,36 +692,36 @@ export function AuthModal({ open, onClose, onSuccess }: AuthModalProps) {
                       "&:hover": { bgcolor: "#000000", boxShadow: "none" },
                     }}
                   >
-                    {loading ? <CircularProgress size={22} color="inherit" /> : "Sign Up"}
+                    {loading ? <CircularProgress size={18} color="inherit" /> : "Sign Up"}
                   </Button>
                 </Stack>
               )}
 
               {/* Social Login Divider */}
-              <Box sx={{ my: 2.2, textAlign: "center", position: "relative" }}>
+              <Box sx={{ my: 1.4, textAlign: "center", position: "relative" }}>
                 <Divider>
-                  <Typography variant="caption" sx={{ color: "#9ca3af", px: 1.5, fontSize: "0.76rem" }}>
+                  <Typography variant="caption" sx={{ color: "#9ca3af", px: 1, fontSize: "0.72rem" }}>
                     or continue with
                   </Typography>
                 </Divider>
               </Box>
 
               {/* Google & Apple Auth Buttons */}
-              <Box sx={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 1.5 }}>
+              <Box sx={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 1.2 }}>
                 <Button
                   variant="outlined"
                   sx={{
-                    borderRadius: "10px",
-                    py: 0.9,
+                    borderRadius: "8px",
+                    py: 0.65,
                     borderColor: "#e5e7eb",
                     color: "#111827",
                     fontWeight: 600,
-                    fontSize: "0.82rem",
+                    fontSize: "0.78rem",
                     textTransform: "none",
                     "&:hover": { borderColor: "#111827", bgcolor: "#f9fafb" },
                   }}
                 >
-                  <svg width="15" height="15" viewBox="0 0 24 24" style={{ marginRight: 8 }}>
+                  <svg width="13" height="13" viewBox="0 0 24 24" style={{ marginRight: 6 }}>
                     <path
                       fill="#4285F4"
                       d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"
@@ -739,17 +745,17 @@ export function AuthModal({ open, onClose, onSuccess }: AuthModalProps) {
                 <Button
                   variant="outlined"
                   sx={{
-                    borderRadius: "10px",
-                    py: 0.9,
+                    borderRadius: "8px",
+                    py: 0.65,
                     borderColor: "#e5e7eb",
                     color: "#111827",
                     fontWeight: 600,
-                    fontSize: "0.82rem",
+                    fontSize: "0.78rem",
                     textTransform: "none",
                     "&:hover": { borderColor: "#111827", bgcolor: "#f9fafb" },
                   }}
                 >
-                  <svg width="15" height="15" viewBox="0 0 24 24" fill="#000000" style={{ marginRight: 8 }}>
+                  <svg width="13" height="13" viewBox="0 0 24 24" fill="#000000" style={{ marginRight: 6 }}>
                     <path d="M18.71 19.5c-.83 1.24-1.71 2.45-3.05 2.47-1.34.03-1.77-.79-3.29-.79-1.53 0-2 .77-3.27.82-1.31.05-2.3-1.32-3.14-2.53C4.25 17 2.94 12.45 4.7 9.39c.87-1.52 2.43-2.48 4.12-2.51 1.28-.02 2.5.87 3.29.87.78 0 2.26-1.07 3.81-.91.65.03 2.47.26 3.64 1.98-.09.06-2.17 1.28-2.15 3.81.03 3.02 2.65 4.03 2.68 4.04-.03.07-.42 1.44-1.38 2.83M15.97 6.38c.62-.76 1.04-1.82.92-2.88-.9.04-1.99.6-2.63 1.35-.58.67-.99 1.76-.85 2.8.99.08 2.02-.51 2.56-1.27z" />
                   </svg>
                   Apple
@@ -763,18 +769,18 @@ export function AuthModal({ open, onClose, onSuccess }: AuthModalProps) {
                   display: "block",
                   textAlign: "center",
                   color: "#9ca3af",
-                  fontSize: "0.72rem",
-                  mt: 3,
-                  lineHeight: 1.5,
+                  fontSize: "0.68rem",
+                  mt: 1.8,
+                  lineHeight: 1.4,
                 }}
               >
                 By {activeTab === "login" ? "continuing" : "creating an account"}, you agree to our{" "}
                 <span style={{ color: "#111827", fontWeight: 600, textDecoration: "underline", cursor: "pointer" }}>
-                  Terms of Service
+                  Terms
                 </span>{" "}
                 and{" "}
                 <span style={{ color: "#111827", fontWeight: 600, textDecoration: "underline", cursor: "pointer" }}>
-                  Privacy Policy
+                  Privacy
                 </span>
                 .
               </Typography>
