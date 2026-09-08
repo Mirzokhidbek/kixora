@@ -7,9 +7,10 @@ import { useGlobals } from "../../hooks/useGlobals";
 
 interface UserPageProps {
   member?: Member | null;
+  onLoginClick?: () => void;
 }
 
-export function UserPage({ member: propMember }: UserPageProps) {
+export function UserPage({ member: propMember, onLoginClick }: UserPageProps) {
   const { authMember } = useGlobals();
   const member = propMember || authMember;
 
@@ -42,8 +43,8 @@ export function UserPage({ member: propMember }: UserPageProps) {
             >
               <LockOutlinedIcon sx={{ fontSize: 36, color: "#f59e0b" }} />
             </Box>
-            <Typography variant="h4" sx={{ fontWeight: 800, mb: 1.5 }}>
-              Account Access Required
+            <Typography variant="h4" sx={{ fontWeight: 900, mb: 1.5, color: "#0f172a" }}>
+              VIP Account Required
             </Typography>
             <Typography variant="body1" sx={{ color: "#64748b", mb: 4, lineHeight: 1.7 }}>
               Please sign in to access your personal credentials, loyalty tier rewards, saved delivery addresses, and culinary preferences.
@@ -51,7 +52,7 @@ export function UserPage({ member: propMember }: UserPageProps) {
             <Button
               variant="contained"
               size="large"
-              onClick={() => (window.location.href = "/")}
+              onClick={onLoginClick || (() => (window.location.href = "/"))}
               sx={{
                 borderRadius: 3,
                 px: 5,
