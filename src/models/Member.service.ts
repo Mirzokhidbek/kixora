@@ -36,27 +36,47 @@ class MemberService {
     const salt = await bcrypt.genSalt();
     input.memberPassword = await bcrypt.hash(input.memberPassword, salt);
 
+    if (input.memberEmail) {
+      input.memberEmail = input.memberEmail.toLowerCase().trim();
+    }
+    if (!input.memberPhone) {
+      input.memberPhone = input.memberEmail || `+998${Date.now()}`;
+    }
+
     try {
       const result = await this.memberModel.create(input);
       result.memberPassword = "";
       return result.toJSON() as Member;
-    } catch (err) {
+    } catch (err: any) {
       console.error("Error, signup:", err);
+      if (err?.code === 11000) {
+        throw new Errors(HTTPCode.BAD_REQUEST, "Email already registered. Please sign in.");
+      }
       throw new Errors(HTTPCode.BAD_REQUEST, Message.USED_NICK_PHONE);
     }
   }
 
-  /** SPA LOGIN (USER) **/
+  /** SPA LOGIN (USER) - Supports Email, Nickname or Phone **/
   public async login(input: LoginInput): Promise<Member> {
+    const identifier = (input.memberEmail || input.memberNick || "").trim();
+    if (!identifier) {
+      throw new Errors(HTTPCode.BAD_REQUEST, Message.NO_DATA_FOUND);
+    }
+
     const member = await this.memberModel
       .findOne(
         {
-          memberNick: input.memberNick,
+          $or: [
+            { memberEmail: identifier.toLowerCase() },
+            { memberNick: identifier },
+            { memberPhone: identifier },
+          ],
           memberStatus: { $ne: MemberStatus.DELETE },
         },
-        { memberNick: 1, memberPassword: 1, memberStatus: 1 }
+        { memberNick: 1, memberEmail: 1, memberPhone: 1, memberPassword: 1, memberStatus: 1 }
       )
       .exec();
+
     if (!member) throw new Errors(HTTPCode.NOT_FOUND, Message.NO_MEMBER_NICK);
     else if (member.memberStatus === MemberStatus.BLOCK) {
       throw new Errors(HTTPCode.FORBIDDEN, Message.BLOCKED_USER);

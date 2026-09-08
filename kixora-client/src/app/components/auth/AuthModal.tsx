@@ -63,10 +63,10 @@ export function AuthModal({ open, onClose, onSuccess }: AuthModalProps) {
   /** LOGIN PROCESS **/
   const handleLogin = async () => {
     resetState();
-    const cleanNick = loginEmail.trim();
+    const cleanEmail = loginEmail.trim();
 
-    if (!cleanNick) {
-      setErrorMsg("Please enter your email or nickname.");
+    if (!cleanEmail) {
+      setErrorMsg("Please enter your email address.");
       return;
     }
     if (!loginPassword) {
@@ -78,7 +78,8 @@ export function AuthModal({ open, onClose, onSuccess }: AuthModalProps) {
     try {
       const memberService = new MemberService();
       const input: LoginInput = {
-        memberNick: cleanNick,
+        memberEmail: cleanEmail,
+        memberNick: cleanEmail,
         memberPassword: loginPassword,
       };
       const member = await memberService.login(input);
@@ -107,7 +108,7 @@ export function AuthModal({ open, onClose, onSuccess }: AuthModalProps) {
       return;
     }
     if (!cleanEmail) {
-      setErrorMsg("Please enter your email address or phone.");
+      setErrorMsg("Please enter your email address.");
       return;
     }
     if (!signupPassword) {
@@ -124,6 +125,7 @@ export function AuthModal({ open, onClose, onSuccess }: AuthModalProps) {
       const memberService = new MemberService();
       const input: MemberInput = {
         memberNick: cleanName,
+        memberEmail: cleanEmail.toLowerCase(),
         memberPhone: cleanEmail.includes("@") ? "+998901234567" : cleanEmail,
         memberPassword: signupPassword,
       };

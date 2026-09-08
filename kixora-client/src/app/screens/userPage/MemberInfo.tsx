@@ -141,12 +141,13 @@ export function MemberInfo({ member }: MemberInfoProps) {
               />
             </Box>
 
-            <Typography variant="body2" sx={{ color: "#6b7280", mb: 1 }}>
-              {member?.memberPhone || "No phone connected"} &bull; Member since {new Date().getFullYear()}
+            <Typography variant="body2" sx={{ color: "#6b7280", mb: 0.5, fontWeight: 600 }}>
+              <i className="fa-solid fa-envelope" style={{ marginRight: 6, fontSize: "0.85rem" }}></i>
+              {member?.memberEmail || member?.memberPhone || "No email connected"} &bull; Joined {new Date(member?.createdAt || Date.now()).getFullYear()}
             </Typography>
 
             <Typography variant="caption" sx={{ color: "#9ca3af", fontStyle: "italic" }}>
-              {member?.memberDesc || "KIXORA sneakerhead collector & community member."}
+              {member?.memberDesc || "KIXORA luxury footwear collector & community member."}
             </Typography>
           </Box>
         </Box>

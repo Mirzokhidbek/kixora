@@ -5,11 +5,13 @@ export interface Member {
   memberType: MemberType;
   memberStatus: MemberStatus;
   memberNick: string;
-  memberPhone: string;
+  memberEmail?: string;
+  memberPhone?: string;
   memberAddress?: string;
   memberDesc?: string;
   memberImage?: string;
   memberPoints: number;
+  googleId?: string;
   createdAt: string;
   updatedAt: string;
 }
@@ -18,7 +20,8 @@ export interface MemberInput {
   memberType?: MemberType;
   memberStatus?: MemberStatus;
   memberNick: string;
-  memberPhone: string;
+  memberEmail?: string;
+  memberPhone?: string;
   memberPassword: string;
   memberAddress?: string;
   memberDesc?: string;
@@ -26,6 +29,7 @@ export interface MemberInput {
 }
 
 export interface LoginInput {
-  memberNick: string;
+  memberEmail?: string;
+  memberNick?: string;
   memberPassword: string;
 }
