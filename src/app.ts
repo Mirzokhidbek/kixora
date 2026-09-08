@@ -65,11 +65,12 @@ app.use(morgan(MORGAN_FORMAT));
 const isProduction = process.env.NODE_ENV === "production";
 app.use(
   session({
-    secret: String(process.env.SESSION_SECRET || "BURAK_SESSION_SECRET"),
+    secret: String(process.env.SESSION_SECRET || "KIXORA_SESSION_SECRET"),
     cookie: {
       maxAge: 1000 * 3600 * 6, // 6 hours
+      httpOnly: true, // Prevents client-side script access (XSS protection)
       sameSite: isProduction ? "none" : "lax",
-      secure: isProduction,
+      secure: isProduction, // HTTPS only in production
     },
     store: store,
     resave: true,
@@ -95,10 +96,10 @@ app.set("view engine", "ejs");
 // Root health check endpoint
 app.get("/", (req, res) => {
   res.json({
-    message: "Burak Luxury Restaurant API is Running 🚀",
+    message: "KIXORA Luxury Footwear API is Running 🚀",
     adminPanel: "/admin",
     docs: "SPA REST API",
-    status: "HEALTHY",
+    status: "healthy",
   });
 });
 
