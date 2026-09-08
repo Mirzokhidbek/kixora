@@ -94,9 +94,11 @@
                       <% order.orderItems.forEach((item, itemIdx) => { %>
                         <% 
                           const product = order.productData ? order.productData.find(p => String(p._id) === String(item.productId)) : null;
-                          const shoeImg = product && product.productImages && product.productImages[0] 
-                            ? (product.productImages[0].startsWith('http') ? product.productImages[0] : '/' + product.productImages[0].replace('public/', ''))
-                            : '/img/kixora/slide1.jpg';
+                          let shoeImg = '/img/kixora/slide1.jpg';
+                          if (product && product.productImages && product.productImages.length) {
+                            const raw = product.productImages[0];
+                            shoeImg = raw.startsWith('http') ? raw : '/' + raw.replace(/^public\//, '').replace(/^\//, '');
+                          }
                           const shoeName = product ? product.productName : 'KIXORA Footwear';
                           const shoeSizes = product && product.productSizes && product.productSizes.length ? product.productSizes[0] : 42;
                         %>
@@ -106,7 +108,7 @@
                             alt="<%= shoeName %>" 
                             class="rounded" 
                             style="width: 40px; height: 40px; object-fit: contain; background: #fff; padding: 2px; border: 1px solid #e5e7eb;"
-                            onerror="this.src='/img/kixora/slide1.jpg'"
+                            onerror="this.onerror=null; this.src='/img/kixora/slide1.jpg';"
                           />
                           <div class="flex-grow-1" style="line-height: 1.2;">
                             <div class="fw-bold text-dark small text-truncate" style="max-width: 170px;"><%= shoeName %></div>
