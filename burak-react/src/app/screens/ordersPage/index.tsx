@@ -38,7 +38,11 @@ const actionDispatch = (dispatch: Dispatch) => ({
   setFinishedOrders: (data: any[]) => dispatch(setFinishedOrders(data)),
 });
 
-export function OrdersPage() {
+interface OrdersPageProps {
+  onLoginClick?: () => void;
+}
+
+export function OrdersPage({ onLoginClick }: OrdersPageProps) {
   const [tabIndex, setTabIndex] = useState(0);
   const { authMember, orderBuilder } = useGlobals();
 
@@ -58,19 +62,31 @@ export function OrdersPage() {
 
       // 1. Paused Orders
       orderService
-        .getMyOrders({ page: 1, limit: 10, orderStatus: OrderStatus.PAUSE })
+        .getMyOrders({
+          page: 1,
+          limit: 10,
+          orderStatus: OrderStatus.PAUSE,
+        })
         .then((data) => setPausedOrders(data))
         .catch((err) => console.log("Paused orders error:", err));
 
       // 2. Process Orders
       orderService
-        .getMyOrders({ page: 1, limit: 10, orderStatus: OrderStatus.PROCESS })
+        .getMyOrders({
+          page: 1,
+          limit: 10,
+          orderStatus: OrderStatus.PROCESS,
+        })
         .then((data) => setProcessOrders(data))
         .catch((err) => console.log("Process orders error:", err));
 
       // 3. Finished Orders
       orderService
-        .getMyOrders({ page: 1, limit: 10, orderStatus: OrderStatus.FINISH })
+        .getMyOrders({
+          page: 1,
+          limit: 10,
+          orderStatus: OrderStatus.FINISH,
+        })
         .then((data) => setFinishedOrders(data))
         .catch((err) => console.log("Finished orders error:", err));
     }
@@ -80,33 +96,43 @@ export function OrdersPage() {
     <Box sx={{ py: 6, minHeight: "85vh", bgcolor: "#ffffff" }}>
       <Container maxWidth="lg">
         {/* Header Title */}
-        <Box sx={{ mb: 4, textAlign: "center" }}>
-          <Box sx={{ display: "inline-flex", alignItems: "center", gap: 1, mb: 1.5, bgcolor: "#fffbeb", px: 2, py: 0.6, borderRadius: 99 }}>
-            <ReceiptLongIcon sx={{ fontSize: 20, color: "#f59e0b" }} />
-            <Typography variant="overline" sx={{ color: "#d97706", fontWeight: 800, letterSpacing: 1.5 }}>
-              REAL-TIME KITCHEN STATUS
-            </Typography>
+        <Box sx={{ mb: 4, display: "flex", alignItems: "center", gap: 2 }}>
+          <Box
+            sx={{
+              width: 52,
+              height: 52,
+              borderRadius: 3,
+              bgcolor: "rgba(245, 158, 11, 0.12)",
+              color: "#f59e0b",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+            }}
+          >
+            <ReceiptLongIcon sx={{ fontSize: 28 }} />
           </Box>
-          <Typography variant="h2" sx={{ fontWeight: 900, color: "#0f172a", mb: 1, fontSize: { xs: "2.2rem", md: "2.8rem" } }}>
-            Track Your <span style={{ color: "#f59e0b" }}>Orders</span>
-          </Typography>
-          <Typography variant="body1" color="text.secondary" sx={{ maxWidth: 600, mx: "auto" }}>
-            View pending payments, live cooking stages, and receipt history of your dining orders.
-          </Typography>
+          <div>
+            <Typography variant="h4" sx={{ fontWeight: 900, color: "#0f172a" }}>
+              My Orders & Live Tracker
+            </Typography>
+            <Typography variant="body2" color="text.secondary">
+              Track your gourmet preparations from the kitchen flame to your doorstep.
+            </Typography>
+          </div>
         </Box>
 
+        {/* Conditional Content */}
         {!authMember ? (
           <Card
             sx={{
               p: { xs: 4, md: 6 },
               textAlign: "center",
               borderRadius: 5,
-              bgcolor: "#ffffff",
-              color: "#0f172a",
               border: "1px solid #f1f5f9",
-              boxShadow: "0 10px 30px rgba(0,0,0,0.04)",
+              boxShadow: "0 10px 30px rgba(0, 0, 0, 0.04)",
               maxWidth: 550,
               mx: "auto",
+              my: 6,
             }}
           >
             <Box
@@ -123,7 +149,7 @@ export function OrdersPage() {
             >
               <LockOutlinedIcon sx={{ fontSize: 36, color: "#f59e0b" }} />
             </Box>
-            <Typography variant="h4" sx={{ fontWeight: 800, mb: 1.5 }}>
+            <Typography variant="h4" sx={{ fontWeight: 900, mb: 1.5, color: "#0f172a" }}>
               Sign In to View Orders
             </Typography>
             <Typography variant="body2" sx={{ color: "#64748b", mb: 4, lineHeight: 1.7 }}>
@@ -142,9 +168,9 @@ export function OrdersPage() {
                 boxShadow: "0 8px 20px rgba(234, 179, 8, 0.4)",
                 "&:hover": { bgcolor: "#ca8a04" },
               }}
-              onClick={() => (window.location.href = "/")}
+              onClick={onLoginClick || (() => (window.location.href = "/"))}
             >
-              Go to Home & Sign In
+              Sign In to View Orders
             </Button>
           </Card>
         ) : (

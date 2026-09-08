@@ -14,11 +14,15 @@
       Browser Storages: Cookie, LocalStorage, SessionStorage
       CORS (Cross-Origin Resource Sharing):
         - `cors({ credentials: true, origin: true })`
-        - Brauzer xavfsizlik siyosati tufayli turli xil portlardagi (React `http://localhost:5173` va Node backend `http://localhost:3001`) so'rovlarning cookie va headerlar bilan to'siqsiz almashinishini ta'minlaydi.
+        - Brauzer xavfsizlik siyosati tufayli turli xil portlardagi (React `http://localhost:8080` va Node backend `http://localhost:3001`) so'rovlarning cookie va headerlar bilan to'siqsiz almashinishini ta'minlaydi.
 
-  - Cross-Device Authentication & Bearer Header Token Persistence (Dars 98):
-      1. Nega boshqa qurilmalarda avval login qilinishi kerak?
-         - Har bir yangi telefon yoki kompyuter o'zining mustaqil brauzer xotirasiga (`LocalStorage` va `Cookie`) ega. Shuning uchun yangi qurilmadan ilk bor kirilganda `Guest` bo'ladi, 1 marta kirgach (yoki `⚡ 1-Click Instant VIP Login` ni bosgach) doimiy saqlanib qoladi.
-      2. Dual Token Auth (Cookie + Authorization Bearer Header):
-         - iOS Safari va Android brauzerlarida uchinchi tomon cookie-fayllari cheklangan holatda ham login holati uzilib qolmasligi uchun `access_token` `LocalStorage` da saqlanib, Axios Interceptor orqali har bir so'rovga `Authorization: Bearer <token>` sifatida biriktirildi.
+  - Standard Registration & Authentication System (Dars 101):
+      1. Clean Standard Login (`Login`):
+         - `memberNick` va `memberPassword` bilan kirish.
+         - Parol ko'rinishini boshqarish (`VisibilityToggle`).
+         - `Enter` tugmasi bilan tezkor tasdiqlash.
+      2. Clean Standard Registration (`Signup`):
+         - `memberNick`, `memberPhone`, `memberPassword` va `confirmPassword`.
+         - Validatsiyalar: Bo'sh maydonlar, minimal 4 belgili parol va parollar mosligi tekshiriladi.
+         - Agar Nickname band bo'lsa, xato xabari ostida to'g'ridan-to'g'ri `Login` tugmasi orqali kirishga o'tkazadi.
 */

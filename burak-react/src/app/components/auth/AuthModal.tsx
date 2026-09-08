@@ -4,23 +4,22 @@ import {
   DialogContent,
   Box,
   Typography,
-  Tabs,
-  Tab,
   TextField,
   Button,
   IconButton,
   InputAdornment,
   Alert,
-  Divider,
+  CircularProgress,
+  Stack,
 } from "@mui/material";
 import CloseIcon from "@mui/icons-material/Close";
 import Visibility from "@mui/icons-material/Visibility";
 import VisibilityOff from "@mui/icons-material/VisibilityOff";
-import LockIcon from "@mui/icons-material/Lock";
-import PersonIcon from "@mui/icons-material/Person";
-import PhoneIcon from "@mui/icons-material/Phone";
-import FlashOnIcon from "@mui/icons-material/FlashOn";
-import { GoogleLogin } from "@react-oauth/google";
+import LockOutlinedIcon from "@mui/icons-material/LockOutlined";
+import PersonOutlineOutlinedIcon from "@mui/icons-material/PersonOutlineOutlined";
+import PhoneOutlinedIcon from "@mui/icons-material/PhoneOutlined";
+import RestaurantIcon from "@mui/icons-material/Restaurant";
+import CheckCircleIcon from "@mui/icons-material/CheckCircle";
 
 import MemberService from "../../services/MemberService";
 import type { Member, LoginInput, MemberInput } from "../../../lib/types/member";
@@ -32,128 +31,131 @@ interface AuthModalProps {
 }
 
 export function AuthModal({ open, onClose, onSuccess }: AuthModalProps) {
-  const [tabIndex, setTabIndex] = useState<number>(0);
+  const [activeTab, setActiveTab] = useState<"login" | "signup">("login");
   const [showPassword, setShowPassword] = useState<boolean>(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState<boolean>(false);
   const [errorMsg, setErrorMsg] = useState<string>("");
+  const [successMsg, setSuccessMsg] = useState<string>("");
   const [loading, setLoading] = useState<boolean>(false);
 
-  // Login Form State
+  // Login Form
   const [loginNick, setLoginNick] = useState<string>("");
   const [loginPassword, setLoginPassword] = useState<string>("");
 
-  // Signup Form State
+  // Signup Form
   const [signupNick, setSignupNick] = useState<string>("");
   const [signupPhone, setSignupPhone] = useState<string>("");
   const [signupPassword, setSignupPassword] = useState<string>("");
   const [signupConfirm, setSignupConfirm] = useState<string>("");
 
-  const handleGoogleSuccess = async (credentialResponse: any) => {
+  const resetState = () => {
     setErrorMsg("");
-    try {
-      if (!credentialResponse.credential) {
-        throw new Error("No Google credential returned");
-      }
-      const memberService = new MemberService();
-      const member = await memberService.googleLogin(credentialResponse.credential);
-      onSuccess(member);
-      onClose();
-    } catch (err: any) {
-      console.error("Google Auth error:", err);
-      setErrorMsg(
-        err.response?.data?.message || "Google Authentication failed. Please try standard sign in."
-      );
-    }
+    setSuccessMsg("");
+    setShowPassword(false);
+    setShowConfirmPassword(false);
   };
 
-  /** 1-CLICK INSTANT VIP LOGIN (FOR ALL USERS) **/
-  const handleFastGuestLogin = async () => {
-    setErrorMsg("");
+  const handleTabSwitch = (tab: "login" | "signup") => {
+    setActiveTab(tab);
+    resetState();
+  };
+
+  /** STANDARD LOGIN PROCESS **/
+  const handleLogin = async () => {
+    resetState();
+    const cleanNick = loginNick.trim();
+
+    if (!cleanNick) {
+      setErrorMsg("Please enter your Nickname.");
+      return;
+    }
+    if (!loginPassword) {
+      setErrorMsg("Please enter your Password.");
+      return;
+    }
+
     setLoading(true);
     try {
       const memberService = new MemberService();
-      // Generate a fresh guaranteed-unique guest account
-      const randomSuffix = `${Date.now().toString().slice(-4)}_${Math.floor(100 + Math.random() * 900)}`;
-      const guestNick = `Guest_${randomSuffix}`;
-      const guestPhone = `+99890${Math.floor(1000000 + Math.random() * 9000000)}`;
-
-      const input: MemberInput = {
-        memberNick: guestNick,
-        memberPhone: guestPhone,
-        memberPassword: "VIPPassword123!",
-      };
-      const result = await memberService.signup(input);
-      onSuccess(result);
-      onClose();
-    } catch {
-      // Fallback: Login with active demo account
-      try {
-        const memberService = new MemberService();
-        const demoLogin: LoginInput = {
-          memberNick: "Zokhidbek",
-          memberPassword: "12345678",
-        };
-        const result = await memberService.login(demoLogin);
-        onSuccess(result);
-        onClose();
-      } catch (e: any) {
-        setErrorMsg(e.response?.data?.message || "Instant login failed. Please sign in below.");
-      }
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const handleLogin = async () => {
-    setErrorMsg("");
-    if (!loginNick || !loginPassword) {
-      setErrorMsg("Please enter both Nickname and Password.");
-      return;
-    }
-
-    try {
-      const memberService = new MemberService();
       const input: LoginInput = {
-        memberNick: loginNick.trim(),
+        memberNick: cleanNick,
         memberPassword: loginPassword,
       };
-      const result = await memberService.login(input);
-      onSuccess(result);
-      onClose();
+      const member = await memberService.login(input);
+      setSuccessMsg(`Welcome back, ${member.memberNick}!`);
+      setTimeout(() => {
+        onSuccess(member);
+        onClose();
+        setLoading(false);
+      }, 400);
     } catch (err: any) {
+      setLoading(false);
       setErrorMsg(
-        err.response?.data?.message || "Incorrect nickname or password. Please check your details."
+        err.response?.data?.message || "Incorrect nickname or password. Please try again."
       );
     }
   };
 
+  /** STANDARD SIGNUP / REGISTRATION PROCESS **/
   const handleSignup = async () => {
-    setErrorMsg("");
-    if (!signupNick.trim() || !signupPhone.trim() || !signupPassword) {
-      setErrorMsg("Please fill in all fields (Nickname, Phone, Password).");
+    resetState();
+    const cleanNick = signupNick.trim();
+    const cleanPhone = signupPhone.trim();
+
+    if (!cleanNick) {
+      setErrorMsg("Please choose a Nickname.");
+      return;
+    }
+    if (!cleanPhone) {
+      setErrorMsg("Please enter your Phone number.");
+      return;
+    }
+    if (!signupPassword) {
+      setErrorMsg("Please enter a Password.");
+      return;
+    }
+    if (signupPassword.length < 4) {
+      setErrorMsg("Password must be at least 4 characters long.");
       return;
     }
     if (signupPassword !== signupConfirm) {
-      setErrorMsg("Passwords do not match!");
+      setErrorMsg("Passwords do not match! Please check again.");
       return;
     }
 
+    setLoading(true);
     try {
       const memberService = new MemberService();
       const input: MemberInput = {
-        memberNick: signupNick.trim(),
-        memberPhone: signupPhone.trim(),
+        memberNick: cleanNick,
+        memberPhone: cleanPhone,
         memberPassword: signupPassword,
       };
-      const result = await memberService.signup(input);
-      onSuccess(result);
-      onClose();
+      const member = await memberService.signup(input);
+      setSuccessMsg(`Account created! Welcome, ${member.memberNick}!`);
+      setTimeout(() => {
+        onSuccess(member);
+        onClose();
+        setLoading(false);
+      }, 500);
     } catch (err: any) {
+      setLoading(false);
       const msg = err.response?.data?.message || "";
       if (msg.includes("already used") || msg.includes("USED_NICK_PHONE")) {
-        setErrorMsg(`"${signupNick}" is already registered! Please switch to SIGN IN tab to log in.`);
-        setLoginNick(signupNick.trim());
+        setErrorMsg(`Nickname "${cleanNick}" or this phone is already registered. Please Login.`);
+        setLoginNick(cleanNick);
       } else {
-        setErrorMsg(msg || "Registration failed. Please try a different nickname.");
+        setErrorMsg(msg || "Registration failed. Please check your details and try again.");
+      }
+    }
+  };
+
+  const handleKeyDown = (e: React.KeyboardEvent) => {
+    if (e.key === "Enter") {
+      if (activeTab === "login") {
+        handleLogin();
+      } else {
+        handleSignup();
       }
     }
   };
@@ -161,120 +163,165 @@ export function AuthModal({ open, onClose, onSuccess }: AuthModalProps) {
   return (
     <Dialog
       open={open}
-      onClose={onClose}
+      onClose={loading ? undefined : onClose}
       maxWidth="xs"
       fullWidth
       slotProps={{
         paper: {
           sx: {
-            borderRadius: 4,
+            borderRadius: 5,
             bgcolor: "#ffffff",
             color: "#0f172a",
             border: "1px solid #f1f5f9",
-            boxShadow: "0 25px 60px rgba(0,0,0,0.15)",
-            p: 1,
+            boxShadow: "0 25px 70px rgba(0,0,0,0.18)",
+            p: { xs: 1.5, sm: 2 },
+            overflow: "hidden",
           },
         },
       }}
     >
-      {/* Modal Header */}
-      <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "center", px: 2, pt: 1 }}>
-        <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
-          <Box sx={{ width: 8, height: 8, borderRadius: "50%", bgcolor: "#f59e0b" }} />
-          <Typography variant="overline" sx={{ color: "#f59e0b", fontWeight: 900, letterSpacing: 1.5 }}>
-            BURAKFOOD AUTHENTICATION
-          </Typography>
+      {/* Modal Top Header */}
+      <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", px: 1.5, pt: 1 }}>
+        <Box sx={{ display: "flex", alignItems: "center", gap: 1.5 }}>
+          <Box
+            sx={{
+              width: 44,
+              height: 44,
+              borderRadius: 3,
+              bgcolor: "#fffbeb",
+              border: "1.5px solid #fef3c7",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              color: "#f59e0b",
+              boxShadow: "0 4px 14px rgba(245, 158, 11, 0.15)",
+            }}
+          >
+            <RestaurantIcon sx={{ fontSize: 24 }} />
+          </Box>
+          <div>
+            <Typography variant="h6" sx={{ fontWeight: 900, color: "#0f172a", lineHeight: 1.2 }}>
+              Burak<span style={{ color: "#f59e0b" }}>food</span> VIP
+            </Typography>
+            <Typography variant="caption" sx={{ color: "#64748b", fontWeight: 600 }}>
+              {activeTab === "login"
+                ? "Sign in to track orders & earn rewards"
+                : "Create your VIP account in seconds"}
+            </Typography>
+          </div>
         </Box>
-        <IconButton onClick={onClose} sx={{ color: "#94a3b8" }}>
+        <IconButton
+          onClick={onClose}
+          disabled={loading}
+          size="small"
+          sx={{ color: "#94a3b8", "&:hover": { color: "#0f172a" } }}
+        >
           <CloseIcon fontSize="small" />
         </IconButton>
       </Box>
 
-      <DialogContent sx={{ px: 3, pt: 1, pb: 3 }}>
-        {/* 1. Instant 1-Click Fast VIP Login */}
-        <Button
-          fullWidth
-          variant="contained"
-          startIcon={<FlashOnIcon sx={{ color: "#000" }} />}
-          onClick={handleFastGuestLogin}
-          disabled={loading}
+      <DialogContent sx={{ px: { xs: 1.5, sm: 2 }, pt: 2.5, pb: 2 }} onKeyDown={handleKeyDown}>
+        {/* Standard Segmented Tab Switcher */}
+        <Box
           sx={{
-            py: 1.3,
-            borderRadius: 3,
-            fontWeight: 900,
-            fontSize: "0.95rem",
-            bgcolor: "#f59e0b",
-            color: "#090d16",
-            boxShadow: "0 6px 18px rgba(245, 158, 11, 0.4)",
-            "&:hover": { bgcolor: "#fbbf24" },
-            mb: 2,
+            display: "flex",
+            p: 0.6,
+            bgcolor: "#f8fafc",
+            borderRadius: 4,
+            border: "1px solid #e2e8f0",
+            mb: 3,
           }}
         >
-          {loading ? "Logging in..." : "⚡ 1-Click Instant VIP Login"}
-        </Button>
-
-        {/* 2. Official Google Sign-In */}
-        <Box sx={{ mb: 2, display: "flex", flexDirection: "column", alignItems: "center", gap: 1 }}>
-          <GoogleLogin
-            onSuccess={handleGoogleSuccess}
-            onError={() => setErrorMsg("Google Sign-In failed or was closed.")}
-            theme="outline"
-            size="large"
-            shape="pill"
-            text="continue_with"
-            width="320"
-          />
-        </Box>
-
-        <Divider sx={{ my: 2.5, color: "#94a3b8", fontSize: "0.78rem", fontWeight: 800 }}>
-          OR WITH NICKNAME & PASSWORD
-        </Divider>
-
-        <Tabs
-          value={tabIndex}
-          onChange={(_, val) => {
-            setTabIndex(val);
-            setErrorMsg("");
-          }}
-          variant="fullWidth"
-          sx={{
-            mb: 3,
-            borderBottom: "1px solid #f1f5f9",
-            "& .MuiTabs-indicator": { backgroundColor: "#f59e0b", height: 3, borderRadius: 2 },
-            "& .MuiTab-root": {
-              color: "#64748b",
+          <Button
+            fullWidth
+            onClick={() => handleTabSwitch("login")}
+            sx={{
+              borderRadius: 3.5,
+              py: 1,
               fontWeight: 800,
               fontSize: "0.9rem",
-              "&.Mui-selected": { color: "#f59e0b" },
-            },
-          }}
-        >
-          <Tab label="SIGN IN" />
-          <Tab label="SIGN UP" />
-        </Tabs>
+              textTransform: "none",
+              color: activeTab === "login" ? "#0f172a" : "#64748b",
+              bgcolor: activeTab === "login" ? "#ffffff" : "transparent",
+              boxShadow: activeTab === "login" ? "0 4px 12px rgba(0,0,0,0.06)" : "none",
+              border: activeTab === "login" ? "1px solid #e2e8f0" : "1px solid transparent",
+              transition: "all 0.2s ease",
+            }}
+          >
+            🔑 Login
+          </Button>
 
+          <Button
+            fullWidth
+            onClick={() => handleTabSwitch("signup")}
+            sx={{
+              borderRadius: 3.5,
+              py: 1,
+              fontWeight: 800,
+              fontSize: "0.9rem",
+              textTransform: "none",
+              color: activeTab === "signup" ? "#0f172a" : "#64748b",
+              bgcolor: activeTab === "signup" ? "#ffffff" : "transparent",
+              boxShadow: activeTab === "signup" ? "0 4px 12px rgba(0,0,0,0.06)" : "none",
+              border: activeTab === "signup" ? "1px solid #e2e8f0" : "1px solid transparent",
+              transition: "all 0.2s ease",
+            }}
+          >
+            ✨ Sign Up
+          </Button>
+        </Box>
+
+        {/* Status Alerts */}
         {errorMsg && (
-          <Alert severity={errorMsg.includes("already registered") ? "info" : "error"} sx={{ mb: 2.5, borderRadius: 2.5, fontSize: "0.82rem", fontWeight: 600 }}>
+          <Alert
+            severity={errorMsg.includes("already registered") ? "info" : "error"}
+            sx={{ mb: 2.5, borderRadius: 3, fontSize: "0.82rem", fontWeight: 600 }}
+            action={
+              errorMsg.includes("already registered") ? (
+                <Button color="inherit" size="small" onClick={() => handleTabSwitch("login")} sx={{ fontWeight: 800 }}>
+                  Login
+                </Button>
+              ) : undefined
+            }
+          >
             {errorMsg}
           </Alert>
         )}
 
-        {/* Tab 0: Sign In */}
-        {tabIndex === 0 && (
-          <Box sx={{ display: "flex", flexDirection: "column", gap: 2.2 }}>
+        {successMsg && (
+          <Alert
+            icon={<CheckCircleIcon fontSize="inherit" />}
+            severity="success"
+            sx={{ mb: 2.5, borderRadius: 3, fontSize: "0.85rem", fontWeight: 700 }}
+          >
+            {successMsg}
+          </Alert>
+        )}
+
+        {/* 1. STANDARD LOGIN FORM */}
+        {activeTab === "login" && (
+          <Stack spacing={2.2}>
             <TextField
               fullWidth
-              size="small"
+              size="medium"
               label="Nickname"
-              placeholder="e.g. Zokhidbek or your nickname"
+              placeholder="e.g. Zokhidbek"
               value={loginNick}
               onChange={(e) => setLoginNick(e.target.value)}
-              sx={{ "& .MuiOutlinedInput-root": { borderRadius: 3 } }}
+              disabled={loading}
+              autoFocus
+              sx={{
+                "& .MuiOutlinedInput-root": {
+                  borderRadius: 3,
+                  bgcolor: "#ffffff",
+                  "&:hover fieldset": { borderColor: "#f59e0b" },
+                },
+              }}
               slotProps={{
                 input: {
                   startAdornment: (
                     <InputAdornment position="start">
-                      <PersonIcon sx={{ color: "#f59e0b" }} />
+                      <PersonOutlineOutlinedIcon sx={{ color: "#f59e0b", fontSize: 22 }} />
                     </InputAdornment>
                   ),
                 },
@@ -283,23 +330,35 @@ export function AuthModal({ open, onClose, onSuccess }: AuthModalProps) {
 
             <TextField
               fullWidth
-              size="small"
+              size="medium"
               type={showPassword ? "text" : "password"}
               label="Password"
-              placeholder="Your password"
+              placeholder="Enter your password"
               value={loginPassword}
               onChange={(e) => setLoginPassword(e.target.value)}
-              sx={{ "& .MuiOutlinedInput-root": { borderRadius: 3 } }}
+              disabled={loading}
+              sx={{
+                "& .MuiOutlinedInput-root": {
+                  borderRadius: 3,
+                  bgcolor: "#ffffff",
+                  "&:hover fieldset": { borderColor: "#f59e0b" },
+                },
+              }}
               slotProps={{
                 input: {
                   startAdornment: (
                     <InputAdornment position="start">
-                      <LockIcon sx={{ color: "#f59e0b" }} />
+                      <LockOutlinedIcon sx={{ color: "#f59e0b", fontSize: 22 }} />
                     </InputAdornment>
                   ),
                   endAdornment: (
                     <InputAdornment position="end">
-                      <IconButton onClick={() => setShowPassword(!showPassword)} edge="end" sx={{ color: "#94a3b8" }}>
+                      <IconButton
+                        onClick={() => setShowPassword(!showPassword)}
+                        edge="end"
+                        size="small"
+                        sx={{ color: "#94a3b8" }}
+                      >
                         {showPassword ? <VisibilityOff fontSize="small" /> : <Visibility fontSize="small" />}
                       </IconButton>
                     </InputAdornment>
@@ -309,42 +368,64 @@ export function AuthModal({ open, onClose, onSuccess }: AuthModalProps) {
             />
 
             <Button
+              fullWidth
               variant="contained"
               size="large"
               onClick={handleLogin}
+              disabled={loading}
               sx={{
-                py: 1.3,
+                py: 1.4,
                 borderRadius: 3,
-                fontWeight: 800,
-                fontSize: "0.95rem",
+                fontWeight: 900,
+                fontSize: "1rem",
                 bgcolor: "#0f172a",
-                color: "#fff",
-                boxShadow: "0 8px 20px rgba(15, 23, 42, 0.25)",
+                color: "#ffffff",
+                boxShadow: "0 8px 25px rgba(15, 23, 42, 0.25)",
                 "&:hover": { bgcolor: "#1e293b" },
                 mt: 1,
               }}
             >
-              Sign In to Account
+              {loading ? <CircularProgress size={24} color="inherit" /> : "Login to Account ➔"}
             </Button>
-          </Box>
+
+            <Box sx={{ textAlign: "center", pt: 1 }}>
+              <Typography variant="body2" sx={{ color: "#64748b" }}>
+                Don't have an account yet?{" "}
+                <strong
+                  style={{ color: "#f59e0b", cursor: "pointer", textDecoration: "underline" }}
+                  onClick={() => handleTabSwitch("signup")}
+                >
+                  Create one now
+                </strong>
+              </Typography>
+            </Box>
+          </Stack>
         )}
 
-        {/* Tab 1: Sign Up */}
-        {tabIndex === 1 && (
-          <Box sx={{ display: "flex", flexDirection: "column", gap: 2 }}>
+        {/* 2. STANDARD SIGNUP / REGISTRATION FORM */}
+        {activeTab === "signup" && (
+          <Stack spacing={2}>
             <TextField
               fullWidth
               size="small"
               label="Nickname"
-              placeholder="Choose a unique nickname"
+              placeholder="e.g. Zokhidbek or my_nickname"
               value={signupNick}
               onChange={(e) => setSignupNick(e.target.value)}
-              sx={{ "& .MuiOutlinedInput-root": { borderRadius: 3 } }}
+              disabled={loading}
+              autoFocus
+              sx={{
+                "& .MuiOutlinedInput-root": {
+                  borderRadius: 3,
+                  bgcolor: "#ffffff",
+                  "&:hover fieldset": { borderColor: "#f59e0b" },
+                },
+              }}
               slotProps={{
                 input: {
                   startAdornment: (
                     <InputAdornment position="start">
-                      <PersonIcon sx={{ color: "#f59e0b" }} />
+                      <PersonOutlineOutlinedIcon sx={{ color: "#f59e0b", fontSize: 20 }} />
                     </InputAdornment>
                   ),
                 },
@@ -355,15 +436,22 @@ export function AuthModal({ open, onClose, onSuccess }: AuthModalProps) {
               fullWidth
               size="small"
               label="Phone Number"
-              placeholder="+998901234567"
+              placeholder="+998 90 123 45 67"
               value={signupPhone}
               onChange={(e) => setSignupPhone(e.target.value)}
-              sx={{ "& .MuiOutlinedInput-root": { borderRadius: 3 } }}
+              disabled={loading}
+              sx={{
+                "& .MuiOutlinedInput-root": {
+                  borderRadius: 3,
+                  bgcolor: "#ffffff",
+                  "&:hover fieldset": { borderColor: "#f59e0b" },
+                },
+              }}
               slotProps={{
                 input: {
                   startAdornment: (
                     <InputAdornment position="start">
-                      <PhoneIcon sx={{ color: "#f59e0b" }} />
+                      <PhoneOutlinedIcon sx={{ color: "#f59e0b", fontSize: 20 }} />
                     </InputAdornment>
                   ),
                 },
@@ -375,15 +463,34 @@ export function AuthModal({ open, onClose, onSuccess }: AuthModalProps) {
               size="small"
               type={showPassword ? "text" : "password"}
               label="Password"
-              placeholder="At least 6 characters"
+              placeholder="At least 4 characters"
               value={signupPassword}
               onChange={(e) => setSignupPassword(e.target.value)}
-              sx={{ "& .MuiOutlinedInput-root": { borderRadius: 3 } }}
+              disabled={loading}
+              sx={{
+                "& .MuiOutlinedInput-root": {
+                  borderRadius: 3,
+                  bgcolor: "#ffffff",
+                  "&:hover fieldset": { borderColor: "#f59e0b" },
+                },
+              }}
               slotProps={{
                 input: {
                   startAdornment: (
                     <InputAdornment position="start">
-                      <LockIcon sx={{ color: "#f59e0b" }} />
+                      <LockOutlinedIcon sx={{ color: "#f59e0b", fontSize: 20 }} />
+                    </InputAdornment>
+                  ),
+                  endAdornment: (
+                    <InputAdornment position="end">
+                      <IconButton
+                        onClick={() => setShowPassword(!showPassword)}
+                        edge="end"
+                        size="small"
+                        sx={{ color: "#94a3b8" }}
+                      >
+                        {showPassword ? <VisibilityOff fontSize="small" /> : <Visibility fontSize="small" />}
+                      </IconButton>
                     </InputAdornment>
                   ),
                 },
@@ -393,17 +500,36 @@ export function AuthModal({ open, onClose, onSuccess }: AuthModalProps) {
             <TextField
               fullWidth
               size="small"
-              type={showPassword ? "text" : "password"}
+              type={showConfirmPassword ? "text" : "password"}
               label="Confirm Password"
               placeholder="Re-enter password"
               value={signupConfirm}
               onChange={(e) => setSignupConfirm(e.target.value)}
-              sx={{ "& .MuiOutlinedInput-root": { borderRadius: 3 } }}
+              disabled={loading}
+              sx={{
+                "& .MuiOutlinedInput-root": {
+                  borderRadius: 3,
+                  bgcolor: "#ffffff",
+                  "&:hover fieldset": { borderColor: "#f59e0b" },
+                },
+              }}
               slotProps={{
                 input: {
                   startAdornment: (
                     <InputAdornment position="start">
-                      <LockIcon sx={{ color: "#f59e0b" }} />
+                      <LockOutlinedIcon sx={{ color: "#f59e0b", fontSize: 20 }} />
+                    </InputAdornment>
+                  ),
+                  endAdornment: (
+                    <InputAdornment position="end">
+                      <IconButton
+                        onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                        edge="end"
+                        size="small"
+                        sx={{ color: "#94a3b8" }}
+                      >
+                        {showConfirmPassword ? <VisibilityOff fontSize="small" /> : <Visibility fontSize="small" />}
+                      </IconButton>
                     </InputAdornment>
                   ),
                 },
@@ -411,24 +537,38 @@ export function AuthModal({ open, onClose, onSuccess }: AuthModalProps) {
             />
 
             <Button
+              fullWidth
               variant="contained"
               size="large"
               onClick={handleSignup}
+              disabled={loading}
               sx={{
-                py: 1.3,
+                py: 1.4,
                 borderRadius: 3,
-                fontWeight: 800,
-                fontSize: "0.95rem",
-                bgcolor: "#0f172a",
-                color: "#fff",
-                boxShadow: "0 8px 20px rgba(15, 23, 42, 0.25)",
-                "&:hover": { bgcolor: "#1e293b" },
+                fontWeight: 900,
+                fontSize: "1rem",
+                bgcolor: "#f59e0b",
+                color: "#090d16",
+                boxShadow: "0 8px 25px rgba(245, 158, 11, 0.4)",
+                "&:hover": { bgcolor: "#fbbf24" },
                 mt: 1,
               }}
             >
-              Create VIP Account
+              {loading ? <CircularProgress size={24} color="inherit" /> : "Sign Up & Join VIP Club"}
             </Button>
-          </Box>
+
+            <Box sx={{ textAlign: "center", pt: 0.5 }}>
+              <Typography variant="body2" sx={{ color: "#64748b" }}>
+                Already have an account?{" "}
+                <strong
+                  style={{ color: "#f59e0b", cursor: "pointer", textDecoration: "underline" }}
+                  onClick={() => handleTabSwitch("login")}
+                >
+                  Login here
+                </strong>
+              </Typography>
+            </Box>
+          </Stack>
         )}
       </DialogContent>
     </Dialog>

@@ -107,8 +107,8 @@ export default function App() {
             <Routes>
               <Route path="/" element={<HomePage onAdd={onAdd} />} />
               <Route path="/products/*" element={<ProductsPage onAdd={onAdd} />} />
-              <Route path="/orders" element={<OrdersPage />} />
-              <Route path="/user" element={<UserPage member={authMember} />} />
+              <Route path="/orders" element={<OrdersPage onLoginClick={() => setAuthOpen(true)} />} />
+              <Route path="/user" element={<UserPage member={authMember} onLoginClick={() => setAuthOpen(true)} />} />
               <Route path="/help" element={<HelpPage />} />
             </Routes>
           </Box>
