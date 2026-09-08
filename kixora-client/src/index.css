@@ -1,25 +1,24 @@
 /* ==========================================================================
-   BURAK RESTAURANT - LUXURY DESIGN SYSTEM & GLOBAL STYLES
+   KIXORA LUXURY FOOTWEAR - GLOBAL STYLES & HARDWARE ACCELERATION
    ========================================================================== */
 
 :root {
   --primary-gold: #f59e0b;
   --primary-gold-hover: #d97706;
   --gold-glow: rgba(245, 158, 11, 0.35);
-  --dark-bg: #090d16;
-  --dark-surface: #0f172a;
-  --dark-card: #1e293b;
-  --text-main: #0f172a;
-  --text-muted: #64748b;
-  --text-light: #f8fafc;
+  --dark-bg: #000000;
+  --dark-surface: #0a0a0a;
+  --dark-card: #141414;
+  --text-main: #111827;
+  --text-muted: #6b7280;
+  --text-light: #f9fafb;
   
   --font-sans: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
   --font-display: 'Outfit', sans-serif;
-  --font-serif: 'Playfair Display', Georgia, serif;
 
-  --transition-smooth: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-  --glass-bg: rgba(255, 255, 255, 0.92);
-  --glass-border: rgba(0, 0, 0, 0.08);
+  --transition-smooth: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+  --glass-bg: rgba(255, 255, 255, 0.95);
+  --glass-border: rgba(0, 0, 0, 0.06);
 }
 
 *, *::before, *::after {
@@ -67,31 +66,32 @@ body {
 }
 
 ::-webkit-scrollbar-track {
-  background: #f8fafc;
+  background: #f9fafb;
 }
 
 ::-webkit-scrollbar-thumb {
-  background: #cbd5e1;
+  background: #d1d5db;
   border-radius: 4px;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: #f59e0b;
+  background: #111827;
 }
 
-/* Card Hover Lift & Glow */
-.hover-lift {
-  transition: var(--transition-smooth);
+/* Luxury SweetAlert2 Toast Customization */
+.kixora-luxury-toast {
+  border-radius: 14px !important;
+  border: 1px solid rgba(255, 255, 255, 0.12) !important;
+  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.5) !important;
+  font-family: var(--font-sans) !important;
+  padding: 12px 18px !important;
+  font-size: 0.9rem !important;
+  font-weight: 700 !important;
 }
 
-.hover-lift:hover {
-  transform: translateY(-6px);
-  box-shadow: 0 20px 40px rgba(15, 23, 42, 0.08), 0 0 20px rgba(245, 158, 11, 0.1);
-}
-
-/* Interactive Tap Target for Mobile */
-@media (max-width: 600px) {
-  button, a {
-    min-height: 44px;
-  }
+/* Smooth Hardware-Accelerated Transforms */
+.gpu-accelerate {
+  transform: translateZ(0);
+  backface-visibility: hidden;
+  perspective: 1000px;
 }
