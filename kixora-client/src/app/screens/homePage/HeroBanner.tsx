@@ -1,3 +1,11 @@
+/**
+ * ============================================================================
+ * HeroBanner.tsx - Smooth Luxury Footwear Carousel
+ * ============================================================================
+ * High-performance 5-slide hero carousel with GPU-accelerated transitions,
+ * zero layout-shift architecture, and preloaded slide assets.
+ */
+
 import { useState, useEffect } from "react";
 import { Box, Container, Typography, Button, Grid, IconButton } from "@mui/material";
 import ArrowForwardIcon from "@mui/icons-material/ArrowForward";
@@ -43,11 +51,19 @@ export function HeroBanner() {
     },
   ];
 
-  // Auto-play carousel every 3.8 seconds
+  // Preload all slide images to prevent image decoding stutter
+  useEffect(() => {
+    heroSlides.forEach((slide) => {
+      const img = new Image();
+      img.src = slide.image;
+    });
+  }, []);
+
+  // Auto-play carousel every 4 seconds
   useEffect(() => {
     const interval = setInterval(() => {
       setActiveSlide((prev) => (prev + 1) % heroSlides.length);
-    }, 3800);
+    }, 4000);
     return () => clearInterval(interval);
   }, [heroSlides.length]);
 
@@ -79,7 +95,7 @@ export function HeroBanner() {
             p: { xs: 3.5, sm: 5, md: 7 },
             position: "relative",
             overflow: "hidden",
-            minHeight: { xs: 460, md: 520 },
+            minHeight: { xs: 480, md: 520 },
             display: "flex",
             alignItems: "center",
           }}
@@ -92,8 +108,7 @@ export function HeroBanner() {
               right: "-10%",
               width: "60%",
               height: "140%",
-              background: "radial-gradient(circle, rgba(255, 255, 255, 0.06) 0%, transparent 70%)",
-              filter: "blur(60px)",
+              background: "radial-gradient(circle, rgba(255, 255, 255, 0.05) 0%, transparent 70%)",
               pointerEvents: "none",
             }}
           />
@@ -111,7 +126,7 @@ export function HeroBanner() {
                     borderRadius: 9999,
                     border: "1px solid rgba(255, 255, 255, 0.2)",
                     bgcolor: "rgba(255, 255, 255, 0.08)",
-                    mb: 2.5,
+                    mb: 2,
                   }}
                 >
                   <Typography
@@ -134,11 +149,11 @@ export function HeroBanner() {
                   sx={{
                     fontFamily: '"Outfit", sans-serif',
                     fontWeight: 900,
-                    fontSize: { xs: "2.5rem", sm: "3.2rem", md: "4rem" },
-                    lineHeight: 1.02,
+                    fontSize: { xs: "2.5rem", sm: "3.2rem", md: "3.8rem" },
+                    lineHeight: 1.05,
                     letterSpacing: "-0.03em",
                     color: "#ffffff",
-                    mb: 2,
+                    mb: 1.5,
                   }}
                 >
                   STEP INTO <br />
@@ -147,18 +162,19 @@ export function HeroBanner() {
                   </span>
                 </Typography>
 
-                {/* Subtitle */}
-                <Typography
-                  variant="body1"
-                  sx={{
-                    color: "#9ca3af",
-                    fontSize: { xs: "0.95rem", md: "1.05rem" },
-                    lineHeight: 1.6,
-                    mb: 4,
-                  }}
-                >
-                  {currentSlide.desc}
-                </Typography>
+                {/* Stable Subtitle Box */}
+                <Box sx={{ minHeight: { xs: 55, sm: 65 }, mb: 3 }}>
+                  <Typography
+                    variant="body1"
+                    sx={{
+                      color: "#9ca3af",
+                      fontSize: { xs: "0.92rem", md: "1.02rem" },
+                      lineHeight: 1.6,
+                    }}
+                  >
+                    {currentSlide.desc}
+                  </Typography>
+                </Box>
 
                 {/* CTA Button */}
                 <Button
@@ -171,7 +187,7 @@ export function HeroBanner() {
                     color: "#000000",
                     borderRadius: 9999,
                     px: { xs: 3.5, sm: 4.5 },
-                    py: 1.5,
+                    py: 1.4,
                     fontWeight: 800,
                     fontSize: "0.95rem",
                     textTransform: "none",
@@ -188,15 +204,16 @@ export function HeroBanner() {
               </Box>
             </Grid>
 
-            {/* Right Column: 5 Pure Black Seamless Floating Shoes */}
+            {/* Right Column: Rock-solid Stacked Absolute Images */}
             <Grid size={{ xs: 12, md: 6 }}>
               <Box
                 sx={{
                   position: "relative",
+                  width: "100%",
+                  height: { xs: 260, sm: 340, md: 380 },
                   display: "flex",
                   alignItems: "center",
                   justifyContent: "center",
-                  minHeight: { xs: 240, sm: 320, md: 380 },
                 }}
               >
                 {heroSlides.map((slide, idx) => (
@@ -209,18 +226,19 @@ export function HeroBanner() {
                       e.target.src = "/img/kixora/slide1.jpg";
                     }}
                     sx={{
-                      position: idx === activeSlide ? "relative" : "absolute",
+                      position: "absolute",
                       width: "100%",
-                      maxWidth: { xs: 340, sm: 440, md: 500 },
-                      maxHeight: { xs: 260, sm: 340, md: 380 },
+                      maxWidth: { xs: 320, sm: 420, md: 480 },
+                      maxHeight: { xs: 240, sm: 320, md: 360 },
                       objectFit: "contain",
                       opacity: idx === activeSlide ? 1 : 0,
-                      transform: idx === activeSlide ? "scale(1) rotate(0deg)" : "scale(0.92) rotate(-5deg)",
-                      transition: "opacity 0.7s ease-in-out, transform 0.7s ease-in-out",
+                      transform: idx === activeSlide ? "scale(1)" : "scale(0.92)",
+                      transition: "opacity 0.6s cubic-bezier(0.4, 0, 0.2, 1), transform 0.6s cubic-bezier(0.4, 0, 0.2, 1)",
+                      willChange: "opacity, transform",
                       filter: "drop-shadow(0 15px 25px rgba(0, 0, 0, 0.9))",
                       pointerEvents: idx === activeSlide ? "auto" : "none",
                       cursor: "pointer",
-                      "&:hover": { transform: "scale(1.04)" },
+                      "&:hover": { transform: "scale(1.03)" },
                     }}
                     onClick={() => navigate("/products")}
                   />
