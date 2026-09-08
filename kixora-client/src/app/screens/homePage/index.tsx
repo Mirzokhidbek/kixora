@@ -4,9 +4,10 @@ import { useDispatch } from "react-redux";
 import type { Dispatch } from "@reduxjs/toolkit";
 
 import { HeroBanner } from "./HeroBanner";
+import { PopularDishes } from "./PopularDishes";
 import { ValuePropsBar } from "./ValuePropsBar";
-import { BrandVideo } from "./BrandVideo";
 import { CategoryShowcase } from "./CategoryShowcase";
+import { BrandVideo } from "./BrandVideo";
 import { NewArrivalsBanner } from "./NewArrivalsBanner";
 
 import ProductService from "../../services/ProductService";
@@ -53,19 +54,22 @@ export function HomePage({ onAdd }: HomePageProps) {
 
   return (
     <Box sx={{ width: "100%", overflowX: "hidden", bgcolor: "#ffffff" }}>
-      {/* 1. Hero Section (STEP INTO MORE, Black Container, 5-Slide Auto Carousel) */}
+      {/* 1. Hero Section (STEP INTO MORE, Light Container, Triple Badges, Solid Black CTA) */}
       <HeroBanner />
 
-      {/* 2. Value Props Bar (Free Shipping, Returns, Secure, Support) */}
-      <ValuePropsBar />
+      {/* 2. Popular Picks (Best Sellers 4-Card Grid with Solid Black "Add to Cart" Buttons) */}
+      <PopularDishes onAdd={onAdd} />
 
-      {/* 3. Cinematic Brand & Shop Crafting Lab Video Showcase */}
-      <BrandVideo />
+      {/* 3. Value Props Bar (Free Shipping, Secure Payments, Easy Returns, 24/7 Support) */}
+      <ValuePropsBar />
 
       {/* 4. Category Showcase (Sneakers, Running, Boots, Limited Drop) */}
       <CategoryShowcase />
 
-      {/* 5. New Arrivals Banner (High impact CTA) */}
+      {/* 5. Cinematic Brand Lab Video Showcase */}
+      <BrandVideo />
+
+      {/* 6. New Arrivals Banner */}
       <NewArrivalsBanner />
     </Box>
   );

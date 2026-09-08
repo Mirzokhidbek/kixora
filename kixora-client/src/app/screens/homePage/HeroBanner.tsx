@@ -1,9 +1,9 @@
 /**
  * ============================================================================
- * HeroBanner.tsx - Smooth Luxury Footwear Carousel
+ * HeroBanner.tsx - Clean Light Studio Footwear Carousel
  * ============================================================================
- * High-performance 5-slide hero carousel with GPU-accelerated transitions,
- * zero layout-shift architecture, and preloaded slide assets.
+ * 100% Transparent Shoe Assets (no background box), perfectly proportioned
+ * 3-column layout without overlap, and crisp typography.
  */
 
 import { useState, useEffect } from "react";
@@ -11,47 +11,38 @@ import { Box, Container, Typography, Button, Grid, IconButton } from "@mui/mater
 import ArrowForwardIcon from "@mui/icons-material/ArrowForward";
 import ArrowBackIosNewIcon from "@mui/icons-material/ArrowBackIosNew";
 import ArrowForwardIosIcon from "@mui/icons-material/ArrowForwardIos";
+import AirIcon from "@mui/icons-material/Air";
+import ShieldOutlinedIcon from "@mui/icons-material/ShieldOutlined";
+import ElectricBoltOutlinedIcon from "@mui/icons-material/ElectricBoltOutlined";
 import { useNavigate } from "react-router-dom";
 
 export function HeroBanner() {
   const navigate = useNavigate();
   const [activeSlide, setActiveSlide] = useState(0);
 
-  // 5 Dedicated Permanent High-End Brand Slides (Pure Black Background)
+  // 3 Dedicated Studio Hero Slides with 100% Transparent PNG Shoes
   const heroSlides = [
     {
-      tag: "FLAGSHIP PERFORMANCE",
-      title: "Velocity Air Pro",
-      desc: "Engineered with aerodynamic carbon plates and responsive cushioning for unstoppable motion.",
-      image: "/img/kixora/slide1.jpg",
+      tag: "ATHLETIC INNOVATION",
+      title: "Nike Air ZoomX",
+      desc: "Ultra lightweight running shoes designed for marathon endurance and explosive energy return.",
+      image: "/img/kixora/hero_shoe1.png",
     },
     {
       tag: "STREETWEAR LUXURY",
       title: "Street Low Classic",
       desc: "Clean minimalist silhouettes crafted from premium calfskin leather and cushioned gum sole.",
-      image: "/img/kixora/slide2.jpg",
+      image: "/img/kixora/hero_shoe2.png",
     },
     {
-      tag: "ATHLETIC INNOVATION",
-      title: "Aero-Flow 8K",
-      desc: "Ultra lightweight running shoes designed for marathon endurance and explosive energy return.",
-      image: "/img/kixora/slide3.jpg",
-    },
-    {
-      tag: "TACTICAL LUXURY",
-      title: "Tactical High-Top Boot",
-      desc: "Matte black ballistic Italian leather with all-weather traction sole for rugged urban dominance.",
-      image: "/img/kixora/slide4.jpg",
-    },
-    {
-      tag: "LIMITED CONCEPT",
-      title: "Futr Cyber Low",
-      desc: "Next-gen concept sneaker with dual neon accents and dynamic impact absorption chassis.",
-      image: "/img/kixora/slide5.jpg",
+      tag: "FLAGSHIP PERFORMANCE",
+      title: "Air Jordan 1 Low Mocha",
+      desc: "Timeless heritage silhouette engineered with encapsulated Air cushioning and premium leather.",
+      image: "/img/kixora/hero_shoe4.png",
     },
   ];
 
-  // Preload all slide images to prevent image decoding stutter
+  // Preload all transparent slide assets
   useEffect(() => {
     heroSlides.forEach((slide) => {
       const img = new Image();
@@ -59,11 +50,11 @@ export function HeroBanner() {
     });
   }, []);
 
-  // Auto-play carousel every 4 seconds
+  // Auto-play carousel every 4.5 seconds
   useEffect(() => {
     const interval = setInterval(() => {
       setActiveSlide((prev) => (prev + 1) % heroSlides.length);
-    }, 4000);
+    }, 4500);
     return () => clearInterval(interval);
   }, [heroSlides.length]);
 
@@ -77,65 +68,95 @@ export function HeroBanner() {
     setActiveSlide((prev) => (prev - 1 + heroSlides.length) % heroSlides.length);
   };
 
+  const featureBadges = [
+    {
+      icon: <ElectricBoltOutlinedIcon sx={{ fontSize: 17, color: "#111827" }} />,
+      title: "LIGHTWEIGHT",
+      desc: "Less weight, more speed",
+    },
+    {
+      icon: <AirIcon sx={{ fontSize: 17, color: "#111827" }} />,
+      title: "BREATHABLE",
+      desc: "Keeps your feet cool",
+    },
+    {
+      icon: <ShieldOutlinedIcon sx={{ fontSize: 17, color: "#111827" }} />,
+      title: "DURABLE",
+      desc: "Built for the long run",
+    },
+  ];
+
   return (
     <Box
       sx={{
-        py: { xs: 3, md: 6 },
+        py: { xs: 2, md: 4 },
         bgcolor: "#ffffff",
         position: "relative",
       }}
     >
       <Container maxWidth="lg">
-        {/* Main Hero Container - Pure Solid Black */}
+        {/* Main Light Hero Container */}
         <Box
           sx={{
-            bgcolor: "#000000",
-            color: "#ffffff",
+            bgcolor: "#F4F4F6",
             borderRadius: { xs: 4, md: 6 },
-            p: { xs: 3.5, sm: 5, md: 7 },
+            p: { xs: 3, sm: 4, md: 5 },
+            pb: { xs: 6, md: 6.5 },
             position: "relative",
             overflow: "hidden",
-            minHeight: { xs: 480, md: 520 },
+            minHeight: { xs: 460, md: 490 },
             display: "flex",
             alignItems: "center",
+            border: "1px solid #E5E7EB",
           }}
         >
-          {/* Subtle Ambient Radial Lighting */}
-          <Box
+          {/* Subtle Faded Brand Watermark */}
+          <Typography
             sx={{
               position: "absolute",
-              top: "-20%",
-              right: "-10%",
-              width: "60%",
-              height: "140%",
-              background: "radial-gradient(circle, rgba(255, 255, 255, 0.05) 0%, transparent 70%)",
+              top: "48%",
+              left: "50%",
+              transform: "translate(-50%, -50%)",
+              fontSize: { xs: "24vw", md: "14vw" },
+              fontWeight: 900,
+              fontFamily: '"Outfit", sans-serif',
+              color: "rgba(0, 0, 0, 0.035)",
+              letterSpacing: "-0.04em",
+              userSelect: "none",
               pointerEvents: "none",
+              zIndex: 0,
             }}
-          />
+          >
+            NIKE
+          </Typography>
 
-          <Grid container spacing={{ xs: 4, md: 5 }} sx={{ alignItems: "center", position: "relative", zIndex: 1 }}>
-            {/* Left Column: Bold Typography & Action */}
-            <Grid size={{ xs: 12, md: 6 }}>
-              <Box sx={{ maxWidth: 480 }}>
-                {/* Clean Tag */}
+          <Grid
+            container
+            spacing={{ xs: 3, md: 2 }}
+            sx={{ alignItems: "center", position: "relative", zIndex: 1, width: "100%" }}
+          >
+            {/* Left Column: Headline & Action */}
+            <Grid size={{ xs: 12, md: 4.5 }}>
+              <Box sx={{ maxWidth: 390 }}>
+                {/* Pill Tag */}
                 <Box
                   sx={{
                     display: "inline-block",
-                    px: 1.8,
+                    px: 1.6,
                     py: 0.5,
                     borderRadius: 9999,
-                    border: "1px solid rgba(255, 255, 255, 0.2)",
-                    bgcolor: "rgba(255, 255, 255, 0.08)",
-                    mb: 2,
+                    bgcolor: "rgba(0, 0, 0, 0.06)",
+                    border: "1px solid rgba(0, 0, 0, 0.08)",
+                    mb: 1.8,
                   }}
                 >
                   <Typography
                     variant="caption"
                     sx={{
-                      color: "#e5e7eb",
+                      color: "#374151",
                       fontWeight: 800,
-                      letterSpacing: "0.14em",
-                      fontSize: "0.72rem",
+                      letterSpacing: "0.12em",
+                      fontSize: "0.7rem",
                       textTransform: "uppercase",
                     }}
                   >
@@ -149,52 +170,51 @@ export function HeroBanner() {
                   sx={{
                     fontFamily: '"Outfit", sans-serif',
                     fontWeight: 900,
-                    fontSize: { xs: "2.5rem", sm: "3.2rem", md: "3.8rem" },
+                    fontSize: { xs: "2.3rem", sm: "2.9rem", md: "3.4rem" },
                     lineHeight: 1.05,
                     letterSpacing: "-0.03em",
-                    color: "#ffffff",
+                    color: "#111827",
                     mb: 1.5,
                   }}
                 >
                   STEP INTO <br />
-                  <span style={{ color: "#ffffff", textDecoration: "underline", textDecorationThickness: "4px" }}>
-                    MORE.
-                  </span>
+                  <span style={{ color: "#111827" }}>MORE</span>
                 </Typography>
 
-                {/* Stable Subtitle Box */}
-                <Box sx={{ minHeight: { xs: 55, sm: 65 }, mb: 3 }}>
+                {/* Subtitle */}
+                <Box sx={{ minHeight: { xs: 44, sm: 52 }, mb: 3 }}>
                   <Typography
-                    variant="body1"
+                    variant="body2"
                     sx={{
-                      color: "#9ca3af",
-                      fontSize: { xs: "0.92rem", md: "1.02rem" },
-                      lineHeight: 1.6,
+                      color: "#4b5563",
+                      fontSize: { xs: "0.88rem", md: "0.95rem" },
+                      lineHeight: 1.5,
                     }}
                   >
                     {currentSlide.desc}
                   </Typography>
                 </Box>
 
-                {/* CTA Button */}
+                {/* CTA Button in Solid Black */}
                 <Button
                   variant="contained"
                   size="large"
-                  endIcon={<ArrowForwardIcon />}
+                  endIcon={<ArrowForwardIcon sx={{ fontSize: "16px !important" }} />}
                   onClick={() => navigate("/products")}
                   sx={{
-                    bgcolor: "#ffffff",
-                    color: "#000000",
+                    bgcolor: "#000000",
+                    color: "#ffffff",
                     borderRadius: 9999,
-                    px: { xs: 3.5, sm: 4.5 },
-                    py: 1.4,
+                    px: { xs: 3.5, sm: 4.2 },
+                    py: 1.3,
                     fontWeight: 800,
-                    fontSize: "0.95rem",
+                    fontSize: "0.9rem",
                     textTransform: "none",
-                    boxShadow: "0 10px 30px rgba(255,255,255,0.15)",
+                    boxShadow: "0 8px 20px rgba(0,0,0,0.2)",
                     "&:hover": {
-                      bgcolor: "#f3f4f6",
+                      bgcolor: "#262626",
                       transform: "translateY(-2px)",
+                      boxShadow: "0 12px 25px rgba(0,0,0,0.25)",
                     },
                     transition: "all 0.2s ease",
                   }}
@@ -204,13 +224,13 @@ export function HeroBanner() {
               </Box>
             </Grid>
 
-            {/* Right Column: Rock-solid Stacked Absolute Images */}
-            <Grid size={{ xs: 12, md: 6 }}>
+            {/* Center Column: 100% Transparent 3D Floating Shoe */}
+            <Grid size={{ xs: 12, md: 4.8 }}>
               <Box
                 sx={{
                   position: "relative",
                   width: "100%",
-                  height: { xs: 260, sm: 340, md: 380 },
+                  height: { xs: 220, sm: 280, md: 340 },
                   display: "flex",
                   alignItems: "center",
                   justifyContent: "center",
@@ -223,53 +243,127 @@ export function HeroBanner() {
                     src={slide.image}
                     alt={slide.title}
                     onError={(e: any) => {
-                      e.target.src = "/img/kixora/slide1.jpg";
+                      e.target.src = "/img/kixora/hero_shoe1.png";
                     }}
                     sx={{
                       position: "absolute",
-                      width: "100%",
-                      maxWidth: { xs: 320, sm: 420, md: 480 },
-                      maxHeight: { xs: 240, sm: 320, md: 360 },
+                      maxWidth: "100%",
+                      maxHeight: "100%",
+                      width: "auto",
+                      height: "auto",
                       objectFit: "contain",
                       opacity: idx === activeSlide ? 1 : 0,
-                      transform: idx === activeSlide ? "scale(1)" : "scale(0.92)",
-                      transition: "opacity 0.6s cubic-bezier(0.4, 0, 0.2, 1), transform 0.6s cubic-bezier(0.4, 0, 0.2, 1)",
+                      transform:
+                        idx === activeSlide
+                          ? "scale(1.06) translateY(-4px)"
+                          : "scale(0.96) translateY(4px)",
+                      transition:
+                        "opacity 0.5s cubic-bezier(0.4, 0, 0.2, 1), transform 0.5s cubic-bezier(0.4, 0, 0.2, 1)",
                       willChange: "opacity, transform",
-                      filter: "drop-shadow(0 15px 25px rgba(0, 0, 0, 0.9))",
+                      filter: "drop-shadow(0 18px 24px rgba(0, 0, 0, 0.18))",
                       pointerEvents: idx === activeSlide ? "auto" : "none",
                       cursor: "pointer",
-                      "&:hover": { transform: "scale(1.03)" },
+                      "&:hover": { transform: "scale(1.1) translateY(-8px)" },
                     }}
                     onClick={() => navigate("/products")}
                   />
                 ))}
               </Box>
             </Grid>
+
+            {/* Right Column: Triple Feature Badges */}
+            <Grid size={{ xs: 12, md: 2.7 }}>
+              <Box
+                sx={{
+                  display: "flex",
+                  flexDirection: { xs: "row", md: "column" },
+                  justifyContent: { xs: "space-between", md: "center" },
+                  gap: { xs: 2, md: 2.5 },
+                  bgcolor: { xs: "rgba(255,255,255,0.6)", md: "transparent" },
+                  p: { xs: 1.5, md: 0 },
+                  borderRadius: 3,
+                }}
+              >
+                {featureBadges.map((badge, idx) => (
+                  <Box
+                    key={idx}
+                    sx={{
+                      display: "flex",
+                      alignItems: "center",
+                      gap: 1.4,
+                    }}
+                  >
+                    <Box
+                      sx={{
+                        width: 36,
+                        height: 36,
+                        borderRadius: "50%",
+                        bgcolor: "#ffffff",
+                        border: "1px solid #e5e7eb",
+                        display: "flex",
+                        alignItems: "center",
+                        justifyContent: "center",
+                        flexShrink: 0,
+                        boxShadow: "0 2px 6px rgba(0,0,0,0.04)",
+                      }}
+                    >
+                      {badge.icon}
+                    </Box>
+                    <Box>
+                      <Typography
+                        variant="caption"
+                        sx={{
+                          fontWeight: 900,
+                          color: "#111827",
+                          fontSize: "0.75rem",
+                          letterSpacing: "0.06em",
+                          display: "block",
+                          lineHeight: 1.2,
+                        }}
+                      >
+                        {badge.title}
+                      </Typography>
+                      <Typography
+                        variant="caption"
+                        sx={{
+                          color: "#6b7280",
+                          fontSize: "0.7rem",
+                          lineHeight: 1.2,
+                          display: "block",
+                        }}
+                      >
+                        {badge.desc}
+                      </Typography>
+                    </Box>
+                  </Box>
+                ))}
+              </Box>
+            </Grid>
           </Grid>
 
-          {/* Bottom Indicators & Navigation */}
+          {/* Bottom Left Controls: Dots + Arrows */}
           <Box
             sx={{
               position: "absolute",
-              bottom: { xs: 14, md: 24 },
-              right: { xs: 16, md: 36 },
+              bottom: { xs: 12, md: 16 },
+              left: { xs: 16, md: 32 },
               display: "flex",
               alignItems: "center",
-              gap: 2,
+              gap: 1.8,
               zIndex: 2,
             }}
           >
-            {/* Dots Indicator */}
-            <Box sx={{ display: { xs: "none", sm: "flex" }, gap: 1, mr: 1 }}>
+            {/* Dots */}
+            <Box sx={{ display: "flex", gap: 0.7 }}>
               {heroSlides.map((_, idx) => (
                 <Box
                   key={idx}
                   onClick={() => setActiveSlide(idx)}
                   sx={{
-                    width: idx === activeSlide ? 24 : 8,
-                    height: 8,
+                    width: idx === activeSlide ? 16 : 6,
+                    height: 6,
                     borderRadius: 9999,
-                    bgcolor: idx === activeSlide ? "#ffffff" : "rgba(255, 255, 255, 0.3)",
+                    bgcolor: idx === activeSlide ? "#111827" : "#d1d5db",
                     cursor: "pointer",
                     transition: "all 0.3s ease",
                   }}
@@ -277,38 +371,52 @@ export function HeroBanner() {
               ))}
             </Box>
 
-            {/* Slide Index (01 / 05) */}
-            <Typography variant="caption" sx={{ color: "#9ca3af", fontWeight: 800, letterSpacing: 2 }}>
-              0{activeSlide + 1} / 0{heroSlides.length}
-            </Typography>
-
-            {/* Prev / Next Arrows */}
-            <Box sx={{ display: "flex", gap: 0.6 }}>
+            {/* Circular Arrows */}
+            <Box sx={{ display: "flex", gap: 0.5 }}>
               <IconButton
                 size="small"
                 onClick={handlePrev}
                 sx={{
-                  color: "#ffffff",
-                  border: "1px solid rgba(255,255,255,0.25)",
-                  p: 0.6,
-                  "&:hover": { bgcolor: "rgba(255,255,255,0.15)" },
+                  color: "#111827",
+                  border: "1px solid #d1d5db",
+                  bgcolor: "#ffffff",
+                  p: 0.5,
+                  "&:hover": { bgcolor: "#f3f4f6" },
                 }}
               >
-                <ArrowBackIosNewIcon sx={{ fontSize: 12 }} />
+                <ArrowBackIosNewIcon sx={{ fontSize: 9 }} />
               </IconButton>
               <IconButton
                 size="small"
                 onClick={handleNext}
                 sx={{
-                  color: "#ffffff",
-                  border: "1px solid rgba(255,255,255,0.25)",
-                  p: 0.6,
-                  "&:hover": { bgcolor: "rgba(255,255,255,0.15)" },
+                  color: "#111827",
+                  border: "1px solid #d1d5db",
+                  bgcolor: "#ffffff",
+                  p: 0.5,
+                  "&:hover": { bgcolor: "#f3f4f6" },
                 }}
               >
-                <ArrowForwardIosIcon sx={{ fontSize: 12 }} />
+                <ArrowForwardIosIcon sx={{ fontSize: 9 }} />
               </IconButton>
             </Box>
+          </Box>
+
+          {/* Bottom Right Slide Numbering */}
+          <Box
+            sx={{
+              position: "absolute",
+              bottom: { xs: 14, md: 18 },
+              right: { xs: 16, md: 32 },
+              zIndex: 2,
+            }}
+          >
+            <Typography
+              variant="caption"
+              sx={{ color: "#6b7280", fontWeight: 800, letterSpacing: 1.5, fontSize: "0.8rem" }}
+            >
+              0{activeSlide + 1} / 0{heroSlides.length}
+            </Typography>
           </Box>
         </Box>
       </Container>
