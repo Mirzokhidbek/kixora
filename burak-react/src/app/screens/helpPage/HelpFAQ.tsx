@@ -15,29 +15,29 @@ import SearchIcon from "@mui/icons-material/Search";
 
 const FAQ_ITEMS = [
   {
-    category: "ORDERING",
-    q: "How does Burak Restaurant ensure hot and fresh delivery?",
-    a: "All our signature meats and grilled items are packed in premium temperature-insulated thermal boxes immediately from the wood-fired grill, preserving heat and aroma until doorstep arrival.",
+    category: "SIZING",
+    q: "How do I choose the correct shoe size for KIXORA sneakers?",
+    a: "All KIXORA footwear fits true to European standard sizing (EU 38-45). If you have wide feet or are between half sizes, we recommend selecting one half size up for maximum athletic comfort.",
   },
   {
-    category: "ORDERING",
-    q: "Can I customize the doneness of my steaks or request allergen modifications?",
-    a: "Yes! While placing your order, you can specify cooking preferences (Medium Rare, Medium, Well Done) or note dietary allergies in the item special instructions field.",
+    category: "SHIPPING",
+    q: "How long does express shipping take and is it free?",
+    a: "We offer complimentary express delivery across Uzbekistan on all orders over $100. Standard delivery arrives within 24 to 48 hours with door-to-door real-time tracking.",
   },
   {
-    category: "RESERVATION",
-    q: "How far in advance should I book a VIP table for special celebrations?",
-    a: "For weekend dinner reservations or private dining rooms, we recommend booking at least 24 to 48 hours in advance via our concierge hotline.",
+    category: "AUTHENTICITY",
+    q: "Are all KIXORA shoes 100% authentic and verified?",
+    a: "Yes. Every pair of KIXORA sneakers comes with a verifiable NFC authentication badge and official Certificate of Authenticity in the original luxury designer box.",
   },
   {
-    category: "PAYMENT",
-    q: "Which payment systems are accepted for online and in-store dining?",
-    a: "We accept Visa, MasterCard, Mir, UzCard, Humo, Payme, Click, and Cash upon delivery.",
+    category: "RETURNS",
+    q: "What is the return and exchange policy?",
+    a: "We offer a 30-day hassle-free return and size exchange policy. Shoes must be unworn in their original packaging with tags intact.",
   },
   {
-    category: "LOYALTY",
-    q: "How are Burak VIP Reward points calculated and redeemed?",
-    a: "Every $1 spent earns 10 loyalty points. Accumulated points can be used for complimentary chef desserts, appetizers, or exclusive dining discounts.",
+    category: "DROPS",
+    q: "How do I participate in limited edition VIP sneaker raffles?",
+    a: "Simply create a free KIXORA VIP Account. Registered members receive secret drop links and early raffle notifications via email and Telegram 2 hours before general release.",
   },
 ];
 
@@ -56,21 +56,27 @@ export function HelpFAQ() {
   return (
     <Box sx={{ mb: 6 }}>
       <Box sx={{ display: "flex", flexDirection: { xs: "column", md: "row" }, justifyContent: "space-between", alignItems: { xs: "stretch", md: "center" }, gap: 2, mb: 3 }}>
-        <Typography variant="h4" sx={{ fontWeight: 800 }}>
+        <Typography variant="h4" sx={{ fontWeight: 900, color: "#000000", letterSpacing: "-0.02em" }}>
           Frequently Asked Questions
         </Typography>
 
         <TextField
           size="small"
-          placeholder="Search FAQs..."
+          placeholder="Search question..."
           value={searchWord}
           onChange={(e) => setSearchWord(e.target.value)}
-          sx={{ minWidth: 260, bgcolor: "#fff", borderRadius: 2 }}
+          sx={{
+            minWidth: 260,
+            "& .MuiOutlinedInput-root": {
+              borderRadius: 9999,
+              bgcolor: "#f9fafb",
+            },
+          }}
           slotProps={{
             input: {
               startAdornment: (
                 <InputAdornment position="start">
-                  <SearchIcon sx={{ color: "primary.main" }} />
+                  <SearchIcon fontSize="small" sx={{ color: "#6b7280" }} />
                 </InputAdornment>
               ),
             },
@@ -78,41 +84,53 @@ export function HelpFAQ() {
         />
       </Box>
 
+      {/* Category Tabs */}
       <Tabs
         value={selectedCat}
         onChange={(_, val) => setSelectedCat(val)}
+        variant="scrollable"
+        scrollButtons="auto"
         sx={{
           mb: 3,
-          "& .MuiTabs-indicator": { backgroundColor: "#f59e0b", height: 3 },
-          "& .MuiTab-root": { fontWeight: 700, color: "#64748b", "&.Mui-selected": { color: "#0f172a" } },
+          "& .MuiTab-root": {
+            fontWeight: 800,
+            fontSize: "0.85rem",
+            textTransform: "none",
+            color: "#6b7280",
+            "&.Mui-selected": { color: "#000000" },
+          },
+          "& .MuiTabs-indicator": { bgcolor: "#000000", height: 2 },
         }}
       >
-        <Tab label="ALL TOPICS" value="ALL" />
-        <Tab label="ORDERING & MENU" value="ORDERING" />
-        <Tab label="RESERVATIONS" value="RESERVATION" />
-        <Tab label="PAYMENTS" value="PAYMENT" />
-        <Tab label="LOYALTY POINTS" value="LOYALTY" />
+        <Tab label="All Inquiries" value="ALL" />
+        <Tab label="Size & Fit" value="SIZING" />
+        <Tab label="Express Shipping" value="SHIPPING" />
+        <Tab label="Authenticity" value="AUTHENTICITY" />
+        <Tab label="Returns & Exchanges" value="RETURNS" />
+        <Tab label="Limited Drops" value="DROPS" />
       </Tabs>
 
+      {/* FAQ Accordions */}
       <Box sx={{ display: "flex", flexDirection: "column", gap: 1.5 }}>
         {filteredFaqs.map((faq, idx) => (
           <Accordion
             key={idx}
-            defaultExpanded={idx === 0}
+            elevation={0}
             sx={{
-              borderRadius: "12px !important",
-              border: "1px solid #e2e8f0",
+              borderRadius: "16px !important",
+              border: "1px solid #e5e7eb",
               "&:before": { display: "none" },
-              boxShadow: "0 2px 8px rgba(15, 23, 42, 0.04)",
+              bgcolor: "#ffffff",
+              overflow: "hidden",
             }}
           >
-            <AccordionSummary expandIcon={<ExpandMoreIcon sx={{ color: "primary.main" }} />}>
-              <Typography variant="subtitle1" sx={{ fontWeight: 700, color: "#0f172a" }}>
+            <AccordionSummary expandIcon={<ExpandMoreIcon sx={{ color: "#000000" }} />}>
+              <Typography sx={{ fontWeight: 800, fontSize: "0.95rem", color: "#111827" }}>
                 {faq.q}
               </Typography>
             </AccordionSummary>
-            <AccordionDetails sx={{ pt: 0 }}>
-              <Typography variant="body2" color="text.secondary" sx={{ lineHeight: 1.7 }}>
+            <AccordionDetails sx={{ pt: 0, pb: 2.5 }}>
+              <Typography sx={{ color: "#4b5563", lineHeight: 1.7, fontSize: "0.9rem" }}>
                 {faq.a}
               </Typography>
             </AccordionDetails>

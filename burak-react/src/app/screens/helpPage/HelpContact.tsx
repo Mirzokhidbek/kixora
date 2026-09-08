@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { Card, Typography, Grid, TextField, Button, Snackbar, Alert } from "@mui/material";
-import SendIcon from "@mui/icons-material/Send";
+import ArrowForwardIcon from "@mui/icons-material/ArrowForward";
 
 export function HelpContact() {
   const [name, setName] = useState("");
@@ -15,7 +15,7 @@ export function HelpContact() {
       setToastOpen(true);
       return;
     }
-    setToastMsg("Thank you! Your message has been sent to Burak VIP Concierge.");
+    setToastMsg("Thank you! Your inquiry has been sent to KIXORA Shoe Care & Support.");
     setToastOpen(true);
     setName("");
     setContact("");
@@ -23,12 +23,12 @@ export function HelpContact() {
   };
 
   return (
-    <Card sx={{ p: { xs: 3, md: 5 }, borderRadius: 4, bgcolor: "#f8fafc", border: "1px solid #e2e8f0" }}>
-      <Typography variant="h5" sx={{ fontWeight: 800, mb: 1 }}>
-        Have a Specific Inquiry?
+    <Card sx={{ p: { xs: 3, md: 5 }, borderRadius: 4, bgcolor: "#f9fafb", border: "1px solid #e5e7eb", boxShadow: "none" }}>
+      <Typography variant="h5" sx={{ fontWeight: 900, mb: 0.5, color: "#000000" }}>
+        Have a Specific Question?
       </Typography>
-      <Typography variant="body2" color="text.secondary" sx={{ mb: 3 }}>
-        Send a direct message to our restaurant management and executive chef team.
+      <Typography variant="body2" sx={{ color: "#6b7280", mb: 3 }}>
+        Send a direct message to our customer care and footwear specialists.
       </Typography>
 
       <Grid container spacing={2.5}>
@@ -39,17 +39,17 @@ export function HelpContact() {
             value={name}
             onChange={(e) => setName(e.target.value)}
             size="small"
-            sx={{ bgcolor: "#fff" }}
+            sx={{ bgcolor: "#fff", "& .MuiOutlinedInput-root": { borderRadius: 2.5 } }}
           />
         </Grid>
         <Grid size={{ xs: 12, sm: 6 }}>
           <TextField
             fullWidth
-            label="Your Email / Phone"
+            label="Your Email or Phone"
             value={contact}
             onChange={(e) => setContact(e.target.value)}
             size="small"
-            sx={{ bgcolor: "#fff" }}
+            sx={{ bgcolor: "#fff", "& .MuiOutlinedInput-root": { borderRadius: 2.5 } }}
           />
         </Grid>
         <Grid size={{ xs: 12 }}>
@@ -57,21 +57,31 @@ export function HelpContact() {
             fullWidth
             multiline
             rows={3}
-            label="Your Message or Special Request"
+            label="Your Message or Size Inquiry"
             value={message}
             onChange={(e) => setMessage(e.target.value)}
-            sx={{ bgcolor: "#fff" }}
+            sx={{ bgcolor: "#fff", "& .MuiOutlinedInput-root": { borderRadius: 2.5 } }}
           />
         </Grid>
         <Grid size={{ xs: 12 }}>
           <Button
             variant="contained"
-            color="primary"
-            endIcon={<SendIcon />}
+            endIcon={<ArrowForwardIcon />}
             onClick={handleSubmit}
-            sx={{ borderRadius: 2, px: 3.5, py: 1, fontWeight: 700 }}
+            sx={{
+              py: 1.2,
+              px: 4,
+              borderRadius: 9999,
+              fontWeight: 800,
+              fontSize: "0.9rem",
+              bgcolor: "#000000",
+              color: "#ffffff",
+              textTransform: "none",
+              boxShadow: "none",
+              "&:hover": { bgcolor: "#262626" },
+            }}
           >
-            Submit Inquiry
+            Send Inquiry
           </Button>
         </Grid>
       </Grid>
@@ -82,7 +92,7 @@ export function HelpContact() {
         onClose={() => setToastOpen(false)}
         anchorOrigin={{ vertical: "bottom", horizontal: "center" }}
       >
-        <Alert severity="success" sx={{ width: "100%", borderRadius: 3, fontWeight: 700 }}>
+        <Alert severity="success" sx={{ width: "100%", borderRadius: 2, fontWeight: 700 }}>
           {toastMsg}
         </Alert>
       </Snackbar>

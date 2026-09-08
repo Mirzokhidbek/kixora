@@ -31,7 +31,9 @@ export function HeroBanner() {
       ];
 
   const currentItem = slides[activeSlide % slides.length];
-  const currentImage = currentItem?.productImages?.[0] ? getImageSrc(currentItem.productImages[0]) : "";
+  const currentImage = currentItem?.productImages?.[0]
+    ? getImageSrc(currentItem.productImages[0])
+    : "/img/kixora/hero.jpg";
 
   const handleNext = () => {
     setActiveSlide((prev) => (prev + 1) % slides.length);
