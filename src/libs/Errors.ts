@@ -15,6 +15,7 @@ export enum Message {
   CREATE_FAILED = "Create failed!",
   UPDATE_FAILED = "Update failed!",
   USED_NICK_PHONE = "You are inserting already used nick or phone!",
+  USED_EMAIL = "This email is already registered. Please sign in!",
   NO_MEMBER_NICK = "No member with that nickname!",
   WRONG_PASSWORD = "Password is incorrect!",
   BLOCKED_USER = "You have been blocked, please contact restaurant!",
@@ -24,14 +25,14 @@ export enum Message {
 
 class Errors extends Error {
   public code: HTTPCode;
-  public message: Message;
+  public message: Message | string;
 
   static standard = new Errors(
     HTTPCode.INTERNAL_SERVER_ERROR,
     Message.SOMETHING_WENT_WRONG
   );
 
-  constructor(statusCode: HTTPCode, statusMessage: Message) {
+  constructor(statusCode: HTTPCode, statusMessage: Message | string) {
     super(statusMessage);
     this.code = statusCode;
     this.message = statusMessage;

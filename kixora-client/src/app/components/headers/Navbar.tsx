@@ -76,9 +76,9 @@ export function Navbar({
   const navLinks = [
     { title: "Home", path: "/" },
     { title: "Shop", path: "/products" },
-    { title: "Orders", path: "/orders" },
-    { title: "Account", path: "/user" },
-    { title: "Support", path: "/help" },
+    { title: "New Arrivals", path: "/products" },
+    { title: "About", path: "/user" },
+    { title: "Contact", path: "/help" },
   ];
 
   const totalCartCount = cartItems.reduce(
