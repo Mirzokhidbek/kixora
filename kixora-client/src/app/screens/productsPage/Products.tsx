@@ -20,6 +20,7 @@ import {
   FormControl,
   InputLabel,
   Divider,
+  Skeleton,
 } from "@mui/material";
 import SearchIcon from "@mui/icons-material/Search";
 import AddShoppingCartIcon from "@mui/icons-material/AddShoppingCart";
@@ -65,15 +66,18 @@ export function Products({ onAdd }: ProductsProps) {
 
   const [searchText, setSearchText] = useState("");
   const [selectedSize, setSelectedSize] = useState<number | null>(null);
+  const [loading, setLoading] = useState<boolean>(true);
   const [toastOpen, setToastOpen] = useState(false);
   const [toastMsg, setToastMsg] = useState("");
 
   useEffect(() => {
+    setLoading(true);
     const productService = new ProductService();
     productService
       .getProducts(productsSearch)
       .then((data) => setProducts(data))
-      .catch((err) => console.log("Products fetch error:", err));
+      .catch((err) => console.log("Products fetch error:", err))
+      .finally(() => setLoading(false));
   }, [productsSearch, setProducts]);
 
   const searchProductHandler = () => {
@@ -158,7 +162,7 @@ export function Products({ onAdd }: ProductsProps) {
           <Typography
             variant="caption"
             sx={{
-              color: "#6b7280",
+              color: "#374151",
               fontWeight: 800,
               letterSpacing: "0.15em",
               textTransform: "uppercase",
@@ -353,8 +357,28 @@ export function Products({ onAdd }: ProductsProps) {
               </FormControl>
             </Box>
 
+            {/* Loading Skeleton Grid */}
+            {loading && (
+              <Grid container spacing={3}>
+                {[1, 2, 3, 4, 5, 6, 7, 8, 9].map((n) => (
+                  <Grid key={n} size={{ xs: 12, sm: 6, md: 4 }}>
+                    <Box sx={{ p: 2, bgcolor: "#ffffff", borderRadius: 4, border: "1px solid #e5e7eb" }}>
+                      <Skeleton variant="rounded" height={180} sx={{ borderRadius: 3, mb: 2 }} />
+                      <Skeleton variant="text" width="40%" height={20} sx={{ mb: 0.5 }} />
+                      <Skeleton variant="text" width="85%" height={28} sx={{ mb: 1 }} />
+                      <Skeleton variant="text" width="30%" height={20} sx={{ mb: 2 }} />
+                      <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "center", pt: 1, borderTop: "1px solid #f3f4f6" }}>
+                        <Skeleton variant="text" width="35%" height={32} />
+                        <Skeleton variant="rounded" width={80} height={32} sx={{ borderRadius: 9999 }} />
+                      </Box>
+                    </Box>
+                  </Grid>
+                ))}
+              </Grid>
+            )}
+
             {/* Empty State */}
-            {products.length === 0 && (
+            {!loading && products.length === 0 && (
               <Box
                 sx={{
                   py: 10,
@@ -387,13 +411,14 @@ export function Products({ onAdd }: ProductsProps) {
             )}
 
             {/* Products Grid */}
-            <Grid container spacing={3}>
-              {products.map((product) => {
-                const isFav = isInWishlist(product._id);
-                const image = product.productImages?.[0] ? getImageSrc(product.productImages[0]) : "";
+            {!loading && (
+              <Grid container spacing={3}>
+                {products.map((product) => {
+                  const isFav = isInWishlist(product._id);
+                  const image = product.productImages?.[0] ? getImageSrc(product.productImages[0]) : "";
 
-                return (
-                  <Grid key={product._id} size={{ xs: 12, sm: 6, md: 4 }}>
+                  return (
+                    <Grid key={product._id} size={{ xs: 12, sm: 6, md: 4 }}>
                     <Card
                       onClick={() => navigate(`/products/${product._id}`)}
                       sx={{
@@ -483,7 +508,7 @@ export function Products({ onAdd }: ProductsProps) {
                           <Typography
                             variant="caption"
                             sx={{
-                              color: "#6b7280",
+                              color: "#374151",
                               fontWeight: 700,
                               fontSize: "0.72rem",
                               letterSpacing: "0.08em",
@@ -511,7 +536,7 @@ export function Products({ onAdd }: ProductsProps) {
 
                           <Box sx={{ display: "flex", alignItems: "center", gap: 0.8, mb: 1.5 }}>
                             <Rating value={4.8} precision={0.1} size="small" readOnly sx={{ fontSize: "0.95rem" }} />
-                            <Typography variant="caption" sx={{ color: "#6b7280", fontWeight: 700 }}>
+                            <Typography variant="caption" sx={{ color: "#374151", fontWeight: 700 }}>
                               4.8 (1.2k)
                             </Typography>
                           </Box>
@@ -552,6 +577,7 @@ export function Products({ onAdd }: ProductsProps) {
                 );
               })}
             </Grid>
+            )}
 
             {/* Pagination */}
             <Box sx={{ display: "flex", justifyContent: "center", mt: 6 }}>
