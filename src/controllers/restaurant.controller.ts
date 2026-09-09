@@ -202,7 +202,7 @@ restaurantController.updateChosenProductDetails = async (
   res: Response
 ) => {
   try {
-    const id = req.params.id;
+    const id = String(req.params.id);
     console.log("updateChosenProductDetails (Admin):", id, req.body);
     const result = await productService.updateChosenProduct(id, req.body);
     res.status(HTTPCode.OK).json({ data: result });
@@ -219,7 +219,7 @@ restaurantController.updateMemberPoints = async (
   res: Response
 ) => {
   try {
-    const id = req.params.id;
+    const id = String(req.params.id);
     const points = Number(req.body.points || 0);
     console.log("updateMemberPoints (Admin):", id, points);
     const result = await memberService.updateMemberPointsByAdmin(id, points);

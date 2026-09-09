@@ -12,8 +12,8 @@ $(document).ready(function () {
 
   // 2. Status Filter Tabs (ALL, PAUSE, PROCESS, FINISH)
   $(".order-status-filter-btn").on("click", function () {
-    $(".order-status-filter-btn").removeClass("btn-dark active").addClass("btn-outline-secondary");
-    $(this).removeClass("btn-outline-secondary").addClass("btn-dark active");
+    $(".order-status-filter-btn").removeClass("active");
+    $(this).addClass("active");
     filterOrdersTable();
   });
 

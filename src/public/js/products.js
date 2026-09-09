@@ -13,8 +13,8 @@ $(document).ready(function () {
 
   // 2. Collection Filter Pills
   $(".collection-filter-btn").on("click", function () {
-    $(".collection-filter-btn").removeClass("btn-dark active").addClass("btn-outline-secondary");
-    $(this).removeClass("btn-outline-secondary").addClass("btn-dark active");
+    $(".collection-filter-btn").removeClass("active");
+    $(this).addClass("active");
     filterProductsTable();
   });
 
