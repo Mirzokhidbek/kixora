@@ -186,6 +186,7 @@ export function Navbar({
             <Box sx={{ display: "flex", alignItems: "center", gap: { xs: 1, sm: 2 } }}>
               {/* Search Icon */}
               <IconButton
+                aria-label="Search footwear products"
                 onClick={() => navigate("/products")}
                 sx={{
                   color: "#111827",
@@ -198,6 +199,7 @@ export function Navbar({
 
               {/* Shopping Bag Icon */}
               <IconButton
+                aria-label="Open shopping bag"
                 sx={{
                   color: "#111827",
                   p: 1,
@@ -343,6 +345,7 @@ export function Navbar({
 
               {/* Mobile Menu Trigger */}
               <IconButton
+                aria-label="Toggle navigation menu"
                 sx={{ color: "#111827", display: { xs: "flex", md: "none" }, p: 0.8 }}
                 onClick={() => setMobileOpen(true)}
               >

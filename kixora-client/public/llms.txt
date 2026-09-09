@@ -1,0 +1,14 @@
+# KIXORA — Luxury Footwear & Street Couture
+> Step Into More. Premium sneakers, athletic performance footwear, and designer collections.
+
+## Website Details
+- Brand: KIXORA
+- Category: Luxury Footwear, Sneakers, Athletic Shoes, Boots
+- Official Site: https://kixora.vercel.app
+
+## Endpoints & Pages
+- / : Home page with featured drops, trending footwear, and brand philosophy
+- /products : Footwear catalog with multi-filter (Sneakers, Running, Boots, Casual, Limited Drops, EU Sizes 38-45)
+- /orders : User order history and shipment tracking
+- /user : Profile management and luxury member credentials
+- /help : Customer assistance, FAQ, returns, and global shipping policies
