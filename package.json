@@ -14,6 +14,7 @@
   "author": "MIT",
   "license": "ISC",
   "dependencies": {
+    "@google/generative-ai": "^0.24.1",
     "bcryptjs": "^3.0.3",
     "connect-mongodb-session": "^5.0.0",
     "cookie-parser": "^1.4.7",

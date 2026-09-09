@@ -54,8 +54,9 @@ export function HomePage({ onAdd }: HomePageProps) {
 
   return (
     <Box sx={{ width: "100%", overflowX: "hidden", bgcolor: "#ffffff" }}>
-      {/* 1. Hero Section (STEP INTO MORE, Light Container, Triple Badges, Solid Black CTA) */}
-      <HeroBanner />
+      {/* 1. Hero Section (STEP INTO MORE, Light Container, Triple Badges, Solid Black CTA, AI Search Bar) */}
+      <HeroBanner onAdd={onAdd} />
+
 
       {/* 2. Popular Picks (Best Sellers 4-Card Grid with Solid Black "Add to Cart" Buttons) */}
       <PopularDishes onAdd={onAdd} />

@@ -28,3 +28,13 @@ export interface ProductInquiry {
   color?: string;
 }
 
+export interface AISearchResponse {
+  query: string;
+  intent: {
+    collection: ProductCollection | null;
+    color: string | null;
+    keywords: string[];
+    recommendation: string;
+  };
+  products: Product[];
+}
