@@ -246,6 +246,23 @@ class MemberService {
     if (!result) throw new Errors(HTTPCode.NOT_MODIFIED, Message.UPDATE_FAILED);
     return (result as any).toJSON() as Member;
   }
+
+  /** BSSR: Adjust User Loyalty Reward Points by Brand Admin **/
+  public async updateMemberPointsByAdmin(
+    id: string,
+    points: number
+  ): Promise<Member> {
+    const memberId = shapeIntoMongooseObjectId(id);
+    const result = await this.memberModel
+      .findByIdAndUpdate(
+        { _id: memberId },
+        { $set: { memberPoints: points } },
+        { new: true }
+      )
+      .exec();
+    if (!result) throw new Errors(HTTPCode.NOT_MODIFIED, Message.UPDATE_FAILED);
+    return (result as any).toJSON() as Member;
+  }
 }
 
 export default MemberService;

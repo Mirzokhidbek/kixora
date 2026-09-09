@@ -1,8 +1,8 @@
 <%- include('includes/header') %>
 
-<main class="container-fluid px-lg-5 my-5 flex-grow-1">
-  <!-- Hero Card -->
-  <div class="admin-card p-4 p-md-5 mb-4 position-relative overflow-hidden" style="background: linear-gradient(135deg, #090a0f 0%, #1e293b 100%); color: #fff; border: 1px solid rgba(255, 70, 85, 0.2);">
+<main class="container-fluid px-lg-5 my-4 flex-grow-1">
+  <!-- Top Brand Hero Banner -->
+  <div class="admin-card p-4 p-md-5 mb-4 position-relative overflow-hidden" style="background: linear-gradient(135deg, #090a0f 0%, #1e293b 100%); color: #fff; border: 1px solid rgba(255, 70, 85, 0.25); border-radius: 20px;">
     <div class="position-absolute end-0 bottom-0 opacity-10 d-none d-lg-block p-4" style="pointer-events: none;">
       <i class="fa-solid fa-shoe-prints" style="font-size: 16rem; color: #ff4655;"></i>
     </div>
@@ -11,29 +11,32 @@
       <div class="col-lg-8">
         <div class="d-inline-flex align-items-center gap-2 px-3 py-1 rounded-pill bg-danger bg-opacity-10 text-danger border border-danger border-opacity-25 mb-3">
           <i class="fa-solid fa-bolt"></i>
-          <span class="small fw-semibold text-warning">KIXORA Brand Management Suite v3.0</span>
+          <span class="small fw-semibold text-warning">KIXORA Executive Brand Suite v4.0</span>
         </div>
         <h1 class="display-5 fw-bold text-white mb-2">
-          Welcome, <span class="text-warning"><%= member ? member.memberNick : 'KIXORA Administrator' %></span>!
+          Welcome back, <span class="text-warning"><%= member ? member.memberNick : 'Brand Director' %></span>!
         </h1>
-        <p class="fs-5 text-slate-300 mb-4 col-md-10" style="color: #94a3b8;">
-          Monitor live sneaker sales, publish new footwear drops, manage shoe sizes and stock levels, and control VIP customer accounts.
+        <p class="fs-6 text-slate-300 mb-4 col-md-11" style="color: #94a3b8; line-height: 1.6;">
+          Real-time commerce overview: monitor live footwear sales, track logistics delivery pipelines, manage sneaker inventory drops, and audit customer VIP tiers.
         </p>
         
-        <div class="d-flex flex-wrap gap-3">
+        <div class="d-flex flex-wrap gap-2.5">
           <% if (member) { %>
             <a class="btn-gold" href="/admin/product/all" style="background: linear-gradient(135deg, #ff4655, #f59e0b);">
-              <i class="fa-solid fa-shoe-prints"></i> Manage Footwear Catalog
+              <i class="fa-solid fa-plus-circle"></i> Footwear Catalog
             </a>
-            <a class="btn btn-outline-light rounded-3 px-4 py-2 fw-semibold" href="/admin/user/all">
-              <i class="fa-solid fa-users me-1"></i> Customer Accounts
+            <a class="btn btn-outline-light rounded-3 px-3.5 py-2 fw-semibold" href="/admin/order/all">
+              <i class="fa-solid fa-truck-fast me-1.5"></i> Logistics & Orders
+              <% if (orderMetrics && orderMetrics.pendingOrders > 0) { %>
+                <span class="badge bg-warning text-dark ms-1.5"><%= orderMetrics.pendingOrders %> New</span>
+              <% } %>
+            </a>
+            <a class="btn btn-outline-secondary rounded-3 px-3.5 py-2 fw-semibold text-white border-secondary" href="/admin/user/all">
+              <i class="fa-solid fa-users me-1.5"></i> Customers
             </a>
           <% } else { %>
-            <a class="btn-gold" href="/admin/signup" style="background: linear-gradient(135deg, #ff4655, #f59e0b);">
-              <i class="fa-solid fa-user-plus"></i> Register Brand
-            </a>
-            <a class="btn btn-outline-light rounded-3 px-4 py-2 fw-semibold" href="/admin/login">
-              <i class="fa-solid fa-right-to-bracket me-1"></i> Login to Console
+            <a class="btn-gold" href="/admin/login" style="background: linear-gradient(135deg, #ff4655, #f59e0b);">
+              <i class="fa-solid fa-right-to-bracket"></i> Login to Console
             </a>
           <% } %>
         </div>
@@ -41,57 +44,225 @@
     </div>
   </div>
 
-  <!-- Key Metrics Row -->
-  <div class="row g-4 mb-4">
+  <!-- Key Metrics Row (4 Cards) -->
+  <div class="row g-3.5 mb-4">
+    <!-- 1. Total Revenue -->
     <div class="col-sm-6 col-xl-3">
-      <div class="admin-card stat-card">
-        <div class="stat-icon gold" style="background: rgba(255, 70, 85, 0.15); color: #ff4655;">
-          <i class="fa-solid fa-shoe-prints"></i>
+      <div class="admin-card stat-card" style="border-radius: 16px;">
+        <div class="stat-icon" style="background: rgba(16, 185, 129, 0.15); color: #10b981;">
+          <i class="fa-solid fa-dollar-sign fs-4"></i>
+        </div>
+        <div>
+          <div class="stat-title">Total Revenue</div>
+          <h3 class="stat-value text-dark fw-bold mb-0">
+            $<%= Number(orderMetrics ? orderMetrics.totalRevenue : 0).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) %>
+          </h3>
+          <div class="small text-muted mt-0.5"><i class="fa-solid fa-arrow-trend-up text-success me-1"></i>From <%= orderMetrics ? orderMetrics.totalOrders : 0 %> Orders</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 2. Active Footwear Models -->
+    <div class="col-sm-6 col-xl-3">
+      <div class="admin-card stat-card" style="border-radius: 16px;">
+        <div class="stat-icon" style="background: rgba(255, 70, 85, 0.15); color: #ff4655;">
+          <i class="fa-solid fa-shoe-prints fs-4"></i>
         </div>
         <div>
           <div class="stat-title">Footwear Models</div>
-          <h3 class="stat-value">Active</h3>
+          <h3 class="stat-value text-dark fw-bold mb-0">
+            <%= productMetrics ? productMetrics.activeProducts : 0 %> <span class="fs-6 text-muted fw-normal">/ <%= productMetrics ? productMetrics.totalProducts : 0 %></span>
+          </h3>
+          <% if (productMetrics && productMetrics.lowStockCount > 0) { %>
+            <div class="small text-danger fw-semibold mt-0.5">
+              <i class="fa-solid fa-triangle-exclamation me-1"></i><%= productMetrics.lowStockCount %> Low Stock Alert
+            </div>
+          <% } else { %>
+            <div class="small text-success mt-0.5"><i class="fa-solid fa-check-circle me-1"></i>Stock Levels Healthy</div>
+          <% } %>
         </div>
       </div>
     </div>
 
+    <!-- 3. Connected VIPs / Customers -->
     <div class="col-sm-6 col-xl-3">
-      <div class="admin-card stat-card">
-        <div class="stat-icon green">
-          <i class="fa-solid fa-user-check"></i>
+      <div class="admin-card stat-card" style="border-radius: 16px;">
+        <div class="stat-icon" style="background: rgba(59, 130, 246, 0.15); color: #3b82f6;">
+          <i class="fa-solid fa-users fs-4"></i>
         </div>
         <div>
-          <div class="stat-title">Sneakerheads / VIPs</div>
-          <h3 class="stat-value">Connected</h3>
+          <div class="stat-title">VIP Customers</div>
+          <h3 class="stat-value text-dark fw-bold mb-0"><%= userCount || 0 %></h3>
+          <div class="small text-muted mt-0.5"><i class="fa-solid fa-circle-check text-primary me-1"></i>Registered Members</div>
         </div>
       </div>
     </div>
 
+    <!-- 4. Pending Logistics -->
     <div class="col-sm-6 col-xl-3">
-      <div class="admin-card stat-card">
-        <div class="stat-icon blue">
-          <i class="fa-solid fa-shield-halved"></i>
+      <div class="admin-card stat-card" style="border-radius: 16px;">
+        <div class="stat-icon" style="background: rgba(245, 158, 11, 0.15); color: #f59e0b;">
+          <i class="fa-solid fa-truck-ramp-box fs-4"></i>
         </div>
         <div>
-          <div class="stat-title">Database Storage</div>
-          <h3 class="stat-value">MongoDB Atlas</h3>
+          <div class="stat-title">Pending Logistics</div>
+          <h3 class="stat-value text-dark fw-bold mb-0"><%= orderMetrics ? (orderMetrics.pendingOrders + orderMetrics.processOrders) : 0 %></h3>
+          <div class="small text-muted mt-0.5">
+            <span class="text-warning fw-semibold"><%= orderMetrics ? orderMetrics.pendingOrders : 0 %> Waiting</span> &bull; 
+            <span class="text-primary fw-semibold"><%= orderMetrics ? orderMetrics.processOrders : 0 %> In Transit</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Interactive Charts Row -->
+  <div class="row g-4 mb-4">
+    <!-- Chart 1: Revenue Dynamics -->
+    <div class="col-lg-8">
+      <div class="admin-card p-4" style="border-radius: 18px; border: 1px solid #e5e7eb; background: #ffffff;">
+        <div class="d-flex justify-content-between align-items-center mb-3">
+          <div>
+            <h5 class="fw-bold text-dark mb-0">Sales & Revenue Dynamics</h5>
+            <p class="small text-muted mb-0">Monthly footwear volume across all collections ($)</p>
+          </div>
+          <div class="badge bg-light text-dark border px-3 py-1.5 fw-semibold">
+            Last 6 Months
+          </div>
+        </div>
+        <div style="height: 280px; position: relative;">
+          <canvas id="revenueChart"></canvas>
         </div>
       </div>
     </div>
 
-    <div class="col-sm-6 col-xl-3">
-      <div class="admin-card stat-card">
-        <div class="stat-icon purple">
-          <i class="fa-solid fa-bolt"></i>
+    <!-- Chart 2: Collection Breakdown -->
+    <div class="col-lg-4">
+      <div class="admin-card p-4" style="border-radius: 18px; border: 1px solid #e5e7eb; background: #ffffff; height: 100%;">
+        <div class="d-flex justify-content-between align-items-center mb-3">
+          <div>
+            <h5 class="fw-bold text-dark mb-0">Catalog Breakdown</h5>
+            <p class="small text-muted mb-0">Footwear models by collection</p>
+          </div>
         </div>
-        <div>
-          <div class="stat-title">API Engine</div>
-          <h3 class="stat-value">Live (Port 3001)</h3>
+        <div style="height: 220px; position: relative;" class="d-flex align-items-center justify-content-center">
+          <canvas id="categoryChart"></canvas>
+        </div>
+        <div class="d-flex justify-content-around text-center pt-3 border-top mt-2">
+          <div>
+            <div class="small text-muted">Sneakers</div>
+            <div class="fw-bold text-dark"><%= productMetrics && productMetrics.categoryBreakdown ? (productMetrics.categoryBreakdown['SNEAKERS'] || productMetrics.categoryBreakdown['DISH'] || 0) : 0 %></div>
+          </div>
+          <div>
+            <div class="small text-muted">Running</div>
+            <div class="fw-bold text-dark"><%= productMetrics && productMetrics.categoryBreakdown ? (productMetrics.categoryBreakdown['RUNNING'] || productMetrics.categoryBreakdown['SALAD'] || 0) : 0 %></div>
+          </div>
+          <div>
+            <div class="small text-muted">Boots</div>
+            <div class="fw-bold text-dark"><%= productMetrics && productMetrics.categoryBreakdown ? (productMetrics.categoryBreakdown['BOOTS'] || productMetrics.categoryBreakdown['DESSERT'] || 0) : 0 %></div>
+          </div>
+          <div>
+            <div class="small text-muted">Limited Drop</div>
+            <div class="fw-bold text-dark"><%= productMetrics && productMetrics.categoryBreakdown ? (productMetrics.categoryBreakdown['LIMITED_DROP'] || productMetrics.categoryBreakdown['DRINK'] || 0) : 0 %></div>
+          </div>
         </div>
       </div>
     </div>
   </div>
 </main>
 
-<%- include('includes/footer') %>
+<!-- Chart.js Initialization Script -->
+<script>
+  $(document).ready(function() {
+    // 1. Revenue Chart Data from Backend
+    const months = <%- JSON.stringify(orderMetrics && orderMetrics.monthlySales ? orderMetrics.monthlySales.months : ["Jan", "Feb", "Mar", "Apr", "May", "Jun"]) %>;
+    const revenues = <%- JSON.stringify(orderMetrics && orderMetrics.monthlySales ? orderMetrics.monthlySales.revenues : [0, 0, 0, 0, 0, 0]) %>;
 
+    const ctxRev = document.getElementById('revenueChart');
+    if (ctxRev) {
+      new Chart(ctxRev, {
+        type: 'line',
+        data: {
+          labels: months,
+          datasets: [{
+            label: 'Revenue ($)',
+            data: revenues,
+            borderColor: '#ff4655',
+            backgroundColor: 'rgba(255, 70, 85, 0.08)',
+            fill: true,
+            tension: 0.35,
+            borderWidth: 3,
+            pointBackgroundColor: '#ff4655',
+            pointRadius: 5,
+            pointHoverRadius: 7
+          }]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: {
+            legend: { display: false },
+            tooltip: {
+              callbacks: {
+                label: function(context) {
+                  return ' $' + Number(context.raw).toFixed(2);
+                }
+              }
+            }
+          },
+          scales: {
+            y: {
+              beginAtZero: true,
+              grid: { color: '#f3f4f6' },
+              ticks: {
+                callback: function(value) { return '$' + value; }
+              }
+            },
+            x: {
+              grid: { display: false }
+            }
+          }
+        }
+      });
+    }
+
+    // 2. Collection Distribution Chart Data
+    const categoryData = <%- JSON.stringify(productMetrics && productMetrics.categoryBreakdown ? productMetrics.categoryBreakdown : {}) %>;
+    const catLabels = ['Sneakers', 'Running', 'Boots', 'Limited Drop'];
+    const catValues = [
+      categoryData['SNEAKERS'] || categoryData['DISH'] || 1,
+      categoryData['RUNNING'] || categoryData['SALAD'] || 1,
+      categoryData['BOOTS'] || categoryData['DESSERT'] || 1,
+      categoryData['LIMITED_DROP'] || categoryData['DRINK'] || 1
+    ];
+
+    const ctxCat = document.getElementById('categoryChart');
+    if (ctxCat) {
+      new Chart(ctxCat, {
+        type: 'doughnut',
+        data: {
+          labels: catLabels,
+          datasets: [{
+            data: catValues,
+            backgroundColor: ['#111827', '#ff4655', '#3b82f6', '#f59e0b'],
+            borderWidth: 2,
+            borderColor: '#ffffff'
+          }]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: {
+            legend: {
+              position: 'bottom',
+              labels: { boxWidth: 12, font: { size: 11 } }
+            }
+          },
+          cutout: '70%'
+        }
+      });
+    }
+  });
+</script>
+
+<%- include('includes/footer') %>
