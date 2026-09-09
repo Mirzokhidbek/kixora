@@ -1,42 +1,42 @@
 <%- include('includes/header') %>
 
 <main class="container-fluid px-lg-5 my-4 flex-grow-1">
-  <!-- Top Brand Hero Banner -->
-  <div class="admin-card p-4 p-md-5 mb-4 position-relative overflow-hidden" style="background: linear-gradient(135deg, #090a0f 0%, #1e293b 100%); color: #fff; border: 1px solid rgba(255, 70, 85, 0.25); border-radius: 20px;">
-    <div class="position-absolute end-0 bottom-0 opacity-10 d-none d-lg-block p-4" style="pointer-events: none;">
-      <i class="fa-solid fa-shoe-prints" style="font-size: 16rem; color: #ff4655;"></i>
+  <!-- Minimalist Brand Hero Banner -->
+  <div class="admin-card p-4 p-md-5 mb-4 position-relative overflow-hidden" style="background: var(--brand-black); color: #fff; border: 1px solid rgba(255, 255, 255, 0.08); border-radius: var(--radius-lg);">
+    <div class="position-absolute end-0 bottom-0 opacity-5 d-none d-lg-block p-4" style="pointer-events: none;">
+      <i class="fa-solid fa-shoe-prints" style="font-size: 14rem; color: #ffffff;"></i>
     </div>
     
     <div class="row align-items-center position-relative z-1">
       <div class="col-lg-8">
-        <div class="d-inline-flex align-items-center gap-2 px-3 py-1 rounded-pill bg-danger bg-opacity-10 text-danger border border-danger border-opacity-25 mb-3">
-          <i class="fa-solid fa-bolt"></i>
-          <span class="small fw-semibold text-warning">KIXORA Executive Brand Suite v4.0</span>
+        <div class="d-inline-flex align-items-center gap-2 px-2.5 py-1 rounded-pill bg-white bg-opacity-10 text-white border border-white border-opacity-15 mb-3">
+          <span class="rounded-circle" style="width: 6px; height: 6px; background: #ffffff;"></span>
+          <span class="fw-semibold text-white" style="font-size: 0.75rem; letter-spacing: 0.04em;">KIXORA EXECUTIVE CONSOLE</span>
         </div>
-        <h1 class="display-5 fw-bold text-white mb-2">
-          Welcome back, <span class="text-warning"><%= member ? member.memberNick : 'Brand Director' %></span>!
+        <h1 class="display-6 fw-bold text-white mb-2 tracking-tight">
+          Welcome back, <%= member ? member.memberNick : 'Brand Director' %>
         </h1>
-        <p class="fs-6 text-slate-300 mb-4 col-md-11" style="color: #94a3b8; line-height: 1.6;">
-          Real-time commerce overview: monitor live footwear sales, track logistics delivery pipelines, manage sneaker inventory drops, and audit customer VIP tiers.
+        <p class="text-secondary mb-4 col-md-11" style="color: #a1a1aa; line-height: 1.6; font-size: 0.92rem;">
+          Real-time commerce overview: live footwear gross volume, logistics fulfillment pipelines, sneaker warehouse stock, and VIP customer records.
         </p>
         
-        <div class="d-flex flex-wrap gap-2.5">
+        <div class="d-flex flex-wrap gap-2">
           <% if (member) { %>
-            <a class="btn-gold" href="/admin/product/all" style="background: linear-gradient(135deg, #ff4655, #f59e0b);">
-              <i class="fa-solid fa-plus-circle"></i> Footwear Catalog
+            <a class="btn btn-light rounded-2 px-3.5 py-1.5 fw-semibold text-dark" style="font-size: 0.85rem;" href="/admin/product/all">
+              <i class="fa-solid fa-shoe-prints me-1"></i> Footwear Catalog
             </a>
-            <a class="btn btn-outline-light rounded-3 px-3.5 py-2 fw-semibold" href="/admin/order/all">
-              <i class="fa-solid fa-truck-fast me-1.5"></i> Logistics & Orders
+            <a class="btn btn-outline-light border-opacity-25 rounded-2 px-3.5 py-1.5 fw-semibold text-white" style="font-size: 0.85rem;" href="/admin/order/all">
+              <i class="fa-solid fa-boxes-packing me-1"></i> Orders & Logistics
               <% if (orderMetrics && orderMetrics.pendingOrders > 0) { %>
-                <span class="badge bg-warning text-dark ms-1.5"><%= orderMetrics.pendingOrders %> New</span>
+                <span class="badge bg-white text-dark ms-1.5" style="font-size: 0.7rem;"><%= orderMetrics.pendingOrders %> Pending</span>
               <% } %>
             </a>
-            <a class="btn btn-outline-secondary rounded-3 px-3.5 py-2 fw-semibold text-white border-secondary" href="/admin/user/all">
-              <i class="fa-solid fa-users me-1.5"></i> Customers
+            <a class="btn btn-outline-light border-opacity-25 rounded-2 px-3.5 py-1.5 fw-semibold text-white" style="font-size: 0.85rem;" href="/admin/user/all">
+              <i class="fa-solid fa-users me-1"></i> Customers
             </a>
           <% } else { %>
-            <a class="btn-gold" href="/admin/login" style="background: linear-gradient(135deg, #ff4655, #f59e0b);">
-              <i class="fa-solid fa-right-to-bracket"></i> Login to Console
+            <a class="btn btn-light rounded-2 px-3.5 py-1.5 fw-semibold text-dark" style="font-size: 0.85rem;" href="/admin/login">
+              <i class="fa-solid fa-right-to-bracket me-1"></i> Login to Console
             </a>
           <% } %>
         </div>
@@ -44,29 +44,29 @@
     </div>
   </div>
 
-  <!-- Key Metrics Row (4 Cards) -->
-  <div class="row g-3.5 mb-4">
+  <!-- Key Metrics Row (4 Clean Minimalist Stat Cards) -->
+  <div class="row g-3 mb-4">
     <!-- 1. Total Revenue -->
     <div class="col-sm-6 col-xl-3">
-      <div class="admin-card stat-card" style="border-radius: 16px;">
-        <div class="stat-icon" style="background: rgba(16, 185, 129, 0.15); color: #10b981;">
-          <i class="fa-solid fa-dollar-sign fs-4"></i>
+      <div class="stat-card">
+        <div class="stat-icon">
+          <i class="fa-solid fa-dollar-sign"></i>
         </div>
         <div>
           <div class="stat-title">Total Revenue</div>
           <h3 class="stat-value text-dark fw-bold mb-0">
             $<%= Number(orderMetrics ? orderMetrics.totalRevenue : 0).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) %>
           </h3>
-          <div class="small text-muted mt-0.5"><i class="fa-solid fa-arrow-trend-up text-success me-1"></i>From <%= orderMetrics ? orderMetrics.totalOrders : 0 %> Orders</div>
+          <div class="text-muted small mt-0.5" style="font-size: 0.75rem;">From <%= orderMetrics ? orderMetrics.totalOrders : 0 %> Orders</div>
         </div>
       </div>
     </div>
 
     <!-- 2. Active Footwear Models -->
     <div class="col-sm-6 col-xl-3">
-      <div class="admin-card stat-card" style="border-radius: 16px;">
-        <div class="stat-icon" style="background: rgba(255, 70, 85, 0.15); color: #ff4655;">
-          <i class="fa-solid fa-shoe-prints fs-4"></i>
+      <div class="stat-card">
+        <div class="stat-icon">
+          <i class="fa-solid fa-shoe-prints"></i>
         </div>
         <div>
           <div class="stat-title">Footwear Models</div>
@@ -74,11 +74,11 @@
             <%= productMetrics ? productMetrics.activeProducts : 0 %> <span class="fs-6 text-muted fw-normal">/ <%= productMetrics ? productMetrics.totalProducts : 0 %></span>
           </h3>
           <% if (productMetrics && productMetrics.lowStockCount > 0) { %>
-            <div class="small text-danger fw-semibold mt-0.5">
+            <div class="text-danger fw-semibold mt-0.5" style="font-size: 0.75rem;">
               <i class="fa-solid fa-triangle-exclamation me-1"></i><%= productMetrics.lowStockCount %> Low Stock Alert
             </div>
           <% } else { %>
-            <div class="small text-success mt-0.5"><i class="fa-solid fa-check-circle me-1"></i>Stock Levels Healthy</div>
+            <div class="text-success mt-0.5" style="font-size: 0.75rem;">Stock Levels Healthy</div>
           <% } %>
         </div>
       </div>
@@ -86,47 +86,47 @@
 
     <!-- 3. Connected VIPs / Customers -->
     <div class="col-sm-6 col-xl-3">
-      <div class="admin-card stat-card" style="border-radius: 16px;">
-        <div class="stat-icon" style="background: rgba(59, 130, 246, 0.15); color: #3b82f6;">
-          <i class="fa-solid fa-users fs-4"></i>
+      <div class="stat-card">
+        <div class="stat-icon">
+          <i class="fa-solid fa-users"></i>
         </div>
         <div>
           <div class="stat-title">VIP Customers</div>
           <h3 class="stat-value text-dark fw-bold mb-0"><%= userCount || 0 %></h3>
-          <div class="small text-muted mt-0.5"><i class="fa-solid fa-circle-check text-primary me-1"></i>Registered Members</div>
+          <div class="text-muted mt-0.5" style="font-size: 0.75rem;">Registered Members</div>
         </div>
       </div>
     </div>
 
     <!-- 4. Pending Logistics -->
     <div class="col-sm-6 col-xl-3">
-      <div class="admin-card stat-card" style="border-radius: 16px;">
-        <div class="stat-icon" style="background: rgba(245, 158, 11, 0.15); color: #f59e0b;">
-          <i class="fa-solid fa-truck-ramp-box fs-4"></i>
+      <div class="stat-card">
+        <div class="stat-icon">
+          <i class="fa-solid fa-boxes-packing"></i>
         </div>
         <div>
           <div class="stat-title">Pending Logistics</div>
           <h3 class="stat-value text-dark fw-bold mb-0"><%= orderMetrics ? (orderMetrics.pendingOrders + orderMetrics.processOrders) : 0 %></h3>
-          <div class="small text-muted mt-0.5">
-            <span class="text-warning fw-semibold"><%= orderMetrics ? orderMetrics.pendingOrders : 0 %> Waiting</span> &bull; 
-            <span class="text-primary fw-semibold"><%= orderMetrics ? orderMetrics.processOrders : 0 %> In Transit</span>
+          <div class="text-muted mt-0.5" style="font-size: 0.75rem;">
+            <span><%= orderMetrics ? orderMetrics.pendingOrders : 0 %> Pending</span> &bull; 
+            <span><%= orderMetrics ? orderMetrics.processOrders : 0 %> In Transit</span>
           </div>
         </div>
       </div>
     </div>
   </div>
 
-  <!-- Interactive Charts Row -->
-  <div class="row g-4 mb-4">
-    <!-- Chart 1: Revenue Dynamics -->
+  <!-- Interactive Charts Row (Colorful Charts & Graphics Area) -->
+  <div class="row g-3 mb-4">
+    <!-- Chart 1: Revenue Dynamics (Colorful Gradient Picture/Graphic Area) -->
     <div class="col-lg-8">
-      <div class="admin-card p-4" style="border-radius: 18px; border: 1px solid #e5e7eb; background: #ffffff;">
+      <div class="admin-card p-4">
         <div class="d-flex justify-content-between align-items-center mb-3">
           <div>
-            <h5 class="fw-bold text-dark mb-0">Sales & Revenue Dynamics</h5>
-            <p class="small text-muted mb-0">Monthly footwear volume across all collections ($)</p>
+            <h6 class="fw-bold text-dark mb-0">Sales & Revenue Dynamics</h6>
+            <p class="text-muted mb-0" style="font-size: 0.78rem;">Monthly footwear sales volume ($)</p>
           </div>
-          <div class="badge bg-light text-dark border px-3 py-1.5 fw-semibold">
+          <div class="badge bg-light text-dark border px-2.5 py-1" style="font-size: 0.72rem; font-weight: 600;">
             Last 6 Months
           </div>
         </div>
@@ -136,34 +136,36 @@
       </div>
     </div>
 
-    <!-- Chart 2: Collection Breakdown -->
+    <!-- Chart 2: Collection Breakdown (Colorful Multi-Color Doughnut Picture/Graphic Area) -->
     <div class="col-lg-4">
-      <div class="admin-card p-4" style="border-radius: 18px; border: 1px solid #e5e7eb; background: #ffffff; height: 100%;">
-        <div class="d-flex justify-content-between align-items-center mb-3">
+      <div class="admin-card p-4 d-flex flex-column justify-content-between" style="height: 100%;">
+        <div class="d-flex justify-content-between align-items-center mb-2">
           <div>
-            <h5 class="fw-bold text-dark mb-0">Catalog Breakdown</h5>
-            <p class="small text-muted mb-0">Footwear models by collection</p>
+            <h6 class="fw-bold text-dark mb-0">Catalog Breakdown</h6>
+            <p class="text-muted mb-0" style="font-size: 0.78rem;">Models by collection</p>
           </div>
         </div>
-        <div style="height: 220px; position: relative;" class="d-flex align-items-center justify-content-center">
+        
+        <div style="height: 210px; position: relative;" class="d-flex align-items-center justify-content-center my-2">
           <canvas id="categoryChart"></canvas>
         </div>
-        <div class="d-flex justify-content-around text-center pt-3 border-top mt-2">
+
+        <div class="d-flex justify-content-around text-center pt-2.5 border-top" style="border-color: var(--border-light) !important;">
           <div>
-            <div class="small text-muted">Sneakers</div>
-            <div class="fw-bold text-dark"><%= productMetrics && productMetrics.categoryBreakdown ? (productMetrics.categoryBreakdown['SNEAKERS'] || productMetrics.categoryBreakdown['DISH'] || 0) : 0 %></div>
+            <div class="text-muted" style="font-size: 0.72rem;">Sneakers</div>
+            <div class="fw-bold text-dark" style="font-size: 0.85rem;"><%= productMetrics && productMetrics.categoryBreakdown ? (productMetrics.categoryBreakdown['SNEAKERS'] || productMetrics.categoryBreakdown['DISH'] || 0) : 0 %></div>
           </div>
           <div>
-            <div class="small text-muted">Running</div>
-            <div class="fw-bold text-dark"><%= productMetrics && productMetrics.categoryBreakdown ? (productMetrics.categoryBreakdown['RUNNING'] || productMetrics.categoryBreakdown['SALAD'] || 0) : 0 %></div>
+            <div class="text-muted" style="font-size: 0.72rem;">Running</div>
+            <div class="fw-bold text-dark" style="font-size: 0.85rem;"><%= productMetrics && productMetrics.categoryBreakdown ? (productMetrics.categoryBreakdown['RUNNING'] || productMetrics.categoryBreakdown['SALAD'] || 0) : 0 %></div>
           </div>
           <div>
-            <div class="small text-muted">Boots</div>
-            <div class="fw-bold text-dark"><%= productMetrics && productMetrics.categoryBreakdown ? (productMetrics.categoryBreakdown['BOOTS'] || productMetrics.categoryBreakdown['DESSERT'] || 0) : 0 %></div>
+            <div class="text-muted" style="font-size: 0.72rem;">Boots</div>
+            <div class="fw-bold text-dark" style="font-size: 0.85rem;"><%= productMetrics && productMetrics.categoryBreakdown ? (productMetrics.categoryBreakdown['BOOTS'] || productMetrics.categoryBreakdown['DESSERT'] || 0) : 0 %></div>
           </div>
           <div>
-            <div class="small text-muted">Limited Drop</div>
-            <div class="fw-bold text-dark"><%= productMetrics && productMetrics.categoryBreakdown ? (productMetrics.categoryBreakdown['LIMITED_DROP'] || productMetrics.categoryBreakdown['DRINK'] || 0) : 0 %></div>
+            <div class="text-muted" style="font-size: 0.72rem;">Limited Drop</div>
+            <div class="fw-bold text-dark" style="font-size: 0.85rem;"><%= productMetrics && productMetrics.categoryBreakdown ? (productMetrics.categoryBreakdown['LIMITED_DROP'] || productMetrics.categoryBreakdown['DRINK'] || 0) : 0 %></div>
           </div>
         </div>
       </div>
@@ -171,30 +173,49 @@
   </div>
 </main>
 
-<!-- Chart.js Initialization Script -->
+<!-- Chart.js Colorful Initialization Script (Vibrant Colors Applied ONLY to the Charts) -->
 <script>
   $(document).ready(function() {
-    // 1. Revenue Chart Data from Backend
+    // 1. Revenue Chart with Vibrant Gradient & Colored Points
     const months = <%- JSON.stringify(orderMetrics && orderMetrics.monthlySales ? orderMetrics.monthlySales.months : ["Jan", "Feb", "Mar", "Apr", "May", "Jun"]) %>;
     const revenues = <%- JSON.stringify(orderMetrics && orderMetrics.monthlySales ? orderMetrics.monthlySales.revenues : [0, 0, 0, 0, 0, 0]) %>;
 
     const ctxRev = document.getElementById('revenueChart');
     if (ctxRev) {
+      const chartCtx = ctxRev.getContext('2d');
+      
+      // Vibrant Gradient Fill under the line
+      const gradientFill = chartCtx.createLinearGradient(0, 0, 0, 300);
+      gradientFill.addColorStop(0, 'rgba(99, 102, 241, 0.45)');
+      gradientFill.addColorStop(0.6, 'rgba(236, 72, 153, 0.15)');
+      gradientFill.addColorStop(1, 'rgba(99, 102, 241, 0.0)');
+
+      // Vibrant Stroke Gradient for the line
+      const strokeGradient = chartCtx.createLinearGradient(0, 0, ctxRev.width || 600, 0);
+      strokeGradient.addColorStop(0, '#6366f1');
+      strokeGradient.addColorStop(0.5, '#a855f7');
+      strokeGradient.addColorStop(1, '#ec4899');
+
       new Chart(ctxRev, {
         type: 'line',
         data: {
           labels: months,
           datasets: [{
-            label: 'Revenue ($)',
+            label: 'Monthly Revenue ($)',
             data: revenues,
-            borderColor: '#ff4655',
-            backgroundColor: 'rgba(255, 70, 85, 0.08)',
+            borderColor: strokeGradient,
+            backgroundColor: gradientFill,
             fill: true,
-            tension: 0.35,
-            borderWidth: 3,
-            pointBackgroundColor: '#ff4655',
-            pointRadius: 5,
-            pointHoverRadius: 7
+            tension: 0.4,
+            borderWidth: 3.5,
+            pointBackgroundColor: '#ffffff',
+            pointBorderColor: '#6366f1',
+            pointBorderWidth: 3,
+            pointRadius: 6,
+            pointHoverRadius: 9,
+            pointHoverBackgroundColor: '#ec4899',
+            pointHoverBorderColor: '#ffffff',
+            pointHoverBorderWidth: 3
           }]
         },
         options: {
@@ -203,9 +224,17 @@
           plugins: {
             legend: { display: false },
             tooltip: {
+              backgroundColor: '#090a0f',
+              titleColor: '#e0e7ff',
+              bodyColor: '#38bdf8',
+              bodyFont: { weight: 'bold', size: 13 },
+              padding: 12,
+              cornerRadius: 10,
+              borderColor: 'rgba(99, 102, 241, 0.4)',
+              borderWidth: 1,
               callbacks: {
                 label: function(context) {
-                  return ' $' + Number(context.raw).toFixed(2);
+                  return ' Revenue: $' + Number(context.raw).toFixed(2);
                 }
               }
             }
@@ -213,20 +242,29 @@
           scales: {
             y: {
               beginAtZero: true,
-              grid: { color: '#f3f4f6' },
+              grid: { 
+                color: 'rgba(226, 232, 240, 0.6)',
+                drawBorder: false
+              },
               ticks: {
-                callback: function(value) { return '$' + value; }
+                callback: function(value) { return '$' + value; },
+                color: '#71717a',
+                font: { size: 11, weight: '500' }
               }
             },
             x: {
-              grid: { display: false }
+              grid: { display: false },
+              ticks: { 
+                color: '#71717a',
+                font: { size: 11, weight: '600' }
+              }
             }
           }
         }
       });
     }
 
-    // 2. Collection Distribution Chart Data
+    // 2. Collection Breakdown with Vibrant Palette (Colors on the Chart Doughnut)
     const categoryData = <%- JSON.stringify(productMetrics && productMetrics.categoryBreakdown ? productMetrics.categoryBreakdown : {}) %>;
     const catLabels = ['Sneakers', 'Running', 'Boots', 'Limited Drop'];
     const catValues = [
@@ -244,9 +282,21 @@
           labels: catLabels,
           datasets: [{
             data: catValues,
-            backgroundColor: ['#111827', '#ff4655', '#3b82f6', '#f59e0b'],
-            borderWidth: 2,
-            borderColor: '#ffffff'
+            backgroundColor: [
+              '#6366f1', // Sneakers: Royal Indigo
+              '#ff4655', // Running: Coral Crimson
+              '#f59e0b', // Boots: Radiant Amber
+              '#10b981'  // Limited Drop: Emerald Teal
+            ],
+            hoverBackgroundColor: [
+              '#4f46e5',
+              '#e11d48',
+              '#d97706',
+              '#059669'
+            ],
+            borderWidth: 3,
+            borderColor: '#ffffff',
+            hoverOffset: 6
           }]
         },
         options: {
@@ -255,10 +305,31 @@
           plugins: {
             legend: {
               position: 'bottom',
-              labels: { boxWidth: 12, font: { size: 11 } }
+              labels: { 
+                boxWidth: 12, 
+                boxHeight: 12,
+                borderRadius: 4,
+                useBorderRadius: true,
+                padding: 14,
+                font: { size: 11, weight: '600' },
+                color: '#334155'
+              }
+            },
+            tooltip: {
+              backgroundColor: '#090a0f',
+              titleColor: '#ffffff',
+              bodyColor: '#fbbf24',
+              bodyFont: { weight: 'bold' },
+              padding: 10,
+              cornerRadius: 8,
+              callbacks: {
+                label: function(context) {
+                  return ' ' + context.label + ': ' + context.raw + ' models';
+                }
+              }
             }
           },
-          cutout: '70%'
+          cutout: '68%'
         }
       });
     }

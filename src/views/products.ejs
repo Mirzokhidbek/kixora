@@ -5,38 +5,52 @@
   <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3 mb-4">
     <div>
       <div class="d-flex align-items-center gap-2 mb-1">
-        <h2 class="fw-bold text-dark mb-0">Footwear Catalog</h2>
-        <span class="badge bg-dark rounded-pill px-3 py-1 fw-bold text-warning"><%= products ? products.length : 0 %> Models</span>
+        <h2 class="fw-bold text-dark mb-0 tracking-tight" style="font-size: 1.45rem;">Footwear Catalog</h2>
+        <span class="badge bg-dark text-white rounded-pill px-2.5 py-1" style="font-size: 0.75rem; font-weight: 600;">
+          <%= products ? products.length : 0 %> Models
+        </span>
       </div>
-      <p class="text-muted mb-0">Add, organize, edit prices, and manage sneaker stock levels in the KIXORA brand catalog.</p>
+      <p class="text-muted mb-0 small">
+        Organize drops, edit pricing, manage EU sizing, and track sneaker warehouse inventory levels.
+      </p>
     </div>
 
     <div>
-      <button class="btn-gold" data-bs-toggle="modal" data-bs-target="#addProductModal" style="background: linear-gradient(135deg, #ff4655, #f59e0b);">
-        <i class="fa-solid fa-plus-circle"></i> Add New Sneaker Drop
+      <button class="btn-brand-dark rounded-2 px-3 py-1.5" data-bs-toggle="modal" data-bs-target="#addProductModal">
+        <i class="fa-solid fa-plus me-1"></i> Add New Sneaker Drop
       </button>
     </div>
   </div>
 
   <!-- Search & Collection Filters Card -->
-  <div class="admin-card p-3 mb-4" style="border-radius: 14px; border: 1px solid #e5e7eb; background: #ffffff;">
+  <div class="admin-card p-3 mb-4">
     <div class="row g-2 align-items-center">
       <!-- Search Input -->
       <div class="col-md-5">
         <div class="input-group">
-          <span class="input-group-text bg-light border-end-0 text-muted"><i class="fa-solid fa-magnifying-glass"></i></span>
-          <input type="text" id="productSearchInput" class="form-control border-start-0 bg-light" placeholder="Search by model name or description...">
+          <span class="input-group-text bg-white border-end-0 text-muted" style="border-color: var(--border-light); font-size: 0.85rem;">
+            <i class="fa-solid fa-magnifying-glass"></i>
+          </span>
+          <input type="text" id="productSearchInput" class="form-control border-start-0 ps-0 bg-white" style="border-color: var(--border-light); font-size: 0.88rem;" placeholder="Search model title or material...">
         </div>
       </div>
 
       <!-- Collection Pills -->
       <div class="col-md-7">
         <div class="d-flex flex-wrap gap-1.5 justify-content-md-end">
-          <button type="button" class="btn btn-sm btn-dark collection-filter-btn active" data-collection="ALL">All Models</button>
-          <button type="button" class="btn btn-sm btn-outline-secondary collection-filter-btn" data-collection="SNEAKERS">Sneakers</button>
-          <button type="button" class="btn btn-sm btn-outline-secondary collection-filter-btn" data-collection="RUNNING">Running</button>
-          <button type="button" class="btn btn-sm btn-outline-secondary collection-filter-btn" data-collection="BOOTS">Boots</button>
-          <button type="button" class="btn btn-sm btn-outline-secondary collection-filter-btn" data-collection="LIMITED_DROP">Limited Drop</button>
+          <button type="button" class="filter-pill-btn collection-filter-btn active" data-collection="ALL">All Models</button>
+          <button type="button" class="filter-pill-btn collection-filter-btn" data-collection="SNEAKERS">
+            <span class="rounded-circle d-inline-block me-1" style="width: 7px; height: 7px; background: #6366f1;"></span> Sneakers
+          </button>
+          <button type="button" class="filter-pill-btn collection-filter-btn" data-collection="RUNNING">
+            <span class="rounded-circle d-inline-block me-1" style="width: 7px; height: 7px; background: #ff4655;"></span> Running
+          </button>
+          <button type="button" class="filter-pill-btn collection-filter-btn" data-collection="BOOTS">
+            <span class="rounded-circle d-inline-block me-1" style="width: 7px; height: 7px; background: #f59e0b;"></span> Boots
+          </button>
+          <button type="button" class="filter-pill-btn collection-filter-btn" data-collection="LIMITED_DROP">
+            <span class="rounded-circle d-inline-block me-1" style="width: 7px; height: 7px; background: #10b981;"></span> Limited Drop
+          </button>
         </div>
       </div>
     </div>
@@ -45,20 +59,20 @@
   <!-- Products Table Card -->
   <div class="admin-table-container">
     <div class="table-responsive">
-      <table class="table admin-table align-middle" id="productsTable">
+      <table class="table admin-table align-middle mb-0" id="productsTable">
         <thead>
           <tr>
             <th scope="col" class="ps-4">#</th>
-            <th scope="col">Image</th>
+            <th scope="col">Silhouette</th>
             <th scope="col">Model Title</th>
             <th scope="col">Collection</th>
-            <th scope="col">EU Sizes</th>
+            <th scope="col">Size</th>
             <th scope="col">Price</th>
-            <th scope="col">Stock Count</th>
+            <th scope="col">Stock</th>
             <th scope="col">Views</th>
             <th scope="col">Status</th>
             <th scope="col" class="text-center">Edit</th>
-            <th scope="col" class="text-center pe-4">Change Status</th>
+            <th scope="col" class="text-center pe-4">Catalog Status</th>
           </tr>
         </thead>
         <tbody>
@@ -68,46 +82,45 @@
                   data-name="<%= product.productName.toLowerCase() %>" 
                   data-collection="<%= product.productCollection %>"
                   data-desc="<%= (product.productDesc || '').toLowerCase() %>">
-                <td class="ps-4 fw-bold text-muted"><%= index + 1 %></td>
+                <td class="ps-4 fw-bold text-muted" style="font-size: 0.8rem;"><%= index + 1 %></td>
                 <td>
                   <% if (product.productImages && product.productImages.length) { %>
                     <img src="/<%= product.productImages[0].replace('public/', '') %>" 
                          alt="<%= product.productName %>" 
                          class="product-img-thumb" 
-                         style="width: 50px; height: 50px; object-fit: contain; background: #f3f4f6; border-radius: 8px; padding: 3px;"
                          onerror="this.src='/img/kixora/sneakers.jpg'">
                   <% } else { %>
-                    <div class="product-img-thumb bg-light d-flex align-items-center justify-content-center text-muted" style="border-radius: 8px; width: 50px; height: 50px;">
+                    <div class="product-img-thumb d-flex align-items-center justify-content-center text-muted">
                       <i class="fa-solid fa-shoe-prints"></i>
                     </div>
                   <% } %>
                 </td>
                 <td>
-                  <div class="fw-bold text-dark"><%= product.productName %></div>
-                  <div class="small text-muted text-truncate" style="max-width: 200px;"><%= product.productDesc || 'No description provided' %></div>
+                  <div class="fw-bold text-dark" style="font-size: 0.88rem;"><%= product.productName %></div>
+                  <div class="text-muted text-truncate" style="max-width: 180px; font-size: 0.76rem;"><%= product.productDesc || 'Standard release' %></div>
                 </td>
                 <td>
-                  <span class="badge bg-light text-dark border px-2 py-1 fw-semibold"><%= product.productCollection %></span>
+                  <span class="badge bg-light text-dark border px-2 py-1" style="font-size: 0.72rem; font-weight: 600;"><%= product.productCollection %></span>
                 </td>
                 <td>
-                  <span class="badge bg-dark text-white px-2 py-1"><%= product.productSize || '42' %></span>
+                  <span class="badge bg-white text-dark border px-2 py-1" style="font-size: 0.72rem; font-weight: 600;">EU <%= product.productSize || '42' %></span>
                 </td>
                 <td>
-                  <span class="fw-bold text-success fs-6">$<%= Number(product.productPrice).toFixed(2) %></span>
+                  <span class="fw-bold text-dark font-monospace" style="font-size: 0.9rem;">$<%= Number(product.productPrice).toFixed(2) %></span>
                 </td>
                 <td>
                   <% if (product.productLeftCount <= 5) { %>
-                    <span class="badge bg-danger bg-opacity-10 text-danger border border-danger border-opacity-25 px-2 py-1 fw-bold">
-                      <i class="fa-solid fa-triangle-exclamation me-1"></i><%= product.productLeftCount %> Left
+                    <span class="badge-status block" style="font-size: 0.7rem;">
+                      <i class="fa-solid fa-triangle-exclamation"></i> <%= product.productLeftCount %> Left
                     </span>
                   <% } else { %>
-                    <span class="fw-semibold text-dark">
+                    <span class="text-dark fw-semibold" style="font-size: 0.82rem;">
                       <%= product.productLeftCount %> pairs
                     </span>
                   <% } %>
                 </td>
                 <td>
-                  <span class="text-muted small"><i class="fa-regular fa-eye me-1"></i><%= product.productViews || 0 %></span>
+                  <span class="text-muted small"><%= product.productViews || 0 %></span>
                 </td>
                 <td>
                   <span id="status-badge-<%= product._id %>" class="badge-status <%= product.productStatus.toLowerCase() %>">
@@ -116,7 +129,8 @@
                 </td>
                 <td class="text-center">
                   <button type="button" 
-                          class="btn btn-sm btn-outline-dark rounded-pill px-2.5 py-1 edit-product-trigger"
+                          class="btn-brand-outline rounded-2 px-2.5 py-1 edit-product-trigger"
+                          style="font-size: 0.78rem;"
                           data-id="<%= product._id %>"
                           data-name="<%= product.productName %>"
                           data-price="<%= product.productPrice %>"
@@ -128,7 +142,7 @@
                   </button>
                 </td>
                 <td class="text-center pe-4">
-                  <select class="form-select-modern form-select-sm product-status-select" data-id="<%= product._id %>">
+                  <select class="form-select-modern form-select-sm product-status-select" style="font-size: 0.78rem; padding: 0.35rem 0.65rem;" data-id="<%= product._id %>">
                     <option value="PROCESS" <%= product.productStatus === 'PROCESS' ? 'selected' : '' %>>PROCESS</option>
                     <option value="PAUSE" <%= product.productStatus === 'PAUSE' ? 'selected' : '' %>>PAUSE</option>
                     <option value="DELETE" <%= product.productStatus === 'DELETE' ? 'selected' : '' %>>DELETE</option>
@@ -140,11 +154,11 @@
             <tr>
               <td colspan="11" class="text-center py-5 text-muted">
                 <div class="p-4">
-                  <i class="fa-solid fa-shoe-prints fa-3x mb-3 text-secondary d-block"></i>
-                  <h5 class="fw-bold text-dark">No Footwear Models Available Yet</h5>
-                  <p class="small text-muted mb-3">Your KIXORA catalog is currently empty. Click the button below to add your first sneaker drop.</p>
-                  <button class="btn-gold btn-sm" data-bs-toggle="modal" data-bs-target="#addProductModal" style="background: linear-gradient(135deg, #ff4655, #f59e0b);">
-                    <i class="fa-solid fa-plus-circle"></i> Add First Sneaker
+                  <i class="fa-solid fa-shoe-prints fa-2x mb-2 text-muted d-block opacity-50"></i>
+                  <div class="fw-bold text-dark">No Footwear Models Available</div>
+                  <p class="small text-muted mb-3">Your KIXORA catalog is currently empty.</p>
+                  <button class="btn-brand-dark rounded-2 px-3 py-1.5" data-bs-toggle="modal" data-bs-target="#addProductModal">
+                    <i class="fa-solid fa-plus me-1"></i> Add First Sneaker
                   </button>
                 </div>
               </td>
@@ -158,37 +172,35 @@
   <!-- Create New Product Modal -->
   <div class="modal fade" id="addProductModal" tabindex="-1" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered modal-lg">
-      <div class="modal-content rounded-4 border-0 shadow-lg overflow-hidden">
+      <div class="modal-content overflow-hidden">
         <div class="modal-header bg-dark text-white border-0 py-3 px-4">
           <div class="d-flex align-items-center gap-2">
-            <div class="brand-icon" style="width: 32px; height: 32px; font-size: 0.9rem; background: #ff4655;">
-              <i class="fa-solid fa-plus"></i>
-            </div>
-            <h5 class="modal-title fw-bold mb-0">Create New Footwear Model</h5>
+            <i class="fa-solid fa-plus"></i>
+            <h6 class="modal-title fw-bold mb-0">Create New Footwear Model</h6>
           </div>
           <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
         </div>
 
         <form id="addProductForm" action="/admin/product/create" method="POST" enctype="multipart/form-data">
-          <div class="modal-body p-4">
+          <div class="modal-body p-4 bg-white">
             <div class="row g-3">
               <div class="col-md-6">
-                <label class="form-label fw-semibold small text-muted">SNEAKER / SHOE NAME</label>
+                <label class="form-label fw-bold small text-muted" style="font-size: 0.72rem; letter-spacing: 0.05em;">SNEAKER / SHOE NAME</label>
                 <input type="text" class="form-control-modern w-100" name="productName" placeholder="e.g. Nike Dunk Low Retro" required>
               </div>
 
               <div class="col-md-3">
-                <label class="form-label fw-semibold small text-muted">PRICE ($)</label>
+                <label class="form-label fw-bold small text-muted" style="font-size: 0.72rem; letter-spacing: 0.05em;">PRICE ($)</label>
                 <input type="number" step="0.01" class="form-control-modern w-100" name="productPrice" placeholder="135.00" required>
               </div>
 
               <div class="col-md-3">
-                <label class="form-label fw-semibold small text-muted">STOCK COUNT (PAIRS)</label>
+                <label class="form-label fw-bold small text-muted" style="font-size: 0.72rem; letter-spacing: 0.05em;">STOCK COUNT</label>
                 <input type="number" class="form-control-modern w-100" name="productLeftCount" placeholder="50" required>
               </div>
 
               <div class="col-md-6">
-                <label class="form-label fw-semibold small text-muted">COLLECTION CATEGORY</label>
+                <label class="form-label fw-bold small text-muted" style="font-size: 0.72rem; letter-spacing: 0.05em;">COLLECTION CATEGORY</label>
                 <select class="form-select-modern w-100" name="productCollection" id="productCollectionSelect" required>
                   <option value="SNEAKERS" selected>Sneakers (Street & Court)</option>
                   <option value="RUNNING">Running (Lightweight Foam)</option>
@@ -198,7 +210,7 @@
               </div>
 
               <div class="col-md-6" id="productSizeBox">
-                <label class="form-label fw-semibold small text-muted">PRIMARY EU SIZE</label>
+                <label class="form-label fw-bold small text-muted" style="font-size: 0.72rem; letter-spacing: 0.05em;">PRIMARY EU SIZE</label>
                 <select class="form-select-modern w-100" name="productSize">
                   <option value="39">EU 39</option>
                   <option value="40">EU 40</option>
@@ -211,22 +223,22 @@
               </div>
 
               <div class="col-12">
-                <label class="form-label fw-semibold small text-muted">FOOTWEAR MATERIALS & DESCRIPTION</label>
-                <textarea class="form-control-modern w-100" name="productDesc" rows="3" placeholder="Describe leather upper, midsole cushioning, traction pattern..."></textarea>
+                <label class="form-label fw-bold small text-muted" style="font-size: 0.72rem; letter-spacing: 0.05em;">MATERIALS & DESCRIPTION</label>
+                <textarea class="form-control-modern w-100" name="productDesc" rows="3" placeholder="Describe materials, cushioning, grip..."></textarea>
               </div>
 
               <div class="col-12">
-                <label class="form-label fw-semibold small text-muted">PRODUCT STUDIO PHOTOS (UP TO 5)</label>
+                <label class="form-label fw-bold small text-muted" style="font-size: 0.72rem; letter-spacing: 0.05em;">STUDIO PHOTOS (UP TO 5)</label>
                 <input type="file" class="form-control-modern w-100" name="productImages" id="productImagesInput" multiple accept="image/*" required>
                 <div class="d-flex flex-wrap gap-2 mt-2" id="imagePreviewContainer"></div>
               </div>
             </div>
           </div>
 
-          <div class="modal-footer bg-light border-0 py-3 px-4">
-            <button type="button" class="btn btn-outline-secondary rounded-3 px-4" data-bs-dismiss="modal">Cancel</button>
-            <button type="submit" class="btn-gold" style="background: linear-gradient(135deg, #ff4655, #f59e0b);">
-              <i class="fa-solid fa-cloud-arrow-up"></i> Publish Sneaker
+          <div class="modal-footer bg-light border-0 py-2.5 px-4">
+            <button type="button" class="btn btn-sm btn-outline-secondary rounded-2 px-3" data-bs-dismiss="modal">Cancel</button>
+            <button type="submit" class="btn-brand-dark rounded-2 px-3 py-1.5">
+              <i class="fa-solid fa-cloud-arrow-up me-1"></i> Publish Sneaker
             </button>
           </div>
         </form>
@@ -237,38 +249,36 @@
   <!-- Edit Product Details Modal -->
   <div class="modal fade" id="editProductModal" tabindex="-1" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered modal-lg">
-      <div class="modal-content rounded-4 border-0 shadow-lg overflow-hidden">
+      <div class="modal-content overflow-hidden">
         <div class="modal-header bg-dark text-white border-0 py-3 px-4">
           <div class="d-flex align-items-center gap-2">
-            <div class="brand-icon" style="width: 32px; height: 32px; font-size: 0.9rem; background: #3b82f6;">
-              <i class="fa-solid fa-pen"></i>
-            </div>
-            <h5 class="modal-title fw-bold mb-0">Edit Footwear Model</h5>
+            <i class="fa-solid fa-pen"></i>
+            <h6 class="modal-title fw-bold mb-0">Edit Footwear Model</h6>
           </div>
           <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
         </div>
 
         <form id="editProductForm">
           <input type="hidden" id="editProductId">
-          <div class="modal-body p-4">
+          <div class="modal-body p-4 bg-white">
             <div class="row g-3">
               <div class="col-md-6">
-                <label class="form-label fw-semibold small text-muted">SNEAKER / SHOE NAME</label>
+                <label class="form-label fw-bold small text-muted" style="font-size: 0.72rem; letter-spacing: 0.05em;">SNEAKER / SHOE NAME</label>
                 <input type="text" class="form-control-modern w-100" id="editProductName" required>
               </div>
 
               <div class="col-md-3">
-                <label class="form-label fw-semibold small text-muted">PRICE ($)</label>
+                <label class="form-label fw-bold small text-muted" style="font-size: 0.72rem; letter-spacing: 0.05em;">PRICE ($)</label>
                 <input type="number" step="0.01" class="form-control-modern w-100" id="editProductPrice" required>
               </div>
 
               <div class="col-md-3">
-                <label class="form-label fw-semibold small text-muted">STOCK COUNT (PAIRS)</label>
+                <label class="form-label fw-bold small text-muted" style="font-size: 0.72rem; letter-spacing: 0.05em;">STOCK COUNT</label>
                 <input type="number" class="form-control-modern w-100" id="editProductLeftCount" required>
               </div>
 
               <div class="col-md-6">
-                <label class="form-label fw-semibold small text-muted">COLLECTION CATEGORY</label>
+                <label class="form-label fw-bold small text-muted" style="font-size: 0.72rem; letter-spacing: 0.05em;">COLLECTION CATEGORY</label>
                 <select class="form-select-modern w-100" id="editProductCollection" required>
                   <option value="SNEAKERS">Sneakers (Street & Court)</option>
                   <option value="RUNNING">Running (Lightweight Foam)</option>
@@ -278,7 +288,7 @@
               </div>
 
               <div class="col-md-6">
-                <label class="form-label fw-semibold small text-muted">PRIMARY EU SIZE</label>
+                <label class="form-label fw-bold small text-muted" style="font-size: 0.72rem; letter-spacing: 0.05em;">PRIMARY EU SIZE</label>
                 <select class="form-select-modern w-100" id="editProductSize">
                   <option value="39">EU 39</option>
                   <option value="40">EU 40</option>
@@ -291,15 +301,15 @@
               </div>
 
               <div class="col-12">
-                <label class="form-label fw-semibold small text-muted">DESCRIPTION & MATERIALS</label>
+                <label class="form-label fw-bold small text-muted" style="font-size: 0.72rem; letter-spacing: 0.05em;">DESCRIPTION & MATERIALS</label>
                 <textarea class="form-control-modern w-100" id="editProductDesc" rows="3"></textarea>
               </div>
             </div>
           </div>
 
-          <div class="modal-footer bg-light border-0 py-3 px-4">
-            <button type="button" class="btn btn-outline-secondary rounded-3 px-4" data-bs-dismiss="modal">Cancel</button>
-            <button type="submit" class="btn btn-primary rounded-3 px-4 fw-semibold" id="saveEditProductBtn">
+          <div class="modal-footer bg-light border-0 py-2.5 px-4">
+            <button type="button" class="btn btn-sm btn-outline-secondary rounded-2 px-3" data-bs-dismiss="modal">Cancel</button>
+            <button type="submit" class="btn-brand-dark rounded-2 px-3 py-1.5" id="saveEditProductBtn">
               <i class="fa-solid fa-check me-1"></i> Save Changes
             </button>
           </div>
