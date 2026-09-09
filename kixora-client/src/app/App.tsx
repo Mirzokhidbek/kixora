@@ -8,9 +8,9 @@
  * - Manages authentication modal and persistent login session restoration
  */
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, lazy, Suspense } from "react";
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
-import { ThemeProvider, CssBaseline, Box } from "@mui/material";
+import { ThemeProvider, CssBaseline, Box, CircularProgress } from "@mui/material";
 import customTheme from "./MaterialTheme/theme";
 
 import { Navbar } from "./components/headers/Navbar";
@@ -18,11 +18,12 @@ import { Footer } from "./components/footers/Footer";
 import { AuthModal } from "./components/auth/AuthModal";
 import { CheckoutModal } from "./components/checkout/CheckoutModal";
 
-import { HomePage } from "./screens/homePage";
-import { ProductsPage } from "./screens/productsPage";
-import { OrdersPage } from "./screens/ordersPage";
-import { UserPage } from "./screens/userPage";
-import { HelpPage } from "./screens/helpPage";
+// Lazy-loaded routes for optimal Lighthouse performance and smaller initial bundles
+const HomePage = lazy(() => import("./screens/homePage").then(m => ({ default: m.HomePage })));
+const ProductsPage = lazy(() => import("./screens/productsPage").then(m => ({ default: m.ProductsPage })));
+const OrdersPage = lazy(() => import("./screens/ordersPage").then(m => ({ default: m.OrdersPage })));
+const UserPage = lazy(() => import("./screens/userPage").then(m => ({ default: m.UserPage })));
+const HelpPage = lazy(() => import("./screens/helpPage").then(m => ({ default: m.HelpPage })));
 
 import { useBasket } from "./hooks/useBasket";
 import { useGlobals } from "./hooks/useGlobals";
@@ -124,13 +125,29 @@ export default function App() {
           />
 
           <Box component="main" sx={{ flexGrow: 1 }}>
-            <Routes>
-              <Route path="/" element={<HomePage onAdd={onAdd} />} />
-              <Route path="/products/*" element={<ProductsPage onAdd={onAdd} />} />
-              <Route path="/orders" element={<OrdersPage onLoginClick={() => setAuthOpen(true)} />} />
-              <Route path="/user" element={<UserPage member={authMember} onLoginClick={() => setAuthOpen(true)} />} />
-              <Route path="/help" element={<HelpPage />} />
-            </Routes>
+            <Suspense
+              fallback={
+                <Box
+                  sx={{
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    minHeight: "60vh",
+                    bgcolor: "#ffffff",
+                  }}
+                >
+                  <CircularProgress size={40} sx={{ color: "#000000" }} />
+                </Box>
+              }
+            >
+              <Routes>
+                <Route path="/" element={<HomePage onAdd={onAdd} />} />
+                <Route path="/products/*" element={<ProductsPage onAdd={onAdd} />} />
+                <Route path="/orders" element={<OrdersPage onLoginClick={() => setAuthOpen(true)} />} />
+                <Route path="/user" element={<UserPage member={authMember} onLoginClick={() => setAuthOpen(true)} />} />
+                <Route path="/help" element={<HelpPage />} />
+              </Routes>
+            </Suspense>
           </Box>
 
           <Footer />
