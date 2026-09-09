@@ -1,59 +1,77 @@
 <%- include('includes/header') %>
 
-<main class="container-fluid px-lg-5 my-5 flex-grow-1">
+<main class="container-fluid px-lg-5 my-4 flex-grow-1">
   <!-- Title Bar -->
   <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3 mb-4">
     <div>
       <div class="d-flex align-items-center gap-2 mb-1">
-        <h2 class="fw-bold text-dark mb-0">Registered Customers</h2>
-        <span class="badge bg-dark rounded-pill px-3 py-1 fw-bold text-warning"><%= users ? users.length : 0 %> Users</span>
+        <h2 class="fw-bold text-dark mb-0">Customer VIP Accounts</h2>
+        <span class="badge bg-dark rounded-pill px-3 py-1 fw-bold text-warning"><%= users ? users.length : 0 %> Registered Users</span>
       </div>
-      <p class="text-muted mb-0">Monitor customer activity, loyalty points, and account authorization states.</p>
+      <p class="text-muted mb-0">Monitor sneakerhead activity, loyalty reward points, account standing, and manage VIP customer authorizations.</p>
+    </div>
+  </div>
+
+  <!-- Search Customers Bar -->
+  <div class="admin-card p-3 mb-4" style="border-radius: 14px; border: 1px solid #e5e7eb; background: #ffffff;">
+    <div class="row g-2 align-items-center">
+      <div class="col-md-6">
+        <div class="input-group">
+          <span class="input-group-text bg-light border-end-0 text-muted"><i class="fa-solid fa-magnifying-glass"></i></span>
+          <input type="text" id="userSearchInput" class="form-control border-start-0 bg-light" placeholder="Search by customer name, email, or phone number...">
+        </div>
+      </div>
+      <div class="col-md-6 text-md-end">
+        <span class="small text-muted">Showing all authenticated sneaker community members</span>
+      </div>
     </div>
   </div>
 
   <!-- Users Table Card -->
   <div class="admin-table-container">
     <div class="table-responsive">
-      <table class="table admin-table align-middle">
+      <table class="table admin-table align-middle" id="usersTable">
         <thead>
           <tr>
             <th scope="col" class="ps-4">#</th>
             <th scope="col">User</th>
-            <th scope="col">Phone Contact</th>
+            <th scope="col">Email & Phone</th>
             <th scope="col">Loyalty Points</th>
             <th scope="col">Registered Date</th>
             <th scope="col">Status</th>
+            <th scope="col" class="text-center">Points</th>
             <th scope="col" class="text-center pe-4">Account Action</th>
           </tr>
         </thead>
         <tbody>
           <% if (users && users.length) { %>
             <% users.forEach((user, index) => { %>
-              <tr>
+              <tr class="user-row"
+                  data-name="<%= (user.memberNick || '').toLowerCase() %>"
+                  data-email="<%= (user.memberEmail || '').toLowerCase() %>"
+                  data-phone="<%= (user.memberPhone || '').toLowerCase() %>">
                 <td class="ps-4 fw-bold text-muted"><%= index + 1 %></td>
                 <td>
                   <div class="d-flex align-items-center gap-3">
                     <% if (user.memberImage) { %>
                       <img src="/<%= user.memberImage.replace('public/', '') %>" alt="<%= user.memberNick %>" class="rounded-circle" style="width: 44px; height: 44px; object-fit: cover;">
                     <% } else { %>
-                      <div class="rounded-circle bg-warning bg-opacity-25 text-warning-emphasis fw-bold d-flex align-items-center justify-content-center" style="width: 44px; height: 44px; font-size: 1.1rem;">
+                      <div class="rounded-circle bg-dark text-white fw-bold d-flex align-items-center justify-content-center" style="width: 44px; height: 44px; font-size: 1.1rem;">
                         <%= user.memberNick.charAt(0).toUpperCase() %>
                       </div>
                     <% } %>
                     <div>
                       <div class="fw-bold text-dark"><%= user.memberNick %></div>
-                      <div class="small text-muted">ID: <%= String(user._id).substring(0, 8) %>...</div>
+                      <div class="small text-muted font-monospace" style="font-size: 0.76rem;">ID: <%= String(user._id).substring(0, 8) %>...</div>
                     </div>
                   </div>
                 </td>
                 <td>
-                  <span class="fw-medium text-slate-700">
-                    <i class="fa-solid fa-phone text-muted me-1 small"></i> <%= user.memberPhone %>
-                  </span>
+                  <div class="fw-semibold text-dark"><%= user.memberEmail || user.memberPhone %></div>
+                  <div class="small text-muted"><i class="fa-solid fa-phone text-muted me-1 small"></i> <%= user.memberPhone %></div>
                 </td>
                 <td>
-                  <span class="badge bg-warning bg-opacity-10 text-dark border border-warning border-opacity-25 px-3 py-2 fw-bold">
+                  <span class="badge bg-warning bg-opacity-10 text-dark border border-warning border-opacity-25 px-3 py-2 fw-bold" id="user-points-badge-<%= user._id %>">
                     <i class="fa-solid fa-coins text-warning me-1"></i> <%= user.memberPoints || 0 %> pts
                   </span>
                 </td>
@@ -67,6 +85,15 @@
                     <%= user.memberStatus %>
                   </span>
                 </td>
+                <td class="text-center">
+                  <button type="button" 
+                          class="btn btn-sm btn-outline-warning text-dark rounded-pill px-2.5 py-1 adjust-points-trigger"
+                          data-id="<%= user._id %>"
+                          data-name="<%= user.memberNick %>"
+                          data-points="<%= user.memberPoints || 0 %>">
+                    <i class="fa-solid fa-coins me-1 text-warning"></i> Adjust
+                  </button>
+                </td>
                 <td class="text-center pe-4">
                   <select class="form-select-modern form-select-sm user-status-select" data-id="<%= user._id %>">
                     <option value="ACTIVE" <%= user.memberStatus === 'ACTIVE' ? 'selected' : '' %>>ACTIVE</option>
@@ -78,17 +105,55 @@
             <% }) %>
           <% } else { %>
             <tr>
-              <td colspan="7" class="text-center py-5 text-muted">
+              <td colspan="8" class="text-center py-5 text-muted">
                 <div class="p-4">
                   <i class="fa-solid fa-users-slash fa-3x mb-3 text-secondary d-block"></i>
                   <h5 class="fw-bold text-dark">No Customer Accounts Found</h5>
-                  <p class="small text-muted mb-0">When customers sign up through the mobile app / SPA, they will appear here automatically.</p>
+                  <p class="small text-muted mb-0">When customers sign up through the store, they will appear here automatically.</p>
                 </div>
               </td>
             </tr>
           <% } %>
         </tbody>
       </table>
+    </div>
+  </div>
+
+  <!-- Adjust Loyalty Points Modal -->
+  <div class="modal fade" id="adjustPointsModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+      <div class="modal-content rounded-4 border-0 shadow-lg overflow-hidden">
+        <div class="modal-header bg-dark text-white border-0 py-3 px-4">
+          <div class="d-flex align-items-center gap-2">
+            <i class="fa-solid fa-coins fs-5 text-warning"></i>
+            <h5 class="modal-title fw-bold mb-0">Adjust Loyalty Points</h5>
+          </div>
+          <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+
+        <form id="adjustPointsForm">
+          <input type="hidden" id="adjustPointsUserId">
+          <div class="modal-body p-4">
+            <div class="mb-3">
+              <label class="form-label text-muted small fw-semibold">CUSTOMER</label>
+              <div class="fw-bold fs-5 text-dark" id="adjustPointsUserName">Customer Name</div>
+            </div>
+
+            <div class="mb-3">
+              <label class="form-label text-muted small fw-semibold">SET LOYALTY POINTS (PTS)</label>
+              <input type="number" class="form-control-modern w-100" id="adjustPointsValue" min="0" required>
+              <div class="small text-muted mt-1">Customers can redeem points for checkout discounts.</div>
+            </div>
+          </div>
+
+          <div class="modal-footer bg-light border-0 py-3 px-4">
+            <button type="button" class="btn btn-outline-secondary rounded-3 px-4" data-bs-dismiss="modal">Cancel</button>
+            <button type="submit" class="btn btn-dark rounded-3 px-4 fw-semibold" id="savePointsBtn">
+              <i class="fa-solid fa-check me-1"></i> Save Points
+            </button>
+          </div>
+        </form>
+      </div>
     </div>
   </div>
 </main>
