@@ -118,7 +118,7 @@ class ProductService {
   /** BSSR: Update Product by ID **/
   public async updateChosenProduct(
     id: string,
-    input: ProductInput
+    input: Partial<ProductInput>
   ): Promise<Product> {
     id = shapeIntoMongooseObjectId(id);
     const result = await this.productModel
@@ -126,6 +126,33 @@ class ProductService {
       .exec();
     if (!result) throw new Errors(HTTPCode.NOT_FOUND, Message.NO_DATA_FOUND);
     return (result as any).toJSON() as Product;
+  }
+
+  /** BSSR: Get Footwear Catalog Metrics (Total Models, Low Stock, Collection Counts) **/
+  public async getProductDashboardMetrics(): Promise<{
+    totalProducts: number;
+    activeProducts: number;
+    lowStockCount: number;
+    categoryBreakdown: { [key: string]: number };
+  }> {
+    const products = await this.productModel.find().lean().exec();
+    let activeProducts = 0;
+    let lowStockCount = 0;
+    const categoryBreakdown: { [key: string]: number } = {};
+
+    products.forEach((p: any) => {
+      if (p.productStatus === ProductStatus.PROCESS) activeProducts++;
+      if (Number(p.productLeftCount || 0) <= 5) lowStockCount++;
+      const col = p.productCollection || "SNEAKERS";
+      categoryBreakdown[col] = (categoryBreakdown[col] || 0) + 1;
+    });
+
+    return {
+      totalProducts: products.length,
+      activeProducts,
+      lowStockCount,
+      categoryBreakdown,
+    };
   }
 }
 

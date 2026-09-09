@@ -200,6 +200,61 @@ class OrderService {
 
     return (result as any).toJSON() as Order;
   }
+
+  /** BSSR: Get Comprehensive Dashboard Metrics & Chart Datasets **/
+  public async getAdminDashboardMetrics(): Promise<{
+    totalRevenue: number;
+    totalOrders: number;
+    pendingOrders: number;
+    processOrders: number;
+    finishOrders: number;
+    monthlySales: { months: string[]; revenues: number[] };
+    statusBreakdown: { pause: number; process: number; finish: number };
+  }> {
+    const allOrders = await this.orderModel.find().lean().exec();
+
+    let totalRevenue = 0;
+    let pendingOrders = 0;
+    let processOrders = 0;
+    let finishOrders = 0;
+
+    const monthNames = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+    const currentMonth = new Date().getMonth();
+    const months: string[] = [];
+    const monthlyRevMap: { [key: string]: number } = {};
+
+    for (let i = 5; i >= 0; i--) {
+      const mIdx = (currentMonth - i + 12) % 12;
+      const mName = monthNames[mIdx];
+      months.push(mName);
+      monthlyRevMap[mName] = 0;
+    }
+
+    allOrders.forEach((order: any) => {
+      totalRevenue += order.orderTotal || 0;
+      if (order.orderStatus === OrderStatus.PAUSE) pendingOrders++;
+      else if (order.orderStatus === OrderStatus.PROCESS) processOrders++;
+      else if (order.orderStatus === OrderStatus.FINISH) finishOrders++;
+
+      const oDate = new Date(order.createdAt || Date.now());
+      const oMonth = monthNames[oDate.getMonth()];
+      if (monthlyRevMap[oMonth] !== undefined) {
+        monthlyRevMap[oMonth] += order.orderTotal || 0;
+      }
+    });
+
+    const revenues = months.map((m) => monthlyRevMap[m] || 0);
+
+    return {
+      totalRevenue,
+      totalOrders: allOrders.length,
+      pendingOrders,
+      processOrders,
+      finishOrders,
+      monthlySales: { months, revenues },
+      statusBreakdown: { pause: pendingOrders, process: processOrders, finish: finishOrders },
+    };
+  }
 }
 
 export default OrderService;
