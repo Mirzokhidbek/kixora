@@ -6,6 +6,7 @@ import morgan from "morgan";
 import cookieParser from "cookie-parser";
 import cors from "cors";
 import { MORGAN_FORMAT } from "./libs/config";
+import { globalLimiter } from "./libs/rateLimiter";
 
 import session from "express-session";
 import ConnectMongoDB from "connect-mongodb-session";
@@ -60,6 +61,7 @@ app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
 app.use(cookieParser());
 app.use(morgan(MORGAN_FORMAT));
+app.use(globalLimiter);
 
 /** 2-SESSIONS **/
 const isProduction = process.env.NODE_ENV === "production";

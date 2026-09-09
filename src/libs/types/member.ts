@@ -37,6 +37,13 @@ export interface LoginInput {
   memberPassword: string;
 }
 
+export interface GoogleAuthInput {
+  googleId: string;
+  email: string;
+  name: string;
+  picture?: string;
+}
+
 export interface MemberUpdateInput {
   _id: Types.ObjectId | string;
   memberStatus?: MemberStatus;

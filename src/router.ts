@@ -4,19 +4,20 @@ import memberController from "./controllers/member.controller";
 import productController from "./controllers/product.controller";
 import orderController from "./controllers/order.controller";
 import uploader from "./libs/uploader";
+import { authLimiter, orderLimiter } from "./libs/rateLimiter";
 
 /** SPA Member Routes **/
 router.get("/member/restaurant", memberController.getRestaurant);
 router.get("/member/top-users", memberController.getTopUsers);
 
-router.post("/member/signup", memberController.signup);
-router.post("/signup", memberController.signup);
+router.post("/member/signup", authLimiter, memberController.signup);
+router.post("/signup", authLimiter, memberController.signup);
 
-router.post("/member/login", memberController.login);
-router.post("/login", memberController.login);
+router.post("/member/login", authLimiter, memberController.login);
+router.post("/login", authLimiter, memberController.login);
 
-router.post("/member/google-login", memberController.googleLogin);
-router.post("/google-login", memberController.googleLogin);
+router.post("/member/google-login", authLimiter, memberController.googleLogin);
+router.post("/google-login", authLimiter, memberController.googleLogin);
 
 router.post(
   "/member/logout",
@@ -54,6 +55,7 @@ router.get(
 router.post(
   "/order/create",
   memberController.verifyAuth,
+  orderLimiter,
   orderController.createOrder
 );
 

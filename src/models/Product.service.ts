@@ -1,5 +1,11 @@
 import ProductModel from "../schema/Product.model";
-import { Product, ProductInput, ProductInquiry } from "../libs/types/product";
+import {
+  Product,
+  ProductDashboardMetrics,
+  ProductInput,
+  ProductInquiry,
+  ProductUpdateInput,
+} from "../libs/types/product";
 import Errors, { HTTPCode, Message } from "../libs/Errors";
 import { shapeIntoMongooseObjectId } from "../libs/config";
 import { ProductStatus } from "../libs/enums/product.enum";
@@ -44,7 +50,7 @@ class ProductService {
         : { [inquiry.order || "createdAt"]: -1 };
 
     const result = await this.productModel
-      .aggregate([
+      .aggregate<Product>([
         { $match: match },
         { $sort: sort },
         { $skip: (inquiry.page * 1 - 1) * inquiry.limit },
@@ -54,7 +60,7 @@ class ProductService {
 
     if (!result) throw new Errors(HTTPCode.NOT_FOUND, Message.NO_DATA_FOUND);
 
-    return result as Product[];
+    return result;
   }
 
   /** SPA: Get Single Product & Track Member Views **/
@@ -64,11 +70,14 @@ class ProductService {
   ): Promise<Product> {
     const productId = shapeIntoMongooseObjectId(id);
 
-    let result = (await this.productModel
+    const foundProduct = await this.productModel
       .findOne({ _id: productId, productStatus: ProductStatus.PROCESS })
-      .exec()) as unknown as Product;
+      .lean<Product>()
+      .exec();
 
-    if (!result) throw new Errors(HTTPCode.NOT_FOUND, Message.NO_DATA_FOUND);
+    if (!foundProduct) throw new Errors(HTTPCode.NOT_FOUND, Message.NO_DATA_FOUND);
+
+    let result: Product = foundProduct;
 
     // If authenticated user visits product, track unique view
     if (memberId) {
@@ -85,13 +94,18 @@ class ProductService {
         await this.viewService.insertMemberView(input);
 
         // Increase product views count in database
-        result = (await this.productModel
+        const updated = await this.productModel
           .findByIdAndUpdate(
             productId,
             { $inc: { productViews: 1 } },
             { new: true }
           )
-          .exec()) as unknown as Product;
+          .lean<Product>()
+          .exec();
+
+        if (updated) {
+          result = updated;
+        }
       }
     }
 
@@ -100,15 +114,15 @@ class ProductService {
 
   /** SPA & BSSR: Get All Products **/
   public async getAllProducts(): Promise<Product[]> {
-    const result = await this.productModel.find().exec();
-    return result as unknown as Product[];
+    const result = await this.productModel.find().lean<Product[]>().exec();
+    return result || [];
   }
 
   /** BSSR: Create New Product **/
   public async createNewProduct(input: ProductInput): Promise<Product> {
     try {
       const result = await this.productModel.create(input);
-      return (result as any).toJSON() as Product;
+      return result.toObject() as Product;
     } catch (err) {
       console.error("Error, createNewProduct:", err);
       throw new Errors(HTTPCode.BAD_REQUEST, Message.CREATE_FAILED);
@@ -118,29 +132,39 @@ class ProductService {
   /** BSSR: Update Product by ID **/
   public async updateChosenProduct(
     id: string,
-    input: Partial<ProductInput>
+    input: Partial<ProductUpdateInput>
   ): Promise<Product> {
-    id = shapeIntoMongooseObjectId(id);
+    const productId = shapeIntoMongooseObjectId(id);
     const result = await this.productModel
-      .findByIdAndUpdate({ _id: id }, input, { new: true })
+      .findByIdAndUpdate({ _id: productId }, input, { new: true })
+      .lean<Product>()
       .exec();
     if (!result) throw new Errors(HTTPCode.NOT_FOUND, Message.NO_DATA_FOUND);
-    return (result as any).toJSON() as Product;
+    return result;
+  }
+
+  /** BSSR: Update Product Details via AJAX (Quick Edit) **/
+  public async updateProductDetailsByAdmin(
+    id: string,
+    input: Partial<ProductUpdateInput>
+  ): Promise<Product> {
+    const productId = shapeIntoMongooseObjectId(id);
+    const result = await this.productModel
+      .findByIdAndUpdate(productId, { $set: input }, { new: true })
+      .lean<Product>()
+      .exec();
+    if (!result) throw new Errors(HTTPCode.NOT_MODIFIED, Message.UPDATE_FAILED);
+    return result;
   }
 
   /** BSSR: Get Footwear Catalog Metrics (Total Models, Low Stock, Collection Counts) **/
-  public async getProductDashboardMetrics(): Promise<{
-    totalProducts: number;
-    activeProducts: number;
-    lowStockCount: number;
-    categoryBreakdown: { [key: string]: number };
-  }> {
-    const products = await this.productModel.find().lean().exec();
+  public async getProductDashboardMetrics(): Promise<ProductDashboardMetrics> {
+    const products = await this.productModel.find().lean<Product[]>().exec();
     let activeProducts = 0;
     let lowStockCount = 0;
-    const categoryBreakdown: { [key: string]: number } = {};
+    const categoryBreakdown: Record<string, number> = {};
 
-    products.forEach((p: any) => {
+    products.forEach((p: Product) => {
       if (p.productStatus === ProductStatus.PROCESS) activeProducts++;
       if (Number(p.productLeftCount || 0) <= 5) lowStockCount++;
       const col = p.productCollection || "SNEAKERS";
