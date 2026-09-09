@@ -1,24 +1,44 @@
 /** =========================================================
- * BURAK ADMIN - PRODUCTS MANAGEMENT SCRIPT
+ * KIXORA BRAND ADMIN - FOOTWEAR PRODUCTS SCRIPT
  * ========================================================= */
 
 $(document).ready(function () {
-  console.log("Products Script Loaded.");
+  console.log("KIXORA Footwear Management Script Loaded.");
 
-  // 1. Dynamic Toggle between Portion Size & Bottle Volume based on Collection
-  $("#productCollectionSelect").on("change", function () {
-    const selectedCollection = $(this).val();
-
-    if (selectedCollection === "DRINK") {
-      $("#productSizeBox").addClass("d-none");
-      $("#productVolumeBox").removeClass("d-none");
-    } else {
-      $("#productVolumeBox").addClass("d-none");
-      $("#productSizeBox").removeClass("d-none");
-    }
+  // 1. Live Search by Model Name / Description
+  $("#productSearchInput").on("keyup", function () {
+    const value = $(this).val().toLowerCase().trim();
+    filterProductsTable();
   });
 
-  // 2. Multi-Image Preloading & File Validation
+  // 2. Collection Filter Pills
+  $(".collection-filter-btn").on("click", function () {
+    $(".collection-filter-btn").removeClass("btn-dark active").addClass("btn-outline-secondary");
+    $(this).removeClass("btn-outline-secondary").addClass("btn-dark active");
+    filterProductsTable();
+  });
+
+  function filterProductsTable() {
+    const searchVal = $("#productSearchInput").val().toLowerCase().trim();
+    const activeCollection = $(".collection-filter-btn.active").data("collection");
+
+    $(".product-row").each(function () {
+      const name = $(this).data("name") || "";
+      const desc = $(this).data("desc") || "";
+      const collection = $(this).data("collection") || "";
+
+      const matchesSearch = !searchVal || name.includes(searchVal) || desc.includes(searchVal);
+      const matchesCollection = activeCollection === "ALL" || collection === activeCollection;
+
+      if (matchesSearch && matchesCollection) {
+        $(this).show();
+      } else {
+        $(this).hide();
+      }
+    });
+  }
+
+  // 3. Multi-Image Preloading & File Validation
   $("#productImagesInput").on("change", function () {
     const previewBox = $("#imagePreviewContainer");
     previewBox.empty();
@@ -27,7 +47,7 @@ $(document).ready(function () {
     if (!files || files.length === 0) return;
 
     if (files.length > 5) {
-      alert("Maximum 5 images allowed per product!");
+      alert("Maximum 5 photos allowed per product!");
       this.value = "";
       return false;
     }
@@ -48,50 +68,17 @@ $(document).ready(function () {
       const reader = new FileReader();
       reader.onload = function (e) {
         const imgEl = $("<img>")
-          .addClass("preview-img-item shadow-sm")
+          .addClass("preview-img-item shadow-sm rounded border")
           .attr("src", e.target.result)
-          .attr("alt", file.name);
+          .attr("alt", file.name)
+          .css({ width: "60px", height: "60px", objectFit: "contain", background: "#f9fafb", padding: "4px" });
         previewBox.append(imgEl);
       };
       reader.readAsDataURL(file);
     });
   });
 
-  // 3. Frontend Validation before Product Creation
-  $("#addProductForm").on("submit", function () {
-    const productName = $("input[name=productName]").val().trim();
-    const productPrice = $("input[name=productPrice]").val();
-    const productLeftCount = $("input[name=productLeftCount]").val();
-    const productCollection = $("#productCollectionSelect").val();
-    const files = $("#productImagesInput").get(0).files;
-
-    if (productName === "") {
-      alert("Please enter product name!");
-      $("input[name=productName]").focus();
-      return false;
-    }
-
-    if (!productPrice || Number(productPrice) <= 0) {
-      alert("Please enter a valid product price!");
-      $("input[name=productPrice]").focus();
-      return false;
-    }
-
-    if (!productLeftCount || Number(productLeftCount) < 0) {
-      alert("Please enter a valid stock count!");
-      $("input[name=productLeftCount]").focus();
-      return false;
-    }
-
-    if (!files || files.length === 0) {
-      alert("Please select at least one product photo!");
-      return false;
-    }
-
-    return true;
-  });
-
-  // 4. AJAX Product Status Update
+  // 4. AJAX Product Status Toggle (PROCESS / PAUSE / DELETE)
   $(".product-status-select").on("change", function () {
     const id = $(this).data("id");
     const productStatus = $(this).val();
@@ -110,6 +97,56 @@ $(document).ready(function () {
       })
       .catch((err) => {
         alert("Failed to update product status!");
+        console.error(err);
+      });
+  });
+
+  // 5. Open Edit Product Modal & Populate Values
+  $(".edit-product-trigger").on("click", function () {
+    const id = $(this).data("id");
+    const name = $(this).data("name");
+    const price = $(this).data("price");
+    const stock = $(this).data("stock");
+    const collection = $(this).data("collection");
+    const size = $(this).data("size");
+    const desc = $(this).data("desc");
+
+    $("#editProductId").val(id);
+    $("#editProductName").val(name);
+    $("#editProductPrice").val(price);
+    $("#editProductLeftCount").val(stock);
+    $("#editProductCollection").val(collection);
+    $("#editProductSize").val(size);
+    $("#editProductDesc").val(desc);
+
+    const editModal = new bootstrap.Modal(document.getElementById("editProductModal"));
+    editModal.show();
+  });
+
+  // 6. Submit Product Edit via AJAX
+  $("#editProductForm").on("submit", function (e) {
+    e.preventDefault();
+    const id = $("#editProductId").val();
+    const payload = {
+      productName: $("#editProductName").val().trim(),
+      productPrice: Number($("#editProductPrice").val()),
+      productLeftCount: Number($("#editProductLeftCount").val()),
+      productCollection: $("#editProductCollection").val(),
+      productSize: $("#editProductSize").val(),
+      productDesc: $("#editProductDesc").val().trim(),
+    };
+
+    const saveBtn = $("#saveEditProductBtn");
+    saveBtn.prop("disabled", true).html('<i class="fa-solid fa-spinner fa-spin me-1"></i> Saving...');
+
+    axios
+      .post(`/admin/product/${id}/update`, payload)
+      .then(() => {
+        window.location.reload();
+      })
+      .catch((err) => {
+        saveBtn.prop("disabled", false).html('<i class="fa-solid fa-check me-1"></i> Save Changes');
+        alert("Failed to update product details. Please try again.");
         console.error(err);
       });
   });

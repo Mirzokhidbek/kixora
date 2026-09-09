@@ -3,20 +3,46 @@ import { T } from "../libs/types/common";
 import Errors, { HTTPCode, Message } from "../libs/Errors";
 import MemberService from "../models/Member.service";
 import OrderService from "../models/Order.service";
+import ProductService from "../models/Product.service";
 import { LoginInput, MemberInput } from "../libs/types/member";
 import { MemberType } from "../libs/enums/member.enum";
 
 const memberService = new MemberService();
 const orderService = new OrderService();
+const productService = new ProductService();
 const restaurantController: T = {};
 
-restaurantController.goHome = (req: Request, res: Response) => {
+restaurantController.goHome = async (req: Request, res: Response) => {
   try {
-    res.render("home");
+    const orderMetrics = await orderService.getAdminDashboardMetrics();
+    const productMetrics = await productService.getProductDashboardMetrics();
+    const allUsers = await memberService.getUsers();
+
+    res.render("home", {
+      orderMetrics,
+      productMetrics,
+      userCount: allUsers.length,
+    });
   } catch (err) {
     console.log("Error, goHome:", err);
-    if (err instanceof Errors) res.status(err.code).json(err);
-    else res.status(Errors.standard.code).json(Errors.standard);
+    res.render("home", {
+      orderMetrics: {
+        totalRevenue: 0,
+        totalOrders: 0,
+        pendingOrders: 0,
+        processOrders: 0,
+        finishOrders: 0,
+        monthlySales: { months: ["Jan", "Feb", "Mar", "Apr", "May", "Jun"], revenues: [0, 0, 0, 0, 0, 0] },
+        statusBreakdown: { pause: 0, process: 0, finish: 0 },
+      },
+      productMetrics: {
+        totalProducts: 0,
+        activeProducts: 0,
+        lowStockCount: 0,
+        categoryBreakdown: {},
+      },
+      userCount: 0,
+    });
   }
 };
 
@@ -165,6 +191,41 @@ restaurantController.updateChosenOrder = async (
     res.status(HTTPCode.OK).json({ data: result });
   } catch (err) {
     console.log("Error, updateChosenOrder:", err);
+    if (err instanceof Errors) res.status(err.code).json(err);
+    else res.status(Errors.standard.code).json(Errors.standard);
+  }
+};
+
+/** Admin BSSR: Update Product Details Modal **/
+restaurantController.updateChosenProductDetails = async (
+  req: Request,
+  res: Response
+) => {
+  try {
+    const id = req.params.id;
+    console.log("updateChosenProductDetails (Admin):", id, req.body);
+    const result = await productService.updateChosenProduct(id, req.body);
+    res.status(HTTPCode.OK).json({ data: result });
+  } catch (err) {
+    console.log("Error, updateChosenProductDetails:", err);
+    if (err instanceof Errors) res.status(err.code).json(err);
+    else res.status(Errors.standard.code).json(Errors.standard);
+  }
+};
+
+/** Admin BSSR: Update Customer Loyalty Points **/
+restaurantController.updateMemberPoints = async (
+  req: Request,
+  res: Response
+) => {
+  try {
+    const id = req.params.id;
+    const points = Number(req.body.points || 0);
+    console.log("updateMemberPoints (Admin):", id, points);
+    const result = await memberService.updateMemberPointsByAdmin(id, points);
+    res.status(HTTPCode.OK).json({ data: result });
+  } catch (err) {
+    console.log("Error, updateMemberPoints:", err);
     if (err instanceof Errors) res.status(err.code).json(err);
     else res.status(Errors.standard.code).json(Errors.standard);
   }

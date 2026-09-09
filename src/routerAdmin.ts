@@ -34,6 +34,11 @@ routerAdmin.post(
   restaurantController.verifyRestaurant,
   productController.updateChosenProduct
 );
+routerAdmin.post(
+  "/product/:id/update",
+  restaurantController.verifyRestaurant,
+  restaurantController.updateChosenProductDetails
+);
 
 /** User Routes **/
 routerAdmin.get(
@@ -45,6 +50,11 @@ routerAdmin.post(
   "/user/edit",
   restaurantController.verifyRestaurant,
   restaurantController.updateChosenUser
+);
+routerAdmin.post(
+  "/user/:id/points",
+  restaurantController.verifyRestaurant,
+  restaurantController.updateMemberPoints
 );
 
 /** Order Routes **/

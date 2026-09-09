@@ -1,6 +1,6 @@
 <%- include('includes/header') %>
 
-<main class="container-fluid px-lg-5 my-5 flex-grow-1">
+<main class="container-fluid px-lg-5 my-4 flex-grow-1">
   <!-- Top Title & Action Bar -->
   <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3 mb-4">
     <div>
@@ -8,51 +8,83 @@
         <h2 class="fw-bold text-dark mb-0">Footwear Catalog</h2>
         <span class="badge bg-dark rounded-pill px-3 py-1 fw-bold text-warning"><%= products ? products.length : 0 %> Models</span>
       </div>
-      <p class="text-muted mb-0">Add, organize, and manage sneakers, running shoes, and boots in the KIXORA brand catalog.</p>
+      <p class="text-muted mb-0">Add, organize, edit prices, and manage sneaker stock levels in the KIXORA brand catalog.</p>
     </div>
 
     <div>
       <button class="btn-gold" data-bs-toggle="modal" data-bs-target="#addProductModal" style="background: linear-gradient(135deg, #ff4655, #f59e0b);">
-        <i class="fa-solid fa-plus-circle"></i> Add New Sneaker
+        <i class="fa-solid fa-plus-circle"></i> Add New Sneaker Drop
       </button>
+    </div>
+  </div>
+
+  <!-- Search & Collection Filters Card -->
+  <div class="admin-card p-3 mb-4" style="border-radius: 14px; border: 1px solid #e5e7eb; background: #ffffff;">
+    <div class="row g-2 align-items-center">
+      <!-- Search Input -->
+      <div class="col-md-5">
+        <div class="input-group">
+          <span class="input-group-text bg-light border-end-0 text-muted"><i class="fa-solid fa-magnifying-glass"></i></span>
+          <input type="text" id="productSearchInput" class="form-control border-start-0 bg-light" placeholder="Search by model name or description...">
+        </div>
+      </div>
+
+      <!-- Collection Pills -->
+      <div class="col-md-7">
+        <div class="d-flex flex-wrap gap-1.5 justify-content-md-end">
+          <button type="button" class="btn btn-sm btn-dark collection-filter-btn active" data-collection="ALL">All Models</button>
+          <button type="button" class="btn btn-sm btn-outline-secondary collection-filter-btn" data-collection="SNEAKERS">Sneakers</button>
+          <button type="button" class="btn btn-sm btn-outline-secondary collection-filter-btn" data-collection="RUNNING">Running</button>
+          <button type="button" class="btn btn-sm btn-outline-secondary collection-filter-btn" data-collection="BOOTS">Boots</button>
+          <button type="button" class="btn btn-sm btn-outline-secondary collection-filter-btn" data-collection="LIMITED_DROP">Limited Drop</button>
+        </div>
+      </div>
     </div>
   </div>
 
   <!-- Products Table Card -->
   <div class="admin-table-container">
     <div class="table-responsive">
-      <table class="table admin-table align-middle">
+      <table class="table admin-table align-middle" id="productsTable">
         <thead>
           <tr>
             <th scope="col" class="ps-4">#</th>
             <th scope="col">Image</th>
             <th scope="col">Model Title</th>
             <th scope="col">Collection</th>
-            <th scope="col">Size (EU)</th>
+            <th scope="col">EU Sizes</th>
             <th scope="col">Price</th>
             <th scope="col">Stock Count</th>
             <th scope="col">Views</th>
             <th scope="col">Status</th>
+            <th scope="col" class="text-center">Edit</th>
             <th scope="col" class="text-center pe-4">Change Status</th>
           </tr>
         </thead>
         <tbody>
           <% if (products && products.length) { %>
             <% products.forEach((product, index) => { %>
-              <tr>
+              <tr class="product-row" 
+                  data-name="<%= product.productName.toLowerCase() %>" 
+                  data-collection="<%= product.productCollection %>"
+                  data-desc="<%= (product.productDesc || '').toLowerCase() %>">
                 <td class="ps-4 fw-bold text-muted"><%= index + 1 %></td>
                 <td>
                   <% if (product.productImages && product.productImages.length) { %>
-                    <img src="/<%= product.productImages[0].replace('public/', '') %>" alt="<%= product.productName %>" class="product-img-thumb" style="object-fit: cover; border-radius: 8px;">
+                    <img src="/<%= product.productImages[0].replace('public/', '') %>" 
+                         alt="<%= product.productName %>" 
+                         class="product-img-thumb" 
+                         style="width: 50px; height: 50px; object-fit: contain; background: #f3f4f6; border-radius: 8px; padding: 3px;"
+                         onerror="this.src='/img/kixora/sneakers.jpg'">
                   <% } else { %>
-                    <div class="product-img-thumb bg-light d-flex align-items-center justify-content-center text-muted" style="border-radius: 8px;">
+                    <div class="product-img-thumb bg-light d-flex align-items-center justify-content-center text-muted" style="border-radius: 8px; width: 50px; height: 50px;">
                       <i class="fa-solid fa-shoe-prints"></i>
                     </div>
                   <% } %>
                 </td>
                 <td>
                   <div class="fw-bold text-dark"><%= product.productName %></div>
-                  <div class="small text-muted text-truncate" style="max-width: 220px;"><%= product.productDesc || 'No description provided' %></div>
+                  <div class="small text-muted text-truncate" style="max-width: 200px;"><%= product.productDesc || 'No description provided' %></div>
                 </td>
                 <td>
                   <span class="badge bg-light text-dark border px-2 py-1 fw-semibold"><%= product.productCollection %></span>
@@ -64,9 +96,15 @@
                   <span class="fw-bold text-success fs-6">$<%= Number(product.productPrice).toFixed(2) %></span>
                 </td>
                 <td>
-                  <span class="fw-semibold <%= product.productLeftCount <= 5 ? 'text-danger' : 'text-dark' %>">
-                    <%= product.productLeftCount %> pairs
-                  </span>
+                  <% if (product.productLeftCount <= 5) { %>
+                    <span class="badge bg-danger bg-opacity-10 text-danger border border-danger border-opacity-25 px-2 py-1 fw-bold">
+                      <i class="fa-solid fa-triangle-exclamation me-1"></i><%= product.productLeftCount %> Left
+                    </span>
+                  <% } else { %>
+                    <span class="fw-semibold text-dark">
+                      <%= product.productLeftCount %> pairs
+                    </span>
+                  <% } %>
                 </td>
                 <td>
                   <span class="text-muted small"><i class="fa-regular fa-eye me-1"></i><%= product.productViews || 0 %></span>
@@ -75,6 +113,19 @@
                   <span id="status-badge-<%= product._id %>" class="badge-status <%= product.productStatus.toLowerCase() %>">
                     <%= product.productStatus %>
                   </span>
+                </td>
+                <td class="text-center">
+                  <button type="button" 
+                          class="btn btn-sm btn-outline-dark rounded-pill px-2.5 py-1 edit-product-trigger"
+                          data-id="<%= product._id %>"
+                          data-name="<%= product.productName %>"
+                          data-price="<%= product.productPrice %>"
+                          data-stock="<%= product.productLeftCount %>"
+                          data-collection="<%= product.productCollection %>"
+                          data-size="<%= product.productSize || '42' %>"
+                          data-desc="<%= product.productDesc || '' %>">
+                    <i class="fa-solid fa-pen-to-square me-1"></i> Edit
+                  </button>
                 </td>
                 <td class="text-center pe-4">
                   <select class="form-select-modern form-select-sm product-status-select" data-id="<%= product._id %>">
@@ -87,11 +138,11 @@
             <% }) %>
           <% } else { %>
             <tr>
-              <td colspan="10" class="text-center py-5 text-muted">
+              <td colspan="11" class="text-center py-5 text-muted">
                 <div class="p-4">
                   <i class="fa-solid fa-shoe-prints fa-3x mb-3 text-secondary d-block"></i>
                   <h5 class="fw-bold text-dark">No Footwear Models Available Yet</h5>
-                  <p class="small text-muted mb-3">Your KIXORA catalog is currently empty. Click the button below to add your first sneaker model.</p>
+                  <p class="small text-muted mb-3">Your KIXORA catalog is currently empty. Click the button below to add your first sneaker drop.</p>
                   <button class="btn-gold btn-sm" data-bs-toggle="modal" data-bs-target="#addProductModal" style="background: linear-gradient(135deg, #ff4655, #f59e0b);">
                     <i class="fa-solid fa-plus-circle"></i> Add First Sneaker
                   </button>
@@ -104,7 +155,7 @@
     </div>
   </div>
 
-  <!-- Advanced Add Product Modal -->
+  <!-- Create New Product Modal -->
   <div class="modal fade" id="addProductModal" tabindex="-1" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered modal-lg">
       <div class="modal-content rounded-4 border-0 shadow-lg overflow-hidden">
@@ -123,12 +174,12 @@
             <div class="row g-3">
               <div class="col-md-6">
                 <label class="form-label fw-semibold small text-muted">SNEAKER / SHOE NAME</label>
-                <input type="text" class="form-control-modern w-100" name="productName" placeholder="e.g. KIXORA Cyber Runner X" required>
+                <input type="text" class="form-control-modern w-100" name="productName" placeholder="e.g. Nike Dunk Low Retro" required>
               </div>
 
               <div class="col-md-3">
                 <label class="form-label fw-semibold small text-muted">PRICE ($)</label>
-                <input type="number" step="0.01" class="form-control-modern w-100" name="productPrice" placeholder="149.00" required>
+                <input type="number" step="0.01" class="form-control-modern w-100" name="productPrice" placeholder="135.00" required>
               </div>
 
               <div class="col-md-3">
@@ -138,52 +189,118 @@
 
               <div class="col-md-6">
                 <label class="form-label fw-semibold small text-muted">COLLECTION CATEGORY</label>
-                <select id="productCollectionSelect" class="form-select-modern w-100" name="productCollection" required>
-                  <option value="SNEAKERS" selected>SNEAKERS (Streetwear & Lifestyle)</option>
-                  <option value="RUNNING">RUNNING (Athletic & Performance)</option>
-                  <option value="BOOTS">BOOTS (High-Tops & Leather)</option>
-                  <option value="CASUAL">CASUAL (Loafers & Comfort)</option>
-                  <option value="LIMITED_DROP">LIMITED DROP (Exclusive Release)</option>
+                <select class="form-select-modern w-100" name="productCollection" id="productCollectionSelect" required>
+                  <option value="SNEAKERS" selected>Sneakers (Street & Court)</option>
+                  <option value="RUNNING">Running (Lightweight Foam)</option>
+                  <option value="BOOTS">Boots (All-Weather Traction)</option>
+                  <option value="LIMITED_DROP">Limited Drop (Rare Concept)</option>
                 </select>
               </div>
 
-              <!-- Shoe Size (EU) -->
-              <div id="productSizeBox" class="col-md-6">
-                <label class="form-label fw-semibold small text-muted">SHOE SIZE (EU)</label>
+              <div class="col-md-6" id="productSizeBox">
+                <label class="form-label fw-semibold small text-muted">PRIMARY EU SIZE</label>
                 <select class="form-select-modern w-100" name="productSize">
-                  <option value="38">EU 38 (US 6)</option>
-                  <option value="39">EU 39 (US 6.5)</option>
-                  <option value="40">EU 40 (US 7.5)</option>
-                  <option value="41">EU 41 (US 8)</option>
-                  <option value="42" selected>EU 42 (US 9 - Standard)</option>
-                  <option value="43">EU 43 (US 10)</option>
-                  <option value="44">EU 44 (US 11)</option>
-                  <option value="45">EU 45 (US 12)</option>
+                  <option value="39">EU 39</option>
+                  <option value="40">EU 40</option>
+                  <option value="41">EU 41</option>
+                  <option value="42" selected>EU 42</option>
+                  <option value="43">EU 43</option>
+                  <option value="44">EU 44</option>
+                  <option value="45">EU 45</option>
                 </select>
               </div>
 
               <div class="col-12">
-                <label class="form-label fw-semibold small text-muted">PRODUCT IMAGES (MULTI-ANGLE PHOTOS, MAX 5)</label>
-                <div class="image-upload-box" onclick="$('#productImagesInput').click()">
-                  <i class="fa-solid fa-cloud-arrow-up text-warning fa-2x mb-2"></i>
-                  <div class="fw-bold text-dark">Click to browse sneaker photos</div>
-                  <div class="small text-muted">PNG, JPG, JPEG or WEBP formats supported (Side, Top, Sole, Perspective)</div>
-                </div>
-                <input type="file" id="productImagesInput" name="productImages" class="d-none" multiple accept="image/*" required>
-                <div id="imagePreviewContainer" class="preview-container"></div>
+                <label class="form-label fw-semibold small text-muted">FOOTWEAR MATERIALS & DESCRIPTION</label>
+                <textarea class="form-control-modern w-100" name="productDesc" rows="3" placeholder="Describe leather upper, midsole cushioning, traction pattern..."></textarea>
               </div>
 
               <div class="col-12">
-                <label class="form-label fw-semibold small text-muted">MATERIAL & SPECIFICATIONS</label>
-                <textarea class="form-control-modern w-100" name="productDesc" rows="3" placeholder="Breathable Mesh, Carbon Fiber Plate, EVA Foam, Air Cushioning technology..."></textarea>
+                <label class="form-label fw-semibold small text-muted">PRODUCT STUDIO PHOTOS (UP TO 5)</label>
+                <input type="file" class="form-control-modern w-100" name="productImages" id="productImagesInput" multiple accept="image/*" required>
+                <div class="d-flex flex-wrap gap-2 mt-2" id="imagePreviewContainer"></div>
               </div>
             </div>
           </div>
 
-          <div class="modal-footer border-0 p-3 bg-light d-flex justify-content-end gap-2">
+          <div class="modal-footer bg-light border-0 py-3 px-4">
             <button type="button" class="btn btn-outline-secondary rounded-3 px-4" data-bs-dismiss="modal">Cancel</button>
-            <button type="submit" class="btn-gold px-4" style="background: linear-gradient(135deg, #ff4655, #f59e0b);">
-              <i class="fa-solid fa-check me-1"></i> Publish Sneaker
+            <button type="submit" class="btn-gold" style="background: linear-gradient(135deg, #ff4655, #f59e0b);">
+              <i class="fa-solid fa-cloud-arrow-up"></i> Publish Sneaker
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <!-- Edit Product Details Modal -->
+  <div class="modal fade" id="editProductModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-lg">
+      <div class="modal-content rounded-4 border-0 shadow-lg overflow-hidden">
+        <div class="modal-header bg-dark text-white border-0 py-3 px-4">
+          <div class="d-flex align-items-center gap-2">
+            <div class="brand-icon" style="width: 32px; height: 32px; font-size: 0.9rem; background: #3b82f6;">
+              <i class="fa-solid fa-pen"></i>
+            </div>
+            <h5 class="modal-title fw-bold mb-0">Edit Footwear Model</h5>
+          </div>
+          <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+
+        <form id="editProductForm">
+          <input type="hidden" id="editProductId">
+          <div class="modal-body p-4">
+            <div class="row g-3">
+              <div class="col-md-6">
+                <label class="form-label fw-semibold small text-muted">SNEAKER / SHOE NAME</label>
+                <input type="text" class="form-control-modern w-100" id="editProductName" required>
+              </div>
+
+              <div class="col-md-3">
+                <label class="form-label fw-semibold small text-muted">PRICE ($)</label>
+                <input type="number" step="0.01" class="form-control-modern w-100" id="editProductPrice" required>
+              </div>
+
+              <div class="col-md-3">
+                <label class="form-label fw-semibold small text-muted">STOCK COUNT (PAIRS)</label>
+                <input type="number" class="form-control-modern w-100" id="editProductLeftCount" required>
+              </div>
+
+              <div class="col-md-6">
+                <label class="form-label fw-semibold small text-muted">COLLECTION CATEGORY</label>
+                <select class="form-select-modern w-100" id="editProductCollection" required>
+                  <option value="SNEAKERS">Sneakers (Street & Court)</option>
+                  <option value="RUNNING">Running (Lightweight Foam)</option>
+                  <option value="BOOTS">Boots (All-Weather Traction)</option>
+                  <option value="LIMITED_DROP">Limited Drop (Rare Concept)</option>
+                </select>
+              </div>
+
+              <div class="col-md-6">
+                <label class="form-label fw-semibold small text-muted">PRIMARY EU SIZE</label>
+                <select class="form-select-modern w-100" id="editProductSize">
+                  <option value="39">EU 39</option>
+                  <option value="40">EU 40</option>
+                  <option value="41">EU 41</option>
+                  <option value="42">EU 42</option>
+                  <option value="43">EU 43</option>
+                  <option value="44">EU 44</option>
+                  <option value="45">EU 45</option>
+                </select>
+              </div>
+
+              <div class="col-12">
+                <label class="form-label fw-semibold small text-muted">DESCRIPTION & MATERIALS</label>
+                <textarea class="form-control-modern w-100" id="editProductDesc" rows="3"></textarea>
+              </div>
+            </div>
+          </div>
+
+          <div class="modal-footer bg-light border-0 py-3 px-4">
+            <button type="button" class="btn btn-outline-secondary rounded-3 px-4" data-bs-dismiss="modal">Cancel</button>
+            <button type="submit" class="btn btn-primary rounded-3 px-4 fw-semibold" id="saveEditProductBtn">
+              <i class="fa-solid fa-check me-1"></i> Save Changes
             </button>
           </div>
         </form>
@@ -195,4 +312,3 @@
 <script src="/js/products.js"></script>
 
 <%- include('includes/footer') %>
-
