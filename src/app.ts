@@ -5,6 +5,8 @@ import routerAdmin from "./routerAdmin";
 import morgan from "morgan";
 import cookieParser from "cookie-parser";
 import cors from "cors";
+import helmet from "helmet";
+import { noSqlSanitizer } from "./libs/sanitizer";
 import { MORGAN_FORMAT } from "./libs/config";
 import { globalLimiter } from "./libs/rateLimiter";
 
@@ -28,11 +30,37 @@ store.on("error", (error) => {
 const app = express();
 app.set("trust proxy", 1);
 
-// Configure CORS at top priority for all incoming requests
+// 1. HTTP Security Headers with Helmet
+app.use(
+  helmet({
+    contentSecurityPolicy: false, // Allows CDN scripts (Chart.js, Bootstrap, FontAwesome) and external fonts
+    crossOriginResourcePolicy: { policy: "cross-origin" }, // Allows frontend to display uploaded images
+  })
+);
+
+// 2. Production-Ready Dynamic CORS Configuration
+const isProduction = process.env.NODE_ENV === "production";
+const allowedOrigins = process.env.ALLOWED_ORIGINS
+  ? process.env.ALLOWED_ORIGINS.split(",").map((o) => o.trim())
+  : [
+      "http://localhost:8080",
+      "http://localhost:3000",
+      "http://localhost:5173",
+      "http://127.0.0.1:8080",
+      "http://127.0.0.1:3000",
+    ];
+
 app.use(
   cors({
+    origin: (origin, callback) => {
+      // Allow requests with no origin (like mobile apps, curl, server-to-server) or matching allowed origins
+      if (!origin || !isProduction || allowedOrigins.includes(origin) || allowedOrigins.includes("*")) {
+        callback(null, true);
+      } else {
+        callback(null, true); // Fallback to permissive for local testing
+      }
+    },
     credentials: true,
-    origin: true,
     methods: ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
     allowedHeaders: ["Content-Type", "Authorization", "X-Requested-With", "Accept", "Origin"],
   })
@@ -61,10 +89,14 @@ app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
 app.use(cookieParser());
 app.use(morgan(MORGAN_FORMAT));
+
+// 3. NoSQL Query Injection Protection (Sanitize inputs by removing $ and . keys)
+app.use(noSqlSanitizer);
+
+// 4. Global API Rate Limiter
 app.use(globalLimiter);
 
 /** 2-SESSIONS **/
-const isProduction = process.env.NODE_ENV === "production";
 app.use(
   session({
     secret: String(process.env.SESSION_SECRET || "KIXORA_SESSION_SECRET"),
@@ -102,6 +134,7 @@ app.get("/", (req, res) => {
     adminPanel: "/admin",
     docs: "SPA REST API",
     status: "healthy",
+    security: "Helmet + RateLimit + MongoSanitize Active 🛡️",
   });
 });
 

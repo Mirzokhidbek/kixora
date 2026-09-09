@@ -63,10 +63,12 @@ const productSchema = new Schema(
   { timestamps: true }
 );
 
-productSchema.index(
-  { productName: 1, productCollection: 1 },
-  { unique: false }
-);
+/** High-Performance MongoDB Database Indexes **/
+productSchema.index({ productCollection: 1, productStatus: 1 });
+productSchema.index({ productStatus: 1, createdAt: -1 });
+productSchema.index({ productPrice: 1 });
+productSchema.index({ productViews: -1 });
+productSchema.index({ productSizes: 1 });
+productSchema.index({ productColors: 1 });
 
 export default mongoose.model("Product", productSchema);
-
