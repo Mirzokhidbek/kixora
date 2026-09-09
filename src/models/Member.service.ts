@@ -4,6 +4,7 @@ import {
   MemberInput,
   LoginInput,
   MemberUpdateInput,
+  GoogleAuthInput,
 } from "../libs/types/member";
 import Errors, { HTTPCode, Message } from "../libs/Errors";
 import { MemberStatus, MemberType } from "../libs/enums/member.enum";
@@ -24,11 +25,11 @@ class MemberService {
         memberType: MemberType.RESTAURANT,
         memberStatus: MemberStatus.ACTIVE,
       })
-      .lean()
+      .lean<Member>()
       .exec();
     if (!result) throw new Errors(HTTPCode.NOT_FOUND, Message.NO_DATA_FOUND);
 
-    return result as unknown as Member;
+    return result;
   }
 
   /** SPA SIGNUP (USER) **/
@@ -46,10 +47,10 @@ class MemberService {
     try {
       const result = await this.memberModel.create(input);
       result.memberPassword = "";
-      return result.toJSON() as Member;
-    } catch (err: any) {
+      return result.toObject() as Member;
+    } catch (err: unknown) {
       console.error("Error, signup:", err);
-      if (err?.code === 11000) {
+      if (typeof err === 'object' && err !== null && 'code' in err && (err as { code: number }).code === 11000) {
         throw new Errors(HTTPCode.BAD_REQUEST, "Email already registered. Please sign in.");
       }
       throw new Errors(HTTPCode.BAD_REQUEST, Message.USED_NICK_PHONE);
@@ -75,6 +76,7 @@ class MemberService {
         },
         { memberNick: 1, memberEmail: 1, memberPhone: 1, memberPassword: 1, memberStatus: 1 }
       )
+      .lean<Member>()
       .exec();
 
     if (!member) throw new Errors(HTTPCode.NOT_FOUND, Message.NO_MEMBER_NICK);
@@ -90,17 +92,13 @@ class MemberService {
       throw new Errors(HTTPCode.UNAUTHORIZED, Message.WRONG_PASSWORD);
     }
 
-    const result = await this.memberModel.findById(member._id).exec();
-    return (result as any).toJSON() as Member;
+    const result = await this.memberModel.findById(member._id).lean<Member>().exec();
+    if (!result) throw new Errors(HTTPCode.NOT_FOUND, Message.NO_DATA_FOUND);
+    return result;
   }
 
   /** SPA: GOOGLE OAUTH LOGIN / SIGNUP **/
-  public async googleLogin(googleData: {
-    googleId: string;
-    email: string;
-    name: string;
-    picture?: string;
-  }): Promise<Member> {
+  public async googleLogin(googleData: GoogleAuthInput): Promise<Member> {
     let member = await this.memberModel
       .findOne({
         $or: [
@@ -119,7 +117,7 @@ class MemberService {
         member.memberImage = googleData.picture;
         await member.save();
       }
-      return member.toJSON() as unknown as Member;
+      return member.toObject() as Member;
     }
 
     // Generate unique nick
@@ -138,26 +136,27 @@ class MemberService {
       memberNick: uniqueNick,
       memberPhone: uniquePhone,
       memberEmail: googleData.email,
-      googleId: googleData.googleId,
+      memberPassword: await bcrypt.hash(googleData.googleId, 10),
       memberImage: googleData.picture || "",
-      memberPoints: 100, // 100 Welcome points
+      googleId: googleData.googleId,
     });
 
-    return newMember.toJSON() as unknown as Member;
+    return newMember.toObject() as Member;
   }
 
-  /** SPA: Get Authenticated Member Detail **/
+  /** SPA: Get Authenticated User Details **/
   public async getMemberDetail(member: Member): Promise<Member> {
     const memberId = shapeIntoMongooseObjectId(member._id);
     const result = await this.memberModel
       .findOne({ _id: memberId, memberStatus: MemberStatus.ACTIVE })
+      .lean<Member>()
       .exec();
     if (!result) throw new Errors(HTTPCode.NOT_FOUND, Message.NO_DATA_FOUND);
 
-    return result.toJSON() as Member;
+    return result;
   }
 
-  /** SPA: Update Member Profile & Image **/
+  /** SPA: Update Member Profile **/
   public async updateMember(
     member: Member,
     input: MemberUpdateInput
@@ -165,29 +164,30 @@ class MemberService {
     const memberId = shapeIntoMongooseObjectId(member._id);
     const result = await this.memberModel
       .findOneAndUpdate({ _id: memberId }, input, { new: true })
+      .lean<Member>()
       .exec();
     if (!result) throw new Errors(HTTPCode.NOT_MODIFIED, Message.UPDATE_FAILED);
 
-    return (result as any).toJSON() as Member;
+    return result;
   }
 
-  /** SPA: Get Top 4 Active Users by Points **/
+  /** SPA: Get Top Users by Loyalty Points **/
   public async getTopUsers(): Promise<Member[]> {
     const result = await this.memberModel
       .find({
-        memberType: MemberType.USER,
         memberStatus: MemberStatus.ACTIVE,
-        memberPoints: { $gte: 0 },
+        memberPoints: { $gte: 1 },
       })
       .sort({ memberPoints: -1 })
       .limit(4)
+      .lean<Member[]>()
       .exec();
     if (!result) throw new Errors(HTTPCode.NOT_FOUND, Message.NO_DATA_FOUND);
 
-    return result as unknown as Member[];
+    return result;
   }
 
-  /** BSSR SIGNUP (ADMIN / RESTAURANT) **/
+  /** BSSR SIGNUP (ADMIN) **/
   public async processSignup(input: MemberInput): Promise<Member> {
     const exist = await this.memberModel
       .findOne({ memberType: MemberType.RESTAURANT })
@@ -200,13 +200,13 @@ class MemberService {
     try {
       const result = await this.memberModel.create(input);
       result.memberPassword = "";
-      return result.toJSON() as Member;
+      return result.toObject() as Member;
     } catch (err) {
       throw new Errors(HTTPCode.BAD_REQUEST, Message.CREATE_FAILED);
     }
   }
 
-  /** BSSR LOGIN (ADMIN / RESTAURANT) **/
+  /** BSSR LOGIN (ADMIN) **/
   public async processLogin(input: LoginInput): Promise<Member> {
     const member = await this.memberModel
       .findOne(
@@ -224,30 +224,35 @@ class MemberService {
       throw new Errors(HTTPCode.UNAUTHORIZED, Message.WRONG_PASSWORD);
     }
 
-    const result = await this.memberModel.findById(member._id).exec();
-    return (result as any).toJSON() as Member;
+    const result = await this.memberModel.findById(member._id).lean<Member>().exec();
+    if (!result) throw new Errors(HTTPCode.NOT_FOUND, Message.NO_DATA_FOUND);
+    return result;
   }
 
-  /** BSSR: Get All Users **/
+  /** BSSR: Get All Registered Users for Brand Admin **/
   public async getUsers(): Promise<Member[]> {
     const result = await this.memberModel
       .find({ memberType: MemberType.USER })
+      .lean<Member[]>()
       .exec();
     if (!result) throw new Errors(HTTPCode.NOT_FOUND, Message.NO_DATA_FOUND);
-    return result as unknown as Member[];
+
+    return result;
   }
 
-  /** BSSR: Update Chosen User (Status/Details) **/
+  /** BSSR: Update Member Status by Admin **/
   public async updateChosenUser(input: MemberUpdateInput): Promise<Member> {
     input._id = shapeIntoMongooseObjectId(input._id);
     const result = await this.memberModel
       .findByIdAndUpdate({ _id: input._id }, input, { new: true })
+      .lean<Member>()
       .exec();
     if (!result) throw new Errors(HTTPCode.NOT_MODIFIED, Message.UPDATE_FAILED);
-    return (result as any).toJSON() as Member;
+
+    return result;
   }
 
-  /** BSSR: Adjust User Loyalty Reward Points by Brand Admin **/
+  /** BSSR: Update Member Loyalty Reward Points by Admin **/
   public async updateMemberPointsByAdmin(
     id: string,
     points: number
@@ -255,13 +260,15 @@ class MemberService {
     const memberId = shapeIntoMongooseObjectId(id);
     const result = await this.memberModel
       .findByIdAndUpdate(
-        { _id: memberId },
-        { $set: { memberPoints: points } },
+        memberId,
+        { $set: { memberPoints: Number(points) } },
         { new: true }
       )
+      .lean<Member>()
       .exec();
     if (!result) throw new Errors(HTTPCode.NOT_MODIFIED, Message.UPDATE_FAILED);
-    return (result as any).toJSON() as Member;
+
+    return result;
   }
 }
 

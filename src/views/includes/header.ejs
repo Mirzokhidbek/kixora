@@ -29,10 +29,10 @@
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
 </head>
 <body>
-  <!-- Header Navbar (Matching Reference Specification) -->
+  <!-- Clean Human-Crafted Header Navbar -->
   <header class="admin-navbar">
     <div class="container-fluid px-lg-4">
-      <div class="d-flex align-items-center justify-content-between gap-2">
+      <div class="d-flex align-items-center justify-content-between gap-3">
         
         <!-- Left: Brand Logo & Title -->
         <a class="d-flex align-items-center gap-2 text-decoration-none" href="/admin">
@@ -41,7 +41,7 @@
           <span class="brand-admin-tag">ADMIN</span>
         </a>
 
-        <!-- Center: Navigation Tabs (Desktop) -->
+        <!-- Center: Core Navigation Tabs -->
         <div class="d-none d-lg-flex align-items-center gap-1 mx-auto">
           <% if (member) { %>
             <a class="nav-pill-item" id="nav-dashboard" href="/admin">
@@ -56,12 +56,6 @@
             <a class="nav-pill-item" id="nav-customers" href="/admin/user/all">
               <i class="fa-solid fa-users" style="font-size: 0.82rem;"></i> Customers
             </a>
-            <a class="nav-pill-item" id="nav-analytics" href="/admin#revenueChart">
-              <i class="fa-solid fa-chart-simple" style="font-size: 0.82rem;"></i> Analytics
-            </a>
-            <button type="button" class="nav-pill-item bg-transparent border-0" data-bs-toggle="modal" data-bs-target="#adminSettingsModal">
-              <i class="fa-solid fa-gear" style="font-size: 0.82rem;"></i> Settings
-            </button>
           <% } else { %>
             <a class="nav-pill-item active" href="/admin">
               <i class="fa-solid fa-house"></i> Home
@@ -72,19 +66,12 @@
           <% } %>
         </div>
 
-        <!-- Right: Search Bar, Notifications & User Profile -->
+        <!-- Right: Notifications & User Profile -->
         <div class="d-flex align-items-center gap-2.5">
           <% if (member) { %>
-            <!-- 1. Search Bar with ⌘ K -->
-            <div class="header-search-bar d-none d-md-inline-flex" id="headerSearchTrigger" data-bs-toggle="modal" data-bs-target="#commandPaletteModal">
-              <i class="fa-solid fa-magnifying-glass" style="font-size: 0.78rem;"></i>
-              <span>Search...</span>
-              <span class="badge px-1.5 py-0.5 rounded-1" style="background: rgba(255, 255, 255, 0.12); color: #cbd5e1; font-size: 0.65rem; font-family: monospace;">⌘ K</span>
-            </div>
-
-            <!-- 2. Notifications Bell with Red Dot -->
+            <!-- 1. Notifications Bell -->
             <div class="dropdown">
-              <button class="header-icon-btn position-relative" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+              <button class="header-icon-btn position-relative" type="button" data-bs-toggle="dropdown" aria-expanded="false" title="Store Notifications">
                 <i class="fa-regular fa-bell"></i>
                 <span class="position-absolute p-1 bg-danger border border-dark rounded-circle" style="width: 7px; height: 7px; top: 7px; right: 7px;"></span>
               </button>
@@ -126,7 +113,7 @@
             <!-- Vertical Divider -->
             <div class="vr bg-secondary opacity-25 d-none d-sm-block" style="height: 18px;"></div>
 
-            <!-- 3. User Profile Dropdown Pill -->
+            <!-- 2. User Profile Dropdown Pill -->
             <div class="dropdown">
               <div class="header-user-dropdown" data-bs-toggle="dropdown" aria-expanded="false">
                 <div class="rounded-circle d-flex align-items-center justify-content-center text-white fw-bold flex-shrink-0" style="width: 22px; height: 22px; background: #3b82f6; font-size: 0.72rem;">
@@ -140,11 +127,6 @@
                   <div class="fw-bold text-white small"><%= member.memberNick %></div>
                   <div class="text-muted small" style="font-size: 0.75rem;"><%= member.memberPhone %></div>
                   <span class="badge bg-white text-dark rounded-1 mt-1" style="font-size: 0.65rem; font-weight: 700;">BRAND DIRECTOR</span>
-                </li>
-                <li>
-                  <button type="button" class="dropdown-item" data-bs-toggle="modal" data-bs-target="#adminSettingsModal">
-                    <i class="fa-solid fa-gear text-muted"></i> Console Settings
-                  </button>
                 </li>
                 <li>
                   <a class="dropdown-item" href="/admin/product/all">
@@ -184,89 +166,9 @@
     </div>
   </header>
 
-  <!-- Global Command Palette Modal (⌘ K) -->
-  <div class="modal fade" id="commandPaletteModal" tabindex="-1" aria-hidden="true">
-    <div class="modal-dialog modal-dialog-centered modal-md">
-      <div class="modal-content overflow-hidden" style="background: #0f172a; border: 1px solid rgba(255, 255, 255, 0.15);">
-        <div class="modal-header border-bottom border-secondary border-opacity-25 p-3">
-          <div class="input-group">
-            <span class="input-group-text bg-transparent border-0 text-white"><i class="fa-solid fa-magnifying-glass"></i></span>
-            <input type="text" id="globalPaletteInput" class="form-control bg-transparent border-0 text-white shadow-none ps-0" placeholder="Type a command or jump to page..." autofocus>
-          </div>
-          <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
-        </div>
-        <div class="modal-body p-2" id="paletteResultsArea">
-          <div class="text-secondary px-3 py-1.5" style="font-size: 0.72rem; font-weight: 700; letter-spacing: 0.05em;">QUICK NAVIGATION</div>
-          <a href="/admin" class="dropdown-item py-2 px-3 text-white rounded-2 d-flex align-items-center justify-content-between">
-            <span><i class="fa-solid fa-house me-2 text-primary"></i> Dashboard</span>
-            <span class="badge bg-dark border border-secondary border-opacity-25 text-muted">/admin</span>
-          </a>
-          <a href="/admin/product/all" class="dropdown-item py-2 px-3 text-white rounded-2 d-flex align-items-center justify-content-between">
-            <span><i class="fa-solid fa-cube me-2 text-danger"></i> Footwear Catalog</span>
-            <span class="badge bg-dark border border-secondary border-opacity-25 text-muted">/admin/product/all</span>
-          </a>
-          <a href="/admin/order/all" class="dropdown-item py-2 px-3 text-white rounded-2 d-flex align-items-center justify-content-between">
-            <span><i class="fa-solid fa-bag-shopping me-2 text-warning"></i> Orders Logistics</span>
-            <span class="badge bg-dark border border-secondary border-opacity-25 text-muted">/admin/order/all</span>
-          </a>
-          <a href="/admin/user/all" class="dropdown-item py-2 px-3 text-white rounded-2 d-flex align-items-center justify-content-between">
-            <span><i class="fa-solid fa-users me-2 text-success"></i> Customer VIP Accounts</span>
-            <span class="badge bg-dark border border-secondary border-opacity-25 text-muted">/admin/user/all</span>
-          </a>
-        </div>
-      </div>
-    </div>
-  </div>
-
-  <!-- Brand Console Settings Modal -->
-  <div class="modal fade" id="adminSettingsModal" tabindex="-1" aria-hidden="true">
-    <div class="modal-dialog modal-dialog-centered">
-      <div class="modal-content overflow-hidden bg-white">
-        <div class="modal-header bg-dark text-white border-0 py-3 px-4">
-          <div class="d-flex align-items-center gap-2">
-            <i class="fa-solid fa-gear text-muted"></i>
-            <h6 class="modal-title fw-bold mb-0">KIXORA Console Settings</h6>
-          </div>
-          <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
-        </div>
-        <div class="modal-body p-4">
-          <div class="p-3 bg-light rounded-3 border mb-3">
-            <div class="d-flex align-items-center gap-3">
-              <div class="brand-k-badge" style="background: #090a0f; color: #fff; width: 38px; height: 38px; font-size: 1.2rem;">K</div>
-              <div>
-                <div class="fw-bold text-dark">KIXORA Footwear Store</div>
-                <div class="text-muted small">Suite Version 4.0 &bull; Production Mode</div>
-              </div>
-            </div>
-          </div>
-
-          <div class="mb-3">
-            <label class="form-label text-muted fw-bold small" style="font-size: 0.72rem; letter-spacing: 0.05em;">ADMINISTRATOR</label>
-            <div class="p-2.5 bg-light rounded-2 border fw-semibold text-dark">
-              <i class="fa-regular fa-user me-2 text-muted"></i> <%= member ? member.memberNick : 'Brand Director' %> (<%= member ? member.memberPhone : '' %>)
-            </div>
-          </div>
-
-          <div class="mb-2">
-            <label class="form-label text-muted fw-bold small" style="font-size: 0.72rem; letter-spacing: 0.05em;">QUICK ACTIONS</label>
-            <div class="d-flex flex-column gap-2">
-              <a href="/admin/logout" class="btn btn-outline-danger btn-sm text-start py-2 px-3 rounded-2 fw-semibold">
-                <i class="fa-solid fa-arrow-right-from-bracket me-2"></i> Sign Out from Console
-              </a>
-            </div>
-          </div>
-        </div>
-        <div class="modal-footer bg-light border-0 py-2 px-4">
-          <button type="button" class="btn btn-sm btn-dark rounded-2 px-3" data-bs-dismiss="modal">Close</button>
-        </div>
-      </div>
-    </div>
-  </div>
-
-  <!-- Active Tab Highlight & Shortcut Scripts -->
+  <!-- Active Tab Highlight Script -->
   <script>
     $(document).ready(function() {
-      // 1. Detect and set active nav tab based on current pathname
       const currentPath = window.location.pathname;
       if (currentPath.includes('/admin/product')) {
         $('#nav-catalog').addClass('active');
@@ -275,33 +177,7 @@
       } else if (currentPath.includes('/admin/user')) {
         $('#nav-customers').addClass('active');
       } else if (currentPath === '/admin' || currentPath === '/admin/') {
-        if (window.location.hash === '#revenueChart') {
-          $('#nav-analytics').addClass('active');
-        } else {
-          $('#nav-dashboard').addClass('active');
-        }
+        $('#nav-dashboard').addClass('active');
       }
-
-      // 2. Global Hotkey Command Palette (Cmd + K or Ctrl + K)
-      $(document).on('keydown', function(e) {
-        if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === 'k') {
-          e.preventDefault();
-          const modal = new bootstrap.Modal(document.getElementById('commandPaletteModal'));
-          modal.show();
-        }
-      });
-
-      // 3. Command Palette Filter
-      $('#globalPaletteInput').on('keyup', function() {
-        const query = $(this).val().toLowerCase().trim();
-        $('#paletteResultsArea a').each(function() {
-          const text = $(this).text().toLowerCase();
-          if (!query || text.includes(query)) {
-            $(this).show();
-          } else {
-            $(this).hide();
-          }
-        });
-      });
     });
   </script>

@@ -1,6 +1,7 @@
 import { Types } from "mongoose";
 import { OrderStatus } from "../enums/order.enum";
 import { Product } from "./product";
+import { Member } from "./member";
 
 export interface OrderItem {
   _id: Types.ObjectId;
@@ -20,9 +21,10 @@ export interface Order {
   memberId: Types.ObjectId;
   createdAt: Date;
   updatedAt: Date;
-  /** from Aggregation **/
+  /** from MongoDB Aggregation Lookup **/
   orderItems?: OrderItem[];
   productData?: Product[];
+  memberData?: Member;
 }
 
 export interface OrderItemInput {
@@ -41,4 +43,21 @@ export interface OrderInquiry {
 export interface OrderUpdateInput {
   orderId: string;
   orderStatus: OrderStatus;
+}
+
+export interface OrderDashboardMetrics {
+  totalRevenue: number;
+  totalOrders: number;
+  pendingOrders: number;
+  processOrders: number;
+  finishOrders: number;
+  monthlySales: {
+    months: string[];
+    revenues: number[];
+  };
+  statusBreakdown: {
+    pause: number;
+    process: number;
+    finish: number;
+  };
 }

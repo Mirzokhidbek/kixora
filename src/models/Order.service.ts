@@ -4,6 +4,7 @@ import MemberModel from "../schema/Member.model";
 import { Member } from "../libs/types/member";
 import {
   Order,
+  OrderDashboardMetrics,
   OrderInquiry,
   OrderItemInput,
   OrderUpdateInput,
@@ -35,14 +36,13 @@ class OrderService {
     const delivery = amount < 100 ? 5 : 0;
 
     try {
-      const newOrder: any = await this.orderModel.create({
+      const newOrder = await this.orderModel.create({
         orderTotal: amount + delivery,
         orderDelivery: delivery,
         memberId: memberId,
       });
 
       const orderId = newOrder._id;
-      console.log("orderId:", orderId);
 
       // Create Order Items
       await Promise.all(
@@ -56,7 +56,7 @@ class OrderService {
         })
       );
 
-      return newOrder.toJSON() as Order;
+      return newOrder.toObject() as Order;
     } catch (err) {
       console.error("Error, createOrder:", err);
       throw new Errors(HTTPCode.BAD_REQUEST, Message.CREATE_FAILED);
@@ -75,7 +75,7 @@ class OrderService {
     };
 
     const result = await this.orderModel
-      .aggregate([
+      .aggregate<Order>([
         { $match: matches },
         { $sort: { updatedAt: -1 } },
         { $skip: (inquiry.page * 1 - 1) * inquiry.limit },
@@ -101,7 +101,7 @@ class OrderService {
 
     if (!result) throw new Errors(HTTPCode.NOT_FOUND, Message.NO_DATA_FOUND);
 
-    return result as Order[];
+    return result;
   }
 
   /** SPA: Update Order Status & Award Member Points **/
@@ -119,6 +119,7 @@ class OrderService {
         { orderStatus: orderStatus },
         { new: true }
       )
+      .lean<Order>()
       .exec();
 
     if (!result) throw new Errors(HTTPCode.NOT_MODIFIED, Message.UPDATE_FAILED);
@@ -134,13 +135,13 @@ class OrderService {
         .exec();
     }
 
-    return (result as any).toJSON() as Order;
+    return result;
   }
 
   /** BSSR: Get All Orders for Brand Admin with Customer & Product details **/
   public async getAllOrdersByAdmin(): Promise<Order[]> {
     const result = await this.orderModel
-      .aggregate([
+      .aggregate<Order>([
         { $sort: { createdAt: -1 } },
         {
           $lookup: {
@@ -177,7 +178,7 @@ class OrderService {
 
     if (!result) throw new Errors(HTTPCode.NOT_FOUND, Message.NO_DATA_FOUND);
 
-    return result as Order[];
+    return result;
   }
 
   /** BSSR: Update Order Status by Brand Admin **/
@@ -194,24 +195,17 @@ class OrderService {
         { orderStatus: orderStatus },
         { new: true }
       )
+      .lean<Order>()
       .exec();
 
     if (!result) throw new Errors(HTTPCode.NOT_MODIFIED, Message.UPDATE_FAILED);
 
-    return (result as any).toJSON() as Order;
+    return result;
   }
 
   /** BSSR: Get Comprehensive Dashboard Metrics & Chart Datasets **/
-  public async getAdminDashboardMetrics(): Promise<{
-    totalRevenue: number;
-    totalOrders: number;
-    pendingOrders: number;
-    processOrders: number;
-    finishOrders: number;
-    monthlySales: { months: string[]; revenues: number[] };
-    statusBreakdown: { pause: number; process: number; finish: number };
-  }> {
-    const allOrders = await this.orderModel.find().lean().exec();
+  public async getAdminDashboardMetrics(): Promise<OrderDashboardMetrics> {
+    const allOrders = await this.orderModel.find().lean<Order[]>().exec();
 
     let totalRevenue = 0;
     let pendingOrders = 0;
@@ -221,7 +215,7 @@ class OrderService {
     const monthNames = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
     const currentMonth = new Date().getMonth();
     const months: string[] = [];
-    const monthlyRevMap: { [key: string]: number } = {};
+    const monthlyRevMap: Record<string, number> = {};
 
     for (let i = 5; i >= 0; i--) {
       const mIdx = (currentMonth - i + 12) % 12;
@@ -230,7 +224,7 @@ class OrderService {
       monthlyRevMap[mName] = 0;
     }
 
-    allOrders.forEach((order: any) => {
+    allOrders.forEach((order: Order) => {
       totalRevenue += order.orderTotal || 0;
       if (order.orderStatus === OrderStatus.PAUSE) pendingOrders++;
       else if (order.orderStatus === OrderStatus.PROCESS) processOrders++;

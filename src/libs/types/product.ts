@@ -15,7 +15,7 @@ export interface Product {
   productLeftCount: number;
   productSizes: number[];
   productColors: string[];
-  productSize?: ProductSize;
+  productSize?: ProductSize | string;
   productVolume?: ProductVolume;
   productDesc?: string;
   productImages: string[];
@@ -32,11 +32,25 @@ export interface ProductInput {
   productLeftCount: number;
   productSizes?: number[];
   productColors?: string[];
-  productSize?: ProductSize;
+  productSize?: ProductSize | string;
   productVolume?: ProductVolume;
   productDesc?: string;
   productImages?: string[];
   productViews?: number;
+}
+
+export interface ProductUpdateInput {
+  _id?: Types.ObjectId | string;
+  productStatus?: ProductStatus;
+  productCollection?: ProductCollection;
+  productName?: string;
+  productPrice?: number;
+  productLeftCount?: number;
+  productSizes?: number[];
+  productColors?: string[];
+  productSize?: ProductSize | string;
+  productDesc?: string;
+  productImages?: string[];
 }
 
 export interface ProductInquiry {
@@ -49,3 +63,9 @@ export interface ProductInquiry {
   color?: string;
 }
 
+export interface ProductDashboardMetrics {
+  totalProducts: number;
+  activeProducts: number;
+  lowStockCount: number;
+  categoryBreakdown: Record<string, number>;
+}
