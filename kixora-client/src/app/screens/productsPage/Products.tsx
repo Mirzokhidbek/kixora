@@ -212,10 +212,13 @@ export function Products({ onAdd }: ProductsProps) {
                   },
                 }}
                 slotProps={{
+                  htmlInput: {
+                    "aria-label": "Search footwear models",
+                  },
                   input: {
                     endAdornment: (
                       <InputAdornment position="end">
-                        <IconButton size="small" onClick={searchProductHandler}>
+                        <IconButton size="small" onClick={searchProductHandler} aria-label="Submit search">
                           <SearchIcon fontSize="small" />
                         </IconButton>
                       </InputAdornment>
@@ -414,6 +417,7 @@ export function Products({ onAdd }: ProductsProps) {
                       {/* Wishlist Button */}
                       <IconButton
                         size="small"
+                        aria-label={isFav ? `Remove ${product.productName} from wishlist` : `Add ${product.productName} to wishlist`}
                         onClick={(e) => handleToggleWishlist(e, product)}
                         sx={{
                           position: "absolute",
@@ -452,12 +456,15 @@ export function Products({ onAdd }: ProductsProps) {
                           <CardMedia
                             component="img"
                             image={image}
-                            alt={product.productName}
+                            alt={`${product.productName} luxury footwear`}
+                            loading="lazy"
+                            decoding="async"
                             onError={(e: any) => {
                               e.target.src = "/img/kixora/sneakers.jpg";
                             }}
                             sx={{
                               maxHeight: 180,
+                              width: "auto",
                               objectFit: "contain",
                               transition: "transform 0.3s ease",
                               "&:hover": { transform: "scale(1.06) rotate(-4deg)" },

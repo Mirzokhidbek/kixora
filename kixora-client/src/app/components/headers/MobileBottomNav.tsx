@@ -1,6 +1,6 @@
 import { Box, Typography, Badge } from "@mui/material";
 import HomeOutlinedIcon from "@mui/icons-material/HomeOutlined";
-import RestaurantMenuOutlinedIcon from "@mui/icons-material/RestaurantMenuOutlined";
+import StorefrontOutlinedIcon from "@mui/icons-material/StorefrontOutlined";
 import ReceiptLongOutlinedIcon from "@mui/icons-material/ReceiptLongOutlined";
 import PersonOutlineOutlinedIcon from "@mui/icons-material/PersonOutlineOutlined";
 import ShoppingBagOutlinedIcon from "@mui/icons-material/ShoppingBagOutlined";
@@ -17,10 +17,10 @@ export function MobileBottomNav({ cartItems, onOpenBasket }: MobileBottomNavProp
 
   const totalCartCount = cartItems.reduce((count, item) => count + item.quantity, 0);
 
-
-
   return (
     <Box
+      component="nav"
+      aria-label="Mobile Bottom Navigation"
       sx={{
         display: { xs: "flex", md: "none" },
         position: "fixed",
@@ -28,11 +28,11 @@ export function MobileBottomNav({ cartItems, onOpenBasket }: MobileBottomNavProp
         left: 0,
         right: 0,
         zIndex: 1250,
-        bgcolor: "rgba(255, 255, 255, 0.94)",
+        bgcolor: "rgba(255, 255, 255, 0.96)",
         backdropFilter: "blur(20px)",
         WebkitBackdropFilter: "blur(20px)",
-        borderTop: "1px solid #f1f5f9",
-        boxShadow: "0 -4px 25px rgba(0, 0, 0, 0.06)",
+        borderTop: "1px solid #e5e7eb",
+        boxShadow: "0 -4px 25px rgba(0, 0, 0, 0.08)",
         px: 1.5,
         py: 0.8,
         justifyContent: "space-around",
@@ -44,12 +44,13 @@ export function MobileBottomNav({ cartItems, onOpenBasket }: MobileBottomNavProp
       <Box
         component={NavLink}
         to="/"
+        aria-label="Navigate to Home"
         sx={{
           display: "flex",
           flexDirection: "column",
           alignItems: "center",
           textDecoration: "none",
-          color: location.pathname === "/" ? "#f59e0b" : "#64748b",
+          color: location.pathname === "/" ? "#000000" : "#6b7280",
           py: 0.5,
           px: 1.5,
           borderRadius: 3,
@@ -61,16 +62,17 @@ export function MobileBottomNav({ cartItems, onOpenBasket }: MobileBottomNavProp
         <Typography sx={{ fontSize: "0.68rem", fontWeight: 800 }}>Home</Typography>
       </Box>
 
-      {/* 2. Menu */}
+      {/* 2. Catalog */}
       <Box
         component={NavLink}
         to="/products"
+        aria-label="Navigate to Catalog"
         sx={{
           display: "flex",
           flexDirection: "column",
           alignItems: "center",
           textDecoration: "none",
-          color: location.pathname.startsWith("/products") ? "#f59e0b" : "#64748b",
+          color: location.pathname.startsWith("/products") ? "#000000" : "#6b7280",
           py: 0.5,
           px: 1.5,
           borderRadius: 3,
@@ -78,36 +80,40 @@ export function MobileBottomNav({ cartItems, onOpenBasket }: MobileBottomNavProp
           "&:active": { transform: "scale(0.92)" },
         }}
       >
-        <RestaurantMenuOutlinedIcon sx={{ fontSize: 24, mb: 0.2 }} />
-        <Typography sx={{ fontSize: "0.68rem", fontWeight: 800 }}>Menu</Typography>
+        <StorefrontOutlinedIcon sx={{ fontSize: 24, mb: 0.2 }} />
+        <Typography sx={{ fontSize: "0.68rem", fontWeight: 800 }}>Shop</Typography>
       </Box>
 
       {/* Center Floating Cart Button */}
       <Box
+        role="button"
+        tabIndex={0}
+        aria-label="Open Shopping Cart"
         onClick={onOpenBasket}
+        onKeyDown={(e) => e.key === "Enter" && onOpenBasket()}
         sx={{
           display: "flex",
           flexDirection: "column",
           alignItems: "center",
           justifyContent: "center",
-          width: 50,
-          height: 50,
+          width: 48,
+          height: 48,
           borderRadius: "50%",
-          bgcolor: "#f59e0b",
+          bgcolor: "#000000",
           color: "#ffffff",
-          boxShadow: "0 6px 18px rgba(245, 158, 11, 0.45)",
-          transform: "translateY(-14px)",
+          boxShadow: "0 6px 18px rgba(0, 0, 0, 0.35)",
+          transform: "translateY(-12px)",
           cursor: "pointer",
           transition: "all 0.25s cubic-bezier(0.4, 0, 0.2, 1)",
-          "&:active": { transform: "translateY(-14px) scale(0.9)" },
+          "&:active": { transform: "translateY(-12px) scale(0.9)" },
         }}
       >
         <Badge
           badgeContent={totalCartCount}
           sx={{
             "& .MuiBadge-badge": {
-              bgcolor: "#0f172a",
-              color: "#fff",
+              bgcolor: "#ffffff",
+              color: "#000000",
               fontWeight: 900,
               fontSize: "0.65rem",
               minWidth: 16,
@@ -117,7 +123,7 @@ export function MobileBottomNav({ cartItems, onOpenBasket }: MobileBottomNavProp
             },
           }}
         >
-          <ShoppingBagOutlinedIcon sx={{ fontSize: 24 }} />
+          <ShoppingBagOutlinedIcon sx={{ fontSize: 22 }} />
         </Badge>
       </Box>
 
@@ -125,12 +131,13 @@ export function MobileBottomNav({ cartItems, onOpenBasket }: MobileBottomNavProp
       <Box
         component={NavLink}
         to="/orders"
+        aria-label="Navigate to Orders"
         sx={{
           display: "flex",
           flexDirection: "column",
           alignItems: "center",
           textDecoration: "none",
-          color: location.pathname === "/orders" ? "#f59e0b" : "#64748b",
+          color: location.pathname === "/orders" ? "#000000" : "#6b7280",
           py: 0.5,
           px: 1.5,
           borderRadius: 3,
@@ -146,12 +153,13 @@ export function MobileBottomNav({ cartItems, onOpenBasket }: MobileBottomNavProp
       <Box
         component={NavLink}
         to="/user"
+        aria-label="Navigate to Profile"
         sx={{
           display: "flex",
           flexDirection: "column",
           alignItems: "center",
           textDecoration: "none",
-          color: location.pathname === "/user" ? "#f59e0b" : "#64748b",
+          color: location.pathname === "/user" ? "#000000" : "#6b7280",
           py: 0.5,
           px: 1.5,
           borderRadius: 3,
