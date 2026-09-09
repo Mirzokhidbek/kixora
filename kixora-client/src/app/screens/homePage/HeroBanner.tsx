@@ -14,11 +14,19 @@ import ArrowForwardIosIcon from "@mui/icons-material/ArrowForwardIos";
 import AirIcon from "@mui/icons-material/Air";
 import ShieldOutlinedIcon from "@mui/icons-material/ShieldOutlined";
 import ElectricBoltOutlinedIcon from "@mui/icons-material/ElectricBoltOutlined";
+import AutoAwesomeIcon from "@mui/icons-material/AutoAwesome";
 import { useNavigate } from "react-router-dom";
+import { AISearchDialog } from "../../components/ai/AISearchDialog";
 
-export function HeroBanner() {
+interface HeroBannerProps {
+  onAdd?: (item: any) => void;
+}
+
+export function HeroBanner({ onAdd }: HeroBannerProps) {
   const navigate = useNavigate();
   const [activeSlide, setActiveSlide] = useState(0);
+  const [aiModalOpen, setAiModalOpen] = useState(false);
+
 
   // 3 Dedicated Studio Hero Slides with 100% Transparent PNG Shoes
   const heroSlides = [
@@ -195,34 +203,124 @@ export function HeroBanner() {
                   </Typography>
                 </Box>
 
-                {/* CTA Button in Solid Black */}
-                <Button
-                  variant="contained"
-                  size="large"
-                  endIcon={<ArrowForwardIcon sx={{ fontSize: "16px !important" }} />}
-                  onClick={() => navigate("/products")}
-                  sx={{
-                    bgcolor: "#000000",
-                    color: "#ffffff",
-                    borderRadius: 9999,
-                    px: { xs: 3.5, sm: 4.2 },
-                    py: 1.3,
-                    fontWeight: 800,
-                    fontSize: "0.9rem",
-                    textTransform: "none",
-                    boxShadow: "0 8px 20px rgba(0,0,0,0.2)",
-                    "&:hover": {
-                      bgcolor: "#262626",
-                      transform: "translateY(-2px)",
-                      boxShadow: "0 12px 25px rgba(0,0,0,0.25)",
-                    },
-                    transition: "all 0.2s ease",
-                  }}
-                >
-                  Shop Now
-                </Button>
+                {/* Action Row: CTA Button + AI Search Trigger Bar */}
+                <Box sx={{ display: "flex", flexDirection: "column", gap: 1.8 }}>
+                  <Box sx={{ display: "flex", alignItems: "center", gap: 1.5, flexWrap: "wrap" }}>
+                    <Button
+                      variant="contained"
+                      size="large"
+                      endIcon={<ArrowForwardIcon sx={{ fontSize: "16px !important" }} />}
+                      onClick={() => navigate("/products")}
+                      sx={{
+                        bgcolor: "#000000",
+                        color: "#ffffff",
+                        borderRadius: 9999,
+                        px: { xs: 3.2, sm: 3.8 },
+                        py: 1.2,
+                        fontWeight: 800,
+                        fontSize: "0.88rem",
+                        textTransform: "none",
+                        boxShadow: "0 8px 20px rgba(0,0,0,0.2)",
+                        "&:hover": {
+                          bgcolor: "#262626",
+                          transform: "translateY(-2px)",
+                          boxShadow: "0 12px 25px rgba(0,0,0,0.25)",
+                        },
+                        transition: "all 0.2s ease",
+                      }}
+                    >
+                      Shop Now
+                    </Button>
+
+                    <Button
+                      variant="outlined"
+                      size="large"
+                      startIcon={<AutoAwesomeIcon sx={{ color: "#2563eb", fontSize: "18px !important" }} />}
+                      onClick={() => setAiModalOpen(true)}
+                      sx={{
+                        borderColor: "#e5e7eb",
+                        bgcolor: "#ffffff",
+                        color: "#111827",
+                        borderRadius: 9999,
+                        px: { xs: 2.5, sm: 3 },
+                        py: 1.2,
+                        fontWeight: 800,
+                        fontSize: "0.85rem",
+                        textTransform: "none",
+                        boxShadow: "0 2px 8px rgba(0,0,0,0.04)",
+                        "&:hover": {
+                          borderColor: "#111827",
+                          bgcolor: "#f9fafb",
+                          transform: "translateY(-2px)",
+                          boxShadow: "0 6px 16px rgba(0,0,0,0.08)",
+                        },
+                        transition: "all 0.2s ease",
+                      }}
+                    >
+                      AI Search
+                    </Button>
+                  </Box>
+
+                  {/* AI Quick Search Prompt Bar */}
+                  <Box
+                    onClick={() => setAiModalOpen(true)}
+                    sx={{
+                      p: "6px 8px 6px 14px",
+                      borderRadius: 9999,
+                      bgcolor: "rgba(255, 255, 255, 0.9)",
+                      border: "1.5px solid #e5e7eb",
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "space-between",
+                      boxShadow: "0 4px 12px rgba(0, 0, 0, 0.03)",
+                      cursor: "pointer",
+                      backdropFilter: "blur(8px)",
+                      transition: "all 0.2s ease",
+                      "&:hover": {
+                        borderColor: "#111827",
+                        bgcolor: "#ffffff",
+                        boxShadow: "0 8px 20px rgba(0, 0, 0, 0.07)",
+                        transform: "translateY(-1px)",
+                      },
+                    }}
+                  >
+                    <Box sx={{ display: "flex", alignItems: "center", gap: 1, overflow: "hidden" }}>
+                      <AutoAwesomeIcon sx={{ fontSize: 16, color: "#2563eb", flexShrink: 0 }} />
+                      <Typography
+                        sx={{
+                          color: "#6b7280",
+                          fontSize: { xs: "0.78rem", sm: "0.82rem" },
+                          fontWeight: 600,
+                          whiteSpace: "nowrap",
+                          overflow: "hidden",
+                          textOverflow: "ellipsis",
+                        }}
+                      >
+                        "Looking for comfortable black sneakers..."
+                      </Typography>
+                    </Box>
+                    <Box
+                      sx={{
+                        bgcolor: "#111827",
+                        color: "#ffffff",
+                        borderRadius: 9999,
+                        px: 1.6,
+                        py: 0.5,
+                        fontSize: "0.72rem",
+                        fontWeight: 800,
+                        display: "flex",
+                        alignItems: "center",
+                        gap: 0.5,
+                        flexShrink: 0,
+                      }}
+                    >
+                      AI Search <ArrowForwardIcon sx={{ fontSize: 11 }} />
+                    </Box>
+                  </Box>
+                </Box>
               </Box>
             </Grid>
+
 
             {/* Center Column: 100% Transparent 3D Floating Shoe */}
             <Grid size={{ xs: 12, md: 4.8 }}>
@@ -420,6 +518,14 @@ export function HeroBanner() {
           </Box>
         </Box>
       </Container>
+
+      {/* KIXORA AI Semantic Footwear Search Dialog */}
+      <AISearchDialog
+        open={aiModalOpen}
+        onClose={() => setAiModalOpen(false)}
+        onAddToCart={onAdd}
+      />
     </Box>
   );
 }
+

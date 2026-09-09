@@ -8,13 +8,33 @@
 
 import axios from "axios";
 import { serverApi } from "../../lib/config";
-import type { Product, ProductInquiry } from "../../lib/types/product";
+import type { AISearchResponse, Product, ProductInquiry } from "../../lib/types/product";
 
 class ProductService {
   private readonly path: string;
 
   constructor() {
     this.path = serverApi;
+  }
+
+  /**
+   * AI Semantic Natural Language Search via Gemini AI
+   * @param query - Free text user prompt in Uzbek, English, or Russian
+   * @returns Intent extraction, recommendation and matched products
+   */
+  public async aiSearchProducts(query: string): Promise<AISearchResponse> {
+    try {
+      const url = `${this.path}/product/ai-search`;
+      const result = await axios.post(
+        url,
+        { query },
+        { withCredentials: true }
+      );
+      return result.data;
+    } catch (err) {
+      console.log("Error, aiSearchProducts:", err);
+      throw err;
+    }
   }
 
   /**
@@ -64,4 +84,5 @@ class ProductService {
 }
 
 export default ProductService;
+
 

@@ -69,3 +69,15 @@ export interface ProductDashboardMetrics {
   lowStockCount: number;
   categoryBreakdown: Record<string, number>;
 }
+
+export interface AISearchResponse {
+  query: string;
+  intent: {
+    collection: ProductCollection | null;
+    color: string | null;
+    keywords: string[];
+    recommendation: string;
+  };
+  products: Product[];
+}
+

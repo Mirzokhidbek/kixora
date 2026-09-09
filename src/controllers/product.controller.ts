@@ -135,4 +135,23 @@ productController.updateChosenProduct = async (
   }
 };
 
+/** SPA: AI Semantic Natural Language Footwear Search **/
+productController.aiSearchProducts = async (req: Request, res: Response) => {
+  try {
+    console.log("aiSearchProducts");
+    const { query } = req.body;
+    if (!query || typeof query !== "string") {
+      throw new Errors(HTTPCode.BAD_REQUEST, Message.BLANK_NOT_ALLOWED);
+    }
+
+    const result = await productService.aiSearchProducts(query);
+    res.status(HTTPCode.OK).json(result);
+  } catch (err) {
+    console.log("Error, aiSearchProducts:", err);
+    if (err instanceof Errors) res.status(err.code).json(err);
+    else res.status(Errors.standard.code).json(Errors.standard);
+  }
+};
+
 export default productController;
+

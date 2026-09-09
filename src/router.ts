@@ -51,6 +51,13 @@ router.get(
   productController.getProduct
 );
 
+router.post(
+  "/product/ai-search",
+  memberController.retrieveAuth,
+  productController.aiSearchProducts
+);
+
+
 /** SPA Order Routes **/
 router.post(
   "/order/create",

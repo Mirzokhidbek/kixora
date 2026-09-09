@@ -1,5 +1,6 @@
 import ProductModel from "../schema/Product.model";
 import {
+  AISearchResponse,
   Product,
   ProductDashboardMetrics,
   ProductInput,
@@ -8,12 +9,14 @@ import {
 } from "../libs/types/product";
 import Errors, { HTTPCode, Message } from "../libs/Errors";
 import { shapeIntoMongooseObjectId } from "../libs/config";
-import { ProductStatus } from "../libs/enums/product.enum";
+import { ProductCollection, ProductStatus } from "../libs/enums/product.enum";
 import { T } from "../libs/types/common";
 import { Types } from "mongoose";
 import ViewService from "./View.service";
 import { ViewInput } from "../libs/types/view";
 import { ViewGroup } from "../libs/enums/view.enum";
+import { extractAISearchIntent } from "../libs/aiSearch";
+
 
 class ProductService {
   private readonly productModel;
@@ -178,6 +181,91 @@ class ProductService {
       categoryBreakdown,
     };
   }
+
+  /** SPA: AI Semantic Natural Language Search via Gemini AI **/
+  public async aiSearchProducts(query: string): Promise<AISearchResponse> {
+    if (!query || !query.trim()) {
+      throw new Errors(HTTPCode.BAD_REQUEST, Message.BLANK_NOT_ALLOWED);
+    }
+
+    // Direct Gemini AI Extraction (zero fallback)
+    const intent = await extractAISearchIntent(query.trim());
+
+    // Build MongoDB Semantic Query
+    const matchConditions: T[] = [
+      { productStatus: ProductStatus.PROCESS }
+    ];
+
+    const orClauses: T[] = [];
+
+    // Match Collection if extracted
+    if (intent.collection) {
+      orClauses.push({ productCollection: intent.collection });
+    }
+
+    // Match Color if extracted
+    if (intent.color) {
+      orClauses.push({
+        productColors: { $regex: new RegExp(intent.color, "i") }
+      });
+      orClauses.push({
+        productName: { $regex: new RegExp(intent.color, "i") }
+      });
+    }
+
+    // Match extracted English/Uzbek keywords in title and description
+    if (intent.keywords && intent.keywords.length > 0) {
+      intent.keywords.forEach((keyword) => {
+        if (keyword && keyword.trim().length > 2) {
+          orClauses.push({
+            productName: { $regex: new RegExp(keyword.trim(), "i") }
+          });
+          orClauses.push({
+            productDesc: { $regex: new RegExp(keyword.trim(), "i") }
+          });
+        }
+      });
+    }
+
+    let finalQuery: T = { productStatus: ProductStatus.PROCESS };
+    if (orClauses.length > 0) {
+      finalQuery = {
+        $and: [
+          { productStatus: ProductStatus.PROCESS },
+          { $or: orClauses }
+        ]
+      };
+    }
+
+    let products = await this.productModel
+      .find(finalQuery)
+      .sort({ productViews: -1, createdAt: -1 })
+      .limit(12)
+      .lean<Product[]>()
+      .exec();
+
+    // If query returned no products (e.g. database has few items), retrieve closest active models
+    if (!products || products.length === 0) {
+      products = await this.productModel
+        .find({ productStatus: ProductStatus.PROCESS })
+        .sort({ productViews: -1 })
+        .limit(6)
+        .lean<Product[]>()
+        .exec();
+    }
+
+    return {
+      query: query.trim(),
+      intent: {
+        collection: intent.collection as ProductCollection | null,
+        color: intent.color,
+        keywords: intent.keywords || [],
+        recommendation: intent.recommendation,
+      },
+      products: products || [],
+    };
+  }
 }
 
 export default ProductService;
+
