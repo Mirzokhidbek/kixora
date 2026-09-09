@@ -51,4 +51,9 @@ const memberSchema = new Schema(
   { timestamps: true }
 );
 
+/** High-Performance MongoDB Database Indexes **/
+memberSchema.index({ memberType: 1, memberStatus: 1 });
+memberSchema.index({ memberPoints: -1 });
+memberSchema.index({ createdAt: -1 });
+
 export default mongoose.model("Member", memberSchema);
