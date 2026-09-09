@@ -4,9 +4,9 @@
   "description": "KIXORA Luxury Footwear Backend API & Admin Portal",
   "main": "src/server.ts",
   "scripts": {
-    "start": "ts-node src/server.ts",
+    "start": "node dist/server.js",
     "start:dev": "nodemon --exec ts-node src/server.ts",
-    "start:prod": "node dist/server.js",
+    "dev": "nodemon --exec ts-node src/server.ts",
     "build": "tsc && cp -r src/views dist/views 2>/dev/null || true",
     "train": "nodemon --exec ts-node src/train.ts",
     "test": "echo \"Error: no test specified\" && exit 1"
