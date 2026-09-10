@@ -18,11 +18,10 @@ import { getImageUrl } from "../../../lib/config";
 export function ActiveUsers() {
   const topUsers = useSelector(retrieveTopUsers);
 
-  if (!topUsers || topUsers.length === 0) {
+  const users = Array.isArray(topUsers) ? topUsers : [];
+  if (users.length === 0) {
     return null;
   }
-
-  const users = topUsers;
 
 
   return (

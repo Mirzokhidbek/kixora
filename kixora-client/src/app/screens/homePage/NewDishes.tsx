@@ -36,7 +36,8 @@ export function NewDishes({ onAdd }: NewDishesProps) {
   };
 
 
-  if (!newDishes || newDishes.length === 0) {
+  const list = Array.isArray(newDishes) ? newDishes : [];
+  if (list.length === 0) {
     return null;
   }
 
@@ -73,7 +74,7 @@ export function NewDishes({ onAdd }: NewDishesProps) {
 
         {/* 4-Column Responsive Grid */}
         <Grid container spacing={3.5}>
-          {newDishes.slice(0, 4).map((product) => {
+          {list.slice(0, 4).map((product) => {
             const isFav = favorites.includes(product._id);
             const image = getImageUrl(product.productImages?.[0]);
 

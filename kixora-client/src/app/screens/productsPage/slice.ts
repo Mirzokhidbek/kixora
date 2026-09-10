@@ -26,7 +26,7 @@ export const productsPageSlice = createSlice({
       state.chosenProduct = action.payload;
     },
     setProducts: (state, action: PayloadAction<Product[]>) => {
-      state.products = action.payload;
+      state.products = Array.isArray(action.payload) ? action.payload : [];
     },
   },
 });

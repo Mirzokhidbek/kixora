@@ -20,13 +20,13 @@ export const homePageSlice = createSlice({
   initialState,
   reducers: {
     setPopularDishes: (state, action: PayloadAction<Product[]>) => {
-      state.popularDishes = action.payload;
+      state.popularDishes = Array.isArray(action.payload) ? action.payload : [];
     },
     setNewDishes: (state, action: PayloadAction<Product[]>) => {
-      state.newDishes = action.payload;
+      state.newDishes = Array.isArray(action.payload) ? action.payload : [];
     },
     setTopUsers: (state, action: PayloadAction<Member[]>) => {
-      state.topUsers = action.payload;
+      state.topUsers = Array.isArray(action.payload) ? action.payload : [];
     },
   },
 });
