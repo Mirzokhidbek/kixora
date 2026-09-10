@@ -522,12 +522,12 @@ export function AISearchDialog({
                     mb: 2,
                   }}
                 >
-                  "{result.intent.recommendation}"
+                  "{result.intent?.recommendation || "Discover our curated footwear styles matching your search."}"
                 </Typography>
 
                 {/* Extracted Intent Tags */}
                 <Box sx={{ display: "flex", flexWrap: "wrap", gap: 0.8 }}>
-                  {result.intent.collection && (
+                  {result.intent?.collection && (
                     <Chip
                       label={`Collection: ${result.intent.collection}`}
                       size="small"
@@ -540,7 +540,7 @@ export function AISearchDialog({
                       }}
                     />
                   )}
-                  {result.intent.color && (
+                  {result.intent?.color && (
                     <Chip
                       label={`Color: ${result.intent.color}`}
                       size="small"
@@ -553,7 +553,7 @@ export function AISearchDialog({
                       }}
                     />
                   )}
-                  {result.intent.keywords?.slice(0, 3).map((kw, i) => (
+                  {result.intent?.keywords?.slice(0, 3).map((kw, i) => (
                     <Chip
                       key={i}
                       label={`#${kw}`}
@@ -575,7 +575,7 @@ export function AISearchDialog({
                   variant="subtitle1"
                   sx={{ fontWeight: 900, color: "#0f172a", fontFamily: '"Outfit", sans-serif' }}
                 >
-                  Matching Footwear ({result.products.length})
+                  Matching Footwear ({result.products?.length || 0})
                 </Typography>
                 <Button
                   size="small"
@@ -595,7 +595,7 @@ export function AISearchDialog({
                 </Button>
               </Box>
 
-              {result.products.length === 0 ? (
+              {(!result.products || result.products.length === 0) ? (
                 <Box sx={{ textAlign: "center", py: 4, bgcolor: "#f8fafc", borderRadius: "14px" }}>
                   <Typography variant="body2" sx={{ color: "#64748b", fontWeight: 600 }}>
                     No matching models found for this search. Try describing a different style, color, or occasion.
@@ -603,7 +603,7 @@ export function AISearchDialog({
                 </Box>
               ) : (
                 <Grid container spacing={2}>
-                  {result.products.map((prod) => {
+                  {(result.products || []).map((prod) => {
                     const imgUrl = getImageUrl(prod.productImages?.[0] || "/img/kixora/hero_shoe1.png");
 
                     return (

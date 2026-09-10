@@ -30,10 +30,29 @@ class ProductService {
         { query },
         { withCredentials: true }
       );
-      return result.data;
+      const data = result.data?.data || result.data || {};
+      return {
+        query: data.query || query,
+        products: Array.isArray(data.products) ? data.products : (Array.isArray(data) ? data : []),
+        intent: {
+          recommendation: data.intent?.recommendation || "Here are our top recommended footwear styles for you.",
+          collection: data.intent?.collection || null,
+          color: data.intent?.color || null,
+          keywords: Array.isArray(data.intent?.keywords) ? data.intent.keywords : [],
+        },
+      };
     } catch (err) {
       console.log("Error, aiSearchProducts:", err);
-      throw err;
+      return {
+        query,
+        products: [],
+        intent: {
+          recommendation: "Explore our premium footwear collection.",
+          collection: null,
+          color: null,
+          keywords: [],
+        },
+      };
     }
   }
 
