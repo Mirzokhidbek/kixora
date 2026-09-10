@@ -59,10 +59,16 @@ class ProductService {
       }
 
       const result = await axios.get(url, { withCredentials: true });
-      return result.data;
+      if (Array.isArray(result.data)) {
+        return result.data;
+      }
+      if (result.data && Array.isArray(result.data.data)) {
+        return result.data.data;
+      }
+      return [];
     } catch (err) {
       console.log("Error, getProducts:", err);
-      throw err;
+      return [];
     }
   }
 

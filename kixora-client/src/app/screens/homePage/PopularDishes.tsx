@@ -89,11 +89,12 @@ export function PopularDishes({ onAdd }: PopularDishesProps) {
     },
   ];
 
+  const rawList = Array.isArray(popularDishes) ? popularDishes : [];
   const displayList =
-    popularDishes && popularDishes.length >= 4
-      ? popularDishes.slice(0, 4)
+    rawList.length >= 4
+      ? rawList.slice(0, 4)
       : samplePicks.map((sample, idx) => {
-          const match = popularDishes?.[idx];
+          const match = rawList[idx];
           return {
             _id: match?._id || `sample_${idx}`,
             productName: match?.productName || sample.name,
@@ -173,7 +174,11 @@ export function PopularDishes({ onAdd }: PopularDishesProps) {
             const image = getImageUrl(product.productImages?.[0] || samplePicks[idx % 4].image);
             const discount = product.discount || `-${12 + (idx * 3)}%`;
             const oldPrice = product.oldPrice || Math.round(product.productPrice * 1.2);
-            const colors = product.colors || samplePicks[idx % 4].colors;
+            const colors: string[] = Array.isArray(product.colors)
+              ? product.colors
+              : Array.isArray(product.productColors)
+              ? product.productColors
+              : samplePicks[idx % 4].colors;
 
             return (
               <Grid key={product._id} size={{ xs: 12, sm: 6, md: 3 }}>
@@ -284,20 +289,22 @@ export function PopularDishes({ onAdd }: PopularDishesProps) {
                   <CardContent sx={{ p: 2.5, pt: 1, flexGrow: 1, display: "flex", flexDirection: "column", justifyContent: "space-between" }}>
                     <Box>
                       {/* Color Dots */}
-                      <Box sx={{ display: "flex", gap: 0.7, mb: 1 }}>
-                        {colors.map((c: string, cIdx: number) => (
-                          <Box
-                            key={cIdx}
-                            sx={{
-                              width: 10,
-                              height: 10,
-                              borderRadius: "50%",
-                              bgcolor: c,
-                              border: "1px solid #d1d5db",
-                            }}
-                          />
-                        ))}
-                      </Box>
+                      {Array.isArray(colors) && colors.length > 0 && (
+                        <Box sx={{ display: "flex", gap: 0.7, mb: 1 }}>
+                          {colors.map((c: string, cIdx: number) => (
+                            <Box
+                              key={cIdx}
+                              sx={{
+                                width: 10,
+                                height: 10,
+                                borderRadius: "50%",
+                                bgcolor: c,
+                                border: "1px solid #d1d5db",
+                              }}
+                            />
+                          ))}
+                        </Box>
+                      )}
 
                       {/* Product Name */}
                       <Typography
