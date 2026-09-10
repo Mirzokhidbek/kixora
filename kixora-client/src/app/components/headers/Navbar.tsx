@@ -76,7 +76,6 @@ export function Navbar({
   const navLinks = [
     { title: "Home", path: "/" },
     { title: "Shop", path: "/products" },
-    { title: "New Arrivals", path: "/products" },
     { title: "About", path: "/user" },
     { title: "Contact", path: "/help" },
   ];
