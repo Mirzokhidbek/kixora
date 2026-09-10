@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import {
   Box,
   Card,
@@ -22,9 +22,22 @@ export function MemberSettings({ member }: MemberSettingsProps) {
   const { setAuthMember } = useGlobals();
 
   const [nick, setNick] = useState(member?.memberNick || "");
-  const [phone, setPhone] = useState(member?.memberPhone || "");
+  const [phone, setPhone] = useState(
+    member?.memberPhone?.startsWith("G_") ? "" : member?.memberPhone || ""
+  );
   const [address, setAddress] = useState(member?.memberAddress || "");
   const [desc, setDesc] = useState(member?.memberDesc || "");
+
+  useEffect(() => {
+    if (member) {
+      setNick(member.memberNick || "");
+      setPhone(
+        member.memberPhone?.startsWith("G_") ? "" : member.memberPhone || ""
+      );
+      setAddress(member.memberAddress || "");
+      setDesc(member.memberDesc || "");
+    }
+  }, [member]);
 
   const [toastOpen, setToastOpen] = useState(false);
   const [toastMsg, setToastMsg] = useState("");
