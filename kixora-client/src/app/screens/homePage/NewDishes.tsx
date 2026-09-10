@@ -36,40 +36,116 @@ export function NewDishes({ onAdd }: NewDishesProps) {
   };
 
 
-  const list = Array.isArray(newDishes) ? newDishes : [];
-  if (list.length === 0) {
-    return null;
-  }
+  // High-res sample fallback footwear for New Arrivals
+  const sampleArrivals = [
+    {
+      name: "Givenchy Luxury Runner",
+      collection: "LIMITED_DROP",
+      price: 135.0,
+      rating: 4.9,
+      reviews: "940",
+      image: "/img/kixora/hero_light1.jpg",
+    },
+    {
+      name: "Nike Air Jordan 1 Low",
+      collection: "CASUAL",
+      price: 149.0,
+      rating: 4.9,
+      reviews: "1.4k",
+      image: "/img/kixora/slide1.jpg",
+    },
+    {
+      name: "New Balance 530 Metallic",
+      collection: "SNEAKERS",
+      price: 130.0,
+      rating: 4.8,
+      reviews: "820",
+      image: "/img/kixora/hero_light2.jpg",
+    },
+    {
+      name: "Nike Dunk Low Retro",
+      collection: "BOOTS",
+      price: 134.0,
+      rating: 4.8,
+      reviews: "1.1k",
+      image: "/img/kixora/sneakers.jpg",
+    },
+  ];
+
+  const rawList = Array.isArray(newDishes) ? newDishes : [];
+  const list =
+    rawList.length >= 4
+      ? rawList.slice(0, 4)
+      : sampleArrivals.map((sample, idx) => {
+          const match = rawList[idx];
+          return {
+            _id: match?._id || `arrival_${idx}`,
+            productName: match?.productName || sample.name,
+            productPrice: match?.productPrice || sample.price,
+            productImages: match?.productImages || [sample.image],
+            productCollection: match?.productCollection || sample.collection,
+            rating: sample.rating,
+            reviews: sample.reviews,
+          };
+        });
+
 
   return (
     <Box sx={{ py: 8, bgcolor: "#ffffff" }}>
       <Container maxWidth="lg">
-        {/* Section Header */}
-        <Box sx={{ mb: 5 }}>
-          <Typography
-            variant="caption"
+        {/* Section Header Matching Mockup */}
+        <Box
+          sx={{
+            display: "flex",
+            justifyContent: "space-between",
+            alignItems: "flex-end",
+            mb: 4,
+            flexWrap: "wrap",
+            gap: 2,
+            borderBottom: "1px solid #f3f4f6",
+            pb: 2,
+          }}
+        >
+          <Box>
+            <Typography
+              variant="h3"
+              sx={{
+                fontWeight: 900,
+                color: "#000000",
+                fontSize: { xs: "1.8rem", md: "2.2rem" },
+                letterSpacing: "-0.03em",
+                fontFamily: '"Outfit", -apple-system, BlinkMacSystemFont, sans-serif',
+                display: "inline-block",
+                position: "relative",
+                pb: 1.2,
+                "&::after": {
+                  content: '""',
+                  position: "absolute",
+                  left: 0,
+                  bottom: -17,
+                  width: "100%",
+                  height: "3px",
+                  bgcolor: "#000000",
+                  borderRadius: "2px",
+                },
+              }}
+            >
+              New Arrivals
+            </Typography>
+          </Box>
+
+          <Button
+            onClick={() => navigate("/products")}
             sx={{
-              color: "#6b7280",
-              fontWeight: 700,
-              textTransform: "uppercase",
-              letterSpacing: 2,
-              display: "block",
-              mb: 1,
+              color: "#111827",
+              fontWeight: 800,
+              fontSize: "0.92rem",
+              textTransform: "none",
+              "&:hover": { bgcolor: "transparent", textDecoration: "underline" },
             }}
           >
-            LATEST DROPS
-          </Typography>
-          <Typography
-            variant="h4"
-            sx={{
-              fontWeight: 900,
-              letterSpacing: "-0.02em",
-              color: "#0f172a",
-              fontFamily: "'Cabinet Grotesk', -apple-system, BlinkMacSystemFont, sans-serif",
-            }}
-          >
-            Fresh Arrivals
-          </Typography>
+            View All &rarr;
+          </Button>
         </Box>
 
         {/* 4-Column Responsive Grid */}
