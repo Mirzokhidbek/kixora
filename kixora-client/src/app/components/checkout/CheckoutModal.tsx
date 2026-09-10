@@ -30,7 +30,7 @@ import ArrowBackIcon from "@mui/icons-material/ArrowBack";
 
 import type { CartItem } from "../../../lib/types/cart";
 import type { Member } from "../../../lib/types/member";
-import { serverApi } from "../../../lib/config";
+import { getImageUrl } from "../../../lib/config";
 
 interface CheckoutModalProps {
   open: boolean;
@@ -71,11 +71,6 @@ export function CheckoutModal({
   const isFreeShipping = subtotal >= 100;
   const shippingFee = subtotal > 0 && !isFreeShipping ? 10 : 0;
   const grandTotal = subtotal + shippingFee;
-
-  const getImageSrc = (img?: string) => {
-    if (!img) return "/sample.jpg";
-    return img.startsWith("http") ? img : `${serverApi}/${img.replace("public/", "")}`;
-  };
 
   const handleNext = () => {
     setErrorMsg("");
@@ -451,7 +446,7 @@ export function CheckoutModal({
                   >
                     <Box sx={{ display: "flex", alignItems: "center", gap: 1.5 }}>
                       <Avatar
-                        src={getImageSrc(item.image)}
+                        src={getImageUrl(item.image)}
                         variant="rounded"
                         sx={{ width: 36, height: 36, borderRadius: "6px", border: "1px solid #e5e7eb" }}
                       />

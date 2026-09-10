@@ -37,7 +37,7 @@ import { setProducts } from "./slice";
 import { retrieveProducts } from "./selector";
 import type { Product, ProductInquiry } from "../../../lib/types/product";
 import { ProductCollection, ProductSize } from "../../../lib/enums/common.enum";
-import { serverApi } from "../../../lib/config";
+import { getImageUrl } from "../../../lib/config";
 
 interface ProductsProps {
   onAdd?: (item: any, quantity?: number, size?: number, color?: string) => void;
@@ -138,10 +138,6 @@ export function Products({ onAdd }: ProductsProps) {
     setToastOpen(true);
   };
 
-  const getImageSrc = (img?: string) => {
-    if (!img) return "/sample.jpg";
-    return img.startsWith("http") ? img : `${serverApi}/${img.replace("public/", "")}`;
-  };
 
   const categories = [
     { label: "All Footwear", value: undefined },
@@ -415,7 +411,7 @@ export function Products({ onAdd }: ProductsProps) {
               <Grid container spacing={3}>
                 {products.map((product) => {
                   const isFav = isInWishlist(product._id);
-                  const image = product.productImages?.[0] ? getImageSrc(product.productImages[0]) : "";
+                  const image = getImageUrl(product.productImages?.[0]);
 
                   return (
                     <Grid key={product._id} size={{ xs: 12, sm: 6, md: 4 }}>

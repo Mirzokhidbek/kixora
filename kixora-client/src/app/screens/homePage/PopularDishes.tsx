@@ -26,7 +26,7 @@ import AddShoppingCartIcon from "@mui/icons-material/AddShoppingCart";
 import ArrowForwardIcon from "@mui/icons-material/ArrowForward";
 import { useNavigate } from "react-router-dom";
 import { retrievePopularDishes } from "./selector";
-import { serverApi } from "../../../lib/config";
+import { getImageUrl } from "../../../lib/config";
 
 interface PopularDishesProps {
   onAdd?: (item: any) => void;
@@ -44,10 +44,6 @@ export function PopularDishes({ onAdd }: PopularDishesProps) {
     );
   };
 
-  const getImageSrc = (img?: string) => {
-    if (!img) return "";
-    return img.startsWith("http") ? img : `${serverApi}/${img}`;
-  };
 
   // Mock sample shoe metadata to ensure 4 full rich cards matching mockup
   const samplePicks = [
@@ -174,8 +170,7 @@ export function PopularDishes({ onAdd }: PopularDishesProps) {
         <Grid container spacing={3}>
           {displayList.map((product: any, idx: number) => {
             const isFav = favorites.includes(product._id);
-            const rawImg = product.productImages?.[0];
-            const image = rawImg ? getImageSrc(rawImg) : samplePicks[idx % 4].image;
+            const image = getImageUrl(product.productImages?.[0] || samplePicks[idx % 4].image);
             const discount = product.discount || `-${12 + (idx * 3)}%`;
             const oldPrice = product.oldPrice || Math.round(product.productPrice * 1.2);
             const colors = product.colors || samplePicks[idx % 4].colors;

@@ -14,7 +14,7 @@ import EmojiEventsOutlinedIcon from "@mui/icons-material/EmojiEventsOutlined";
 import VerifiedOutlinedIcon from "@mui/icons-material/VerifiedOutlined";
 import type { Member } from "../../../lib/types/member";
 import { MemberType } from "../../../lib/enums/common.enum";
-import { serverApi } from "../../../lib/config";
+import { getImageUrl } from "../../../lib/config";
 import MemberService from "../../services/MemberService";
 import { useGlobals } from "../../hooks/useGlobals";
 
@@ -27,11 +27,6 @@ export function MemberInfo({ member }: MemberInfoProps) {
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const currentPoints = member?.memberPoints || 0;
-
-  const getImageSrc = (img?: string) => {
-    if (!img) return "";
-    return img.startsWith("http") ? img : `${serverApi}/${img}`;
-  };
 
   const handleImageChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -80,7 +75,7 @@ export function MemberInfo({ member }: MemberInfoProps) {
           {/* Avatar with Camera Icon */}
           <Box sx={{ position: "relative" }}>
             <Avatar
-              src={getImageSrc(member?.memberImage)}
+              src={getImageUrl(member?.memberImage)}
               sx={{
                 width: { xs: 85, md: 95 },
                 height: { xs: 85, md: 95 },

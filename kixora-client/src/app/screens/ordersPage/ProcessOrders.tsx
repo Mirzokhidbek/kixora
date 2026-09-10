@@ -19,7 +19,7 @@ import VerifiedIcon from "@mui/icons-material/Verified";
 import { useSelector } from "react-redux";
 
 import { retrieveProcessOrders } from "./selector";
-import { serverApi } from "../../../lib/config";
+import { getImageUrl } from "../../../lib/config";
 import type { Order, OrderItem } from "../../../lib/types/order";
 import { OrderStatus } from "../../../lib/enums/common.enum";
 import OrderService from "../../services/OrderService";
@@ -37,11 +37,6 @@ export function ProcessOrders() {
     } catch (err) {
       console.log("Error finishing order:", err);
     }
-  };
-
-  const getImageSrc = (img?: string) => {
-    if (!img) return "/sample.jpg";
-    return img.startsWith("http") ? img : `${serverApi}/${img.replace("public/", "")}`;
   };
 
   const trackingSteps = [
@@ -180,7 +175,7 @@ export function ProcessOrders() {
                   >
                     <Box sx={{ display: "flex", alignItems: "center", gap: 2 }}>
                       <Avatar
-                        src={getImageSrc(product?.productImages?.[0])}
+                        src={getImageUrl(product?.productImages?.[0])}
                         variant="rounded"
                         sx={{
                           width: 54,

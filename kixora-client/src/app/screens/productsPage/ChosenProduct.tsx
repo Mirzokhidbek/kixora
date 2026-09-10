@@ -30,7 +30,7 @@ import ShoppingBagOutlinedIcon from "@mui/icons-material/ShoppingBagOutlined";
 import ProductService from "../../services/ProductService";
 import { setChosenProduct } from "./slice";
 import { retrieveChosenProduct } from "./selector";
-import { serverApi } from "../../../lib/config";
+import { getImageUrl } from "../../../lib/config";
 import { ProductSize } from "../../../lib/enums/common.enum";
 import { useWishlist } from "../../hooks/useWishlist";
 
@@ -76,11 +76,6 @@ export function ChosenProduct({ onAdd }: ChosenProductProps) {
     }
   }, [productId, dispatch]);
 
-  const getImageSrc = (img?: string) => {
-    if (!img) return "";
-    return img.startsWith("http") ? img : `${serverApi}/${img}`;
-  };
-
   if (!product) {
     return (
       <Box sx={{ py: 12, minHeight: "70vh", display: "flex", alignItems: "center", bgcolor: "#ffffff" }}>
@@ -101,7 +96,7 @@ export function ChosenProduct({ onAdd }: ChosenProductProps) {
   }
 
   const images = product.productImages && product.productImages.length > 0 ? product.productImages : [];
-  const mainImageSrc = images[activeImgIndex] ? getImageSrc(images[activeImgIndex]) : "";
+  const mainImageSrc = images[activeImgIndex] ? getImageUrl(images[activeImgIndex]) : "";
 
   const handleAddToCart = () => {
     if (onAdd && product) {
@@ -179,7 +174,7 @@ export function ChosenProduct({ onAdd }: ChosenProductProps) {
                     >
                       <Box
                         component="img"
-                        src={getImageSrc(img)}
+                        src={getImageUrl(img)}
                         alt={`Angle ${idx + 1}`}
                         onError={(e: any) => {
                           e.target.src = "/img/kixora/sneakers.jpg";

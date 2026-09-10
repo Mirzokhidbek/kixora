@@ -4,16 +4,12 @@ import PlayCircleFilledWhiteIcon from "@mui/icons-material/PlayCircleFilledWhite
 import WhatsAppIcon from "@mui/icons-material/WhatsApp";
 import FlashOnIcon from "@mui/icons-material/FlashOn";
 import { retrievePopularDishes } from "./selector";
-import { serverApi } from "../../../lib/config";
+import { getImageUrl } from "../../../lib/config";
 
 export function Advertisement() {
   const popularDishes = useSelector(retrievePopularDishes);
   const featuredDish = popularDishes?.[0];
-  const featuredImage = featuredDish?.productImages?.[0]
-    ? featuredDish.productImages[0].startsWith("http")
-      ? featuredDish.productImages[0]
-      : `${serverApi}/${featuredDish.productImages[0]}`
-    : "";
+  const featuredImage = getImageUrl(featuredDish?.productImages?.[0]);
 
   return (
     <Box sx={{ py: 8 }}>

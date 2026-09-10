@@ -5,16 +5,11 @@ import VerifiedOutlinedIcon from "@mui/icons-material/VerifiedOutlined";
 import { useSelector } from "react-redux";
 
 import { retrieveFinishedOrders } from "./selector";
-import { serverApi } from "../../../lib/config";
+import { getImageUrl } from "../../../lib/config";
 import type { Order, OrderItem } from "../../../lib/types/order";
 
 export function FinishedOrders() {
   const finishedOrders = useSelector(retrieveFinishedOrders);
-
-  const getImageSrc = (img?: string) => {
-    if (!img) return "/sample.jpg";
-    return img.startsWith("http") ? img : `${serverApi}/${img.replace("public/", "")}`;
-  };
 
   if (finishedOrders.length === 0) {
     return (
@@ -100,7 +95,7 @@ export function FinishedOrders() {
                   >
                     <Box sx={{ display: "flex", alignItems: "center", gap: 2 }}>
                       <Avatar
-                        src={getImageSrc(product?.productImages?.[0])}
+                        src={getImageUrl(product?.productImages?.[0])}
                         variant="rounded"
                         sx={{
                           width: 52,

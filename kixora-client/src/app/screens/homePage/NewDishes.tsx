@@ -17,7 +17,7 @@ import FavoriteIcon from "@mui/icons-material/Favorite";
 import AddShoppingCartIcon from "@mui/icons-material/AddShoppingCart";
 import { useNavigate } from "react-router-dom";
 import { retrieveNewDishes } from "./selector";
-import { serverApi } from "../../../lib/config";
+import { getImageUrl } from "../../../lib/config";
 
 interface NewDishesProps {
   onAdd?: (item: any) => void;
@@ -35,10 +35,6 @@ export function NewDishes({ onAdd }: NewDishesProps) {
     );
   };
 
-  const getImageSrc = (img?: string) => {
-    if (!img) return "";
-    return img.startsWith("http") ? img : `${serverApi}/${img}`;
-  };
 
   if (!newDishes || newDishes.length === 0) {
     return null;
@@ -53,34 +49,33 @@ export function NewDishes({ onAdd }: NewDishesProps) {
             variant="caption"
             sx={{
               color: "#6b7280",
-              fontWeight: 800,
-              letterSpacing: "0.15em",
+              fontWeight: 700,
               textTransform: "uppercase",
-              fontSize: "0.78rem",
+              letterSpacing: 2,
               display: "block",
-              mb: 0.8,
+              mb: 1,
             }}
           >
-            FRESH INVENTORY
+            LATEST DROPS
           </Typography>
           <Typography
-            variant="h3"
+            variant="h4"
             sx={{
               fontWeight: 900,
-              color: "#000000",
-              fontSize: { xs: "1.8rem", md: "2.4rem" },
-              letterSpacing: "-0.03em",
+              letterSpacing: "-0.02em",
+              color: "#0f172a",
+              fontFamily: "'Cabinet Grotesk', -apple-system, BlinkMacSystemFont, sans-serif",
             }}
           >
-            New Arrivals
+            Fresh Arrivals
           </Typography>
         </Box>
 
-        {/* 4-Column Product Grid */}
+        {/* 4-Column Responsive Grid */}
         <Grid container spacing={3.5}>
           {newDishes.slice(0, 4).map((product) => {
             const isFav = favorites.includes(product._id);
-            const image = product.productImages?.[0] ? getImageSrc(product.productImages[0]) : "";
+            const image = getImageUrl(product.productImages?.[0]);
 
             return (
               <Grid key={product._id} size={{ xs: 12, sm: 6, md: 3 }}>
