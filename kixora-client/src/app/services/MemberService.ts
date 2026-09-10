@@ -87,10 +87,11 @@ class MemberService {
   public async login(input: LoginInput): Promise<Member> {
     const url = `${this.path}/member/login`;
     const result = await axios.post(url, input, { withCredentials: true });
-    if (result.data.accessToken) {
+    if (result.data?.accessToken) {
       localStorage.setItem("access_token", result.data.accessToken);
     }
-    return result.data.member;
+    const member = result.data?.member || result.data;
+    return member;
   }
 
   public async googleLogin(credential: string, userData?: any): Promise<Member> {
@@ -100,19 +101,21 @@ class MemberService {
       { credential, userData },
       { withCredentials: true }
     );
-    if (result.data.accessToken) {
+    if (result.data?.accessToken) {
       localStorage.setItem("access_token", result.data.accessToken);
     }
-    return result.data.member;
+    const member = result.data?.member || result.data;
+    return member;
   }
 
   public async signup(input: MemberInput): Promise<Member> {
     const url = `${this.path}/member/signup`;
     const result = await axios.post(url, input, { withCredentials: true });
-    if (result.data.accessToken) {
+    if (result.data?.accessToken) {
       localStorage.setItem("access_token", result.data.accessToken);
     }
-    return result.data.member;
+    const member = result.data?.member || result.data;
+    return member;
   }
 
   public async logout(): Promise<boolean> {
