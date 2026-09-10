@@ -7,6 +7,7 @@ import { HeroBanner } from "./HeroBanner";
 import { PopularDishes } from "./PopularDishes";
 import { ValuePropsBar } from "./ValuePropsBar";
 import { CategoryShowcase } from "./CategoryShowcase";
+import { NewDishes } from "./NewDishes";
 import { BrandVideo } from "./BrandVideo";
 import { NewArrivalsBanner } from "./NewArrivalsBanner";
 
@@ -61,10 +62,13 @@ export function HomePage({ onAdd }: HomePageProps) {
       {/* 2. Popular Picks (Best Sellers 4-Card Grid with Solid Black "Add to Cart" Buttons) */}
       <PopularDishes onAdd={onAdd} />
 
-      {/* 3. Value Props Bar (Free Shipping, Secure Payments, Easy Returns, 24/7 Support) */}
+      {/* 3. Fresh Arrivals / Latest Drops Grid */}
+      <NewDishes onAdd={onAdd} />
+
+      {/* 4. Value Props Bar (Free Shipping, Secure Payments, Easy Returns, 24/7 Support) */}
       <ValuePropsBar />
 
-      {/* 4. Category Showcase (Sneakers, Running, Boots, Limited Drop) */}
+      {/* 5. Category Showcase (Sneakers, Running, Boots, Limited Drop) */}
       <CategoryShowcase />
 
       {/* 5. Cinematic Brand Lab Video Showcase */}
