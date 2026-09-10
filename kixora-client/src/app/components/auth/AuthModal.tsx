@@ -83,9 +83,10 @@ export function AuthModal({ open, onClose, onSuccess }: AuthModalProps) {
         picture: user.photoURL || "",
       });
 
-      setSuccessMsg(`Welcome back, ${member.memberNick}! ✨`);
+      const nick = member?.memberNick || user.displayName || user.email?.split("@")[0] || "User";
+      setSuccessMsg(`Welcome back, ${nick}! ✨`);
       setTimeout(() => {
-        onSuccess(member);
+        if (member) onSuccess(member);
         onClose();
         setLoading(false);
       }, 400);
@@ -121,9 +122,10 @@ export function AuthModal({ open, onClose, onSuccess }: AuthModalProps) {
         memberPassword: loginPassword,
       };
       const member = await memberService.login(input);
-      setSuccessMsg(`Welcome back, ${member.memberNick}!`);
+      const nick = member?.memberNick || cleanEmail.split("@")[0] || "User";
+      setSuccessMsg(`Welcome back, ${nick}!`);
       setTimeout(() => {
-        onSuccess(member);
+        if (member) onSuccess(member);
         onClose();
         setLoading(false);
       }, 400);
@@ -168,9 +170,10 @@ export function AuthModal({ open, onClose, onSuccess }: AuthModalProps) {
         memberPassword: signupPassword,
       };
       const member = await memberService.signup(input);
-      setSuccessMsg(`Account created! Welcome, ${member.memberNick}!`);
+      const nick = member?.memberNick || cleanName || "User";
+      setSuccessMsg(`Account created! Welcome, ${nick}!`);
       setTimeout(() => {
-        onSuccess(member);
+        if (member) onSuccess(member);
         onClose();
         setLoading(false);
       }, 500);

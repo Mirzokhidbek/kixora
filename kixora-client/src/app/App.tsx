@@ -158,7 +158,7 @@ export default function App() {
             onClose={() => setAuthOpen(false)}
             onSuccess={(member) => {
               setAuthMember(member);
-              sweetTopSuccessAlert(`Welcome back, ${member.memberNick}! ✨`);
+              sweetTopSuccessAlert(`Welcome back, ${member?.memberNick || "Member"}! ✨`);
             }}
           />
 
