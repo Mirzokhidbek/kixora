@@ -14,7 +14,7 @@ import AddShoppingCartIcon from "@mui/icons-material/AddShoppingCart";
 import ArrowForwardIcon from "@mui/icons-material/ArrowForward";
 import { useNavigate } from "react-router-dom";
 import type { Product } from "../../../lib/types/product";
-import { serverApi } from "../../../lib/config";
+import { getImageUrl } from "../../../lib/config";
 
 interface WishlistDrawerProps {
   open: boolean;
@@ -35,10 +35,6 @@ export function WishlistDrawer({
 }: WishlistDrawerProps) {
   const navigate = useNavigate();
 
-  const getImageSrc = (img?: string) => {
-    if (!img) return "/sample.jpg";
-    return img.startsWith("http") ? img : `${serverApi}/${img.replace("public/", "")}`;
-  };
 
   const handleMoveAllToBag = () => {
     wishlist.forEach((item) => {
@@ -188,7 +184,7 @@ export function WishlistDrawer({
                 }}
               >
                 <Avatar
-                  src={getImageSrc(item.productImages?.[0])}
+                  src={getImageUrl(item.productImages?.[0])}
                   variant="rounded"
                   sx={{
                     width: 74,

@@ -19,7 +19,7 @@ import ShoppingBagOutlinedIcon from "@mui/icons-material/ShoppingBagOutlined";
 import ArrowForwardIcon from "@mui/icons-material/ArrowForward";
 import LocalShippingOutlinedIcon from "@mui/icons-material/LocalShippingOutlined";
 import type { CartItem } from "../../../lib/types/cart";
-import { serverApi } from "../../../lib/config";
+import { getImageUrl } from "../../../lib/config";
 
 interface BasketDrawerProps {
   open: boolean;
@@ -57,10 +57,6 @@ export function BasketDrawer({
   const discountAmount = (subtotal * appliedDiscount) / 100;
   const grandTotal = Math.max(0, subtotal - discountAmount + shippingFee);
 
-  const getImageSrc = (img?: string) => {
-    if (!img) return "";
-    return img.startsWith("http") ? img : `${serverApi}/${img}`;
-  };
 
   const handleApplyPromo = () => {
     if (promoCode.trim().toUpperCase() === "KIXORA10") {
@@ -189,7 +185,7 @@ export function BasketDrawer({
                 }}
               >
                 <Avatar
-                  src={getImageSrc(item.image)}
+                  src={getImageUrl(item.image)}
                   variant="rounded"
                   sx={{
                     width: 72,

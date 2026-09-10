@@ -13,7 +13,7 @@ import {
 import FormatQuoteIcon from "@mui/icons-material/FormatQuote";
 import VerifiedIcon from "@mui/icons-material/Verified";
 import { retrieveTopUsers } from "./selector";
-import { serverApi } from "../../../lib/config";
+import { getImageUrl } from "../../../lib/config";
 
 export function ActiveUsers() {
   const topUsers = useSelector(retrieveTopUsers);
@@ -24,10 +24,6 @@ export function ActiveUsers() {
 
   const users = topUsers;
 
-  const getImageSrc = (img?: string) => {
-    if (!img) return "";
-    return img.startsWith("http") ? img : `${serverApi}/${img}`;
-  };
 
   return (
     <Box sx={{ py: 8, bgcolor: "#fff" }}>
@@ -71,7 +67,7 @@ export function ActiveUsers() {
 
                   <Box sx={{ display: "flex", alignItems: "center", gap: 2, pt: 2, borderTop: "1px solid #f1f5f9" }}>
                     <Avatar
-                      src={getImageSrc(user.memberImage)}
+                      src={getImageUrl(user.memberImage)}
                       sx={{
                         width: 48,
                         height: 48,

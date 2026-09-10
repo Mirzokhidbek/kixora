@@ -35,7 +35,7 @@ import ShieldOutlinedIcon from "@mui/icons-material/ShieldOutlined";
 import WaterDropOutlinedIcon from "@mui/icons-material/WaterDropOutlined";
 import ProductService from "../../services/ProductService";
 import type { AISearchResponse, Product } from "../../../lib/types/product";
-import { serverApi } from "../../../lib/config";
+import { getImageUrl } from "../../../lib/config";
 import { useNavigate } from "react-router-dom";
 
 interface AISearchDialogProps {
@@ -604,9 +604,7 @@ export function AISearchDialog({
               ) : (
                 <Grid container spacing={2}>
                   {result.products.map((prod) => {
-                    const imgUrl = prod.productImages?.[0]
-                      ? `${serverApi}/${prod.productImages[0]}`
-                      : "/img/kixora/hero_shoe1.png";
+                    const imgUrl = getImageUrl(prod.productImages?.[0] || "/img/kixora/hero_shoe1.png");
 
                     return (
                       <Grid size={{ xs: 12, sm: 6, md: 4 }} key={prod._id}>
