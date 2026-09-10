@@ -2,7 +2,10 @@ import axios from "axios";
 
 export const serverApi: string = (
   (import.meta.env.VITE_API_URL as string) || "http://localhost:3001"
-).replace(/\/+$/, "");
+)
+  .replace(/\/+$/, "")
+  .replace(/\/admin\/?$/i, "");
+
 
 // Global Axios Interceptor: automatically attaches Bearer token if present
 axios.interceptors.request.use((config) => {
