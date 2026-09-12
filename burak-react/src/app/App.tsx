@@ -21,7 +21,7 @@ export default function App() {
           <Box component="main" sx={{ flexGrow: 1 }}>
             <Routes>
               <Route path="/" element={<HomePage />} />
-              <Route path="/products" element={<ProductsPage />} />
+              <Route path="/products/*" element={<ProductsPage />} />
               <Route path="/orders" element={<OrdersPage />} />
               <Route path="/user" element={<UserPage />} />
               <Route path="/help" element={<HelpPage />} />

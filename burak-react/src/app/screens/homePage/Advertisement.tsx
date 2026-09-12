@@ -18,7 +18,7 @@ export function Advertisement() {
             boxShadow: "0 24px 60px rgba(0,0,0,0.3)",
           }}
         >
-          <Grid container spacing={4} alignItems="center">
+          <Grid container spacing={4} sx={{ alignItems: "center" }}>
             <Grid size={{ xs: 12, md: 7 }}>
               <Typography variant="overline" sx={{ color: "#f59e0b", fontWeight: 800, letterSpacing: 2 }}>
                 THE LEGENDARY CZN BURAK SHOW
