@@ -1,77 +1,606 @@
 <%- include('includes/header') %>
 
-<div class="auth-wrapper flex-grow-1">
-  <div class="auth-card" style="max-width: 540px;">
-    <div class="auth-header">
-      <div class="brand-icon mx-auto mb-3" style="width: 48px; height: 48px; font-size: 1.3rem; background: linear-gradient(135deg, #ff4655, #f59e0b);">
-        <i class="fa-solid fa-shoe-prints"></i>
-      </div>
-      <h3 class="fw-bold mb-1">Register KIXORA Store</h3>
-      <p class="text-slate-400 small mb-0" style="color: #94a3b8;">Establish your brand administrative root console</p>
-    </div>
+<!-- Custom Modern UI/UX Styles for KIXORA Admin Registration -->
+<style>
+  .kixora-auth-bg {
+    min-height: calc(100vh - 120px);
+    background: radial-gradient(circle at 10% 20%, #fff7ed 0%, #fef3c7 25%, #fbf8f5 55%, #f4f4f5 100%);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 40px 16px;
+    font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, sans-serif;
+  }
 
-    <div class="auth-body">
-      <form id="signupForm" action="/admin/signup" method="POST" enctype="multipart/form-data">
-        <div class="row g-3">
-          <div class="col-12">
-            <label class="form-label fw-semibold small text-muted">BRAND / STORE NAME</label>
-            <div class="input-group">
-              <span class="input-group-text bg-light border-end-0" style="border-radius: var(--radius-md) 0 0 var(--radius-md); border-color: var(--light-border);">
-                <i class="fa-solid fa-store text-muted"></i>
-              </span>
-              <input type="text" class="form-control-modern form-control border-start-0" style="border-radius: 0 var(--radius-md) var(--radius-md) 0;" name="memberNick" placeholder="e.g. KIXORA Flagship Store" required>
+  .auth-split-card {
+    max-width: 1040px;
+    width: 100%;
+    background: #ffffff;
+    border-radius: 28px;
+    box-shadow: 0 25px 60px -15px rgba(234, 88, 12, 0.14), 0 10px 30px rgba(0, 0, 0, 0.04);
+    border: 1px solid rgba(226, 232, 240, 0.8);
+    display: flex;
+    overflow: hidden;
+  }
+
+  /* Left Showcase Panel */
+  .auth-showcase-panel {
+    width: 42%;
+    background: linear-gradient(160deg, #fff7ed 0%, #fed7aa 40%, #fdba74 80%, #fb923c 100%);
+    padding: 44px 36px;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .auth-showcase-panel::before {
+    content: '';
+    position: absolute;
+    bottom: -20%;
+    left: -20%;
+    width: 140%;
+    height: 70%;
+    background: radial-gradient(ellipse at center, rgba(255, 255, 255, 0.4) 0%, rgba(254, 215, 170, 0.1) 70%, transparent 100%);
+    filter: blur(20px);
+    pointer-events: none;
+  }
+
+  .brand-badge-square {
+    width: 42px;
+    height: 42px;
+    border-radius: 12px;
+    background: linear-gradient(135deg, #ff4e17, #ff8c00);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    color: #ffffff;
+    font-size: 1.25rem;
+    box-shadow: 0 8px 18px rgba(255, 78, 23, 0.35);
+  }
+
+  .brand-logo-text {
+    font-family: 'Outfit', sans-serif;
+    font-size: 1.65rem;
+    font-weight: 800;
+    color: #0f172a;
+    letter-spacing: -0.02em;
+  }
+
+  .hero-headline {
+    font-family: 'Outfit', sans-serif;
+    font-size: 2.2rem;
+    font-weight: 900;
+    line-height: 1.15;
+    color: #0f172a;
+    letter-spacing: -0.03em;
+    margin-top: 24px;
+    margin-bottom: 12px;
+  }
+
+  .hero-headline .highlight-orange {
+    color: #ea580c;
+    background: linear-gradient(135deg, #ff4500 0%, #ff8c00 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+  }
+
+  .hero-description {
+    color: #475569;
+    font-size: 0.92rem;
+    font-weight: 500;
+    line-height: 1.55;
+    margin-bottom: 24px;
+  }
+
+  /* Feature Badges List */
+  .feature-pill-list {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    margin: 10px 0 20px;
+    position: relative;
+    z-index: 1;
+  }
+
+  .feature-pill-item {
+    background: rgba(255, 255, 255, 0.75);
+    backdrop-filter: blur(12px);
+    border: 1px solid rgba(255, 255, 255, 0.9);
+    border-radius: 14px;
+    padding: 10px 14px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    box-shadow: 0 4px 14px rgba(234, 88, 12, 0.08);
+  }
+
+  .feature-pill-icon {
+    width: 34px;
+    height: 34px;
+    border-radius: 10px;
+    background: linear-gradient(135deg, #ff4e17, #ff8c00);
+    color: #ffffff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.88rem;
+    flex-shrink: 0;
+  }
+
+  .feature-pill-title {
+    font-size: 0.85rem;
+    font-weight: 700;
+    color: #0f172a;
+    line-height: 1.2;
+  }
+
+  .feature-pill-desc {
+    font-size: 0.74rem;
+    color: #64748b;
+  }
+
+  .left-footer-tagline {
+    color: #475569;
+    font-size: 0.85rem;
+    font-weight: 700;
+    line-height: 1.4;
+  }
+
+  /* Right Form Panel */
+  .auth-form-panel {
+    width: 58%;
+    background: #ffffff;
+    padding: 44px 42px;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+  }
+
+  .lang-pill-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 6px 14px;
+    border-radius: 9999px;
+    border: 1px solid #e2e8f0;
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: #334155;
+    background: #ffffff;
+    text-decoration: none;
+    transition: all 0.2s ease;
+  }
+
+  .lang-pill-btn:hover {
+    background: #f8fafc;
+    border-color: #cbd5e1;
+    color: #0f172a;
+  }
+
+  .form-title {
+    font-family: 'Outfit', sans-serif;
+    font-size: 2rem;
+    font-weight: 800;
+    color: #0f172a;
+    letter-spacing: -0.03em;
+    margin-bottom: 4px;
+  }
+
+  .form-subtitle {
+    color: #64748b;
+    font-size: 0.92rem;
+    margin-bottom: 24px;
+  }
+
+  .custom-form-label {
+    font-size: 0.85rem;
+    font-weight: 700;
+    color: #1e293b;
+    margin-bottom: 6px;
+    display: block;
+  }
+
+  /* Custom Input Box */
+  .custom-input-box {
+    position: relative;
+    display: flex;
+    align-items: center;
+    border-radius: 14px;
+    border: 1.5px solid #e2e8f0;
+    background: #ffffff;
+    transition: all 0.2s ease;
+    overflow: hidden;
+  }
+
+  .custom-input-box:focus-within {
+    border-color: #ff6422;
+    box-shadow: 0 0 0 4px rgba(255, 100, 34, 0.12);
+    background: #ffffff;
+  }
+
+  .input-icon-pill {
+    width: 42px;
+    height: 36px;
+    margin-left: 6px;
+    border-radius: 10px;
+    background: #f1f5f9;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #475569;
+    font-size: 0.95rem;
+    flex-shrink: 0;
+  }
+
+  .custom-input-field {
+    width: 100%;
+    height: 48px;
+    border: none;
+    background: transparent;
+    padding: 0 14px 0 10px;
+    font-size: 0.92rem;
+    font-weight: 500;
+    color: #0f172a;
+    outline: none;
+  }
+
+  .custom-input-field::placeholder {
+    color: #94a3b8;
+    font-weight: 400;
+  }
+
+  .input-action-btn {
+    border: none;
+    background: transparent;
+    padding: 0 14px;
+    color: #64748b;
+    cursor: pointer;
+    font-size: 0.95rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: color 0.2s;
+  }
+
+  .input-action-btn:hover {
+    color: #0f172a;
+  }
+
+  /* File Upload Box */
+  .upload-logo-card {
+    border: 1.5px dashed #cbd5e1;
+    border-radius: 14px;
+    padding: 12px 16px;
+    background: #f8fafc;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+  }
+
+  .upload-logo-card:hover {
+    border-color: #ff6422;
+    background: #fffaf5;
+  }
+
+  .btn-kixora-primary {
+    width: 100%;
+    height: 50px;
+    border-radius: 14px;
+    background: linear-gradient(135deg, #ff4500 0%, #ff8c00 100%);
+    border: none;
+    color: #ffffff;
+    font-weight: 800;
+    font-size: 0.98rem;
+    letter-spacing: 0.01em;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    box-shadow: 0 10px 24px -2px rgba(255, 69, 0, 0.4);
+    cursor: pointer;
+    transition: all 0.25s ease;
+  }
+
+  .btn-kixora-primary:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 14px 28px -2px rgba(255, 69, 0, 0.5);
+    background: linear-gradient(135deg, #ff3300 0%, #ff7f00 100%);
+  }
+
+  .auth-divider {
+    display: flex;
+    align-items: center;
+    text-align: center;
+    color: #94a3b8;
+    font-size: 0.82rem;
+    font-weight: 600;
+    margin: 18px 0;
+  }
+
+  .auth-divider::before,
+  .auth-divider::after {
+    content: '';
+    flex: 1;
+    border-bottom: 1px solid #e2e8f0;
+  }
+
+  .auth-divider:not(:empty)::before {
+    margin-right: 1rem;
+  }
+
+  .auth-divider:not(:empty)::after {
+    margin-left: 1rem;
+  }
+
+  .login-card-box {
+    border: 1.5px solid #e2e8f0;
+    border-radius: 14px;
+    padding: 12px 18px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    background: #ffffff;
+    color: #475569;
+    font-size: 0.9rem;
+    font-weight: 600;
+    text-decoration: none;
+    transition: all 0.2s ease;
+  }
+
+  .login-card-box:hover {
+    border-color: #ea580c;
+    background: #fffaf5;
+    color: #0f172a;
+    box-shadow: 0 4px 16px rgba(234, 88, 12, 0.08);
+  }
+
+  /* Responsive Adjustments */
+  @media (max-width: 920px) {
+    .auth-split-card {
+      flex-direction: column;
+      max-width: 520px;
+    }
+    .auth-showcase-panel {
+      width: 100%;
+      padding: 36px 28px;
+    }
+    .auth-form-panel {
+      width: 100%;
+      padding: 36px 28px;
+    }
+  }
+</style>
+
+<div class="kixora-auth-bg">
+  <div class="auth-split-card">
+    
+    <!-- 1. LEFT BRANDING & FEATURES PANEL -->
+    <div class="auth-showcase-panel">
+      <!-- Top Logo -->
+      <div>
+        <div class="d-flex align-items-center gap-2.5">
+          <div class="brand-badge-square">
+            <i class="fa-solid fa-shoe-prints"></i>
+          </div>
+          <span class="brand-logo-text">Kixora</span>
+        </div>
+
+        <h1 class="hero-headline">
+          Launch Your Brand,<br>
+          <span class="highlight-orange">Scale Worldwide</span>
+        </h1>
+        <p class="hero-description">
+          Create your official Kixora merchant account to manage luxury footwear drops, orders, and customer analytics.
+        </p>
+
+        <!-- Feature Pill List -->
+        <div class="feature-pill-list">
+          <div class="feature-pill-item">
+            <div class="feature-pill-icon">
+              <i class="fa-solid fa-bolt"></i>
+            </div>
+            <div>
+              <div class="feature-pill-title">Instant Catalog Publishing</div>
+              <div class="feature-pill-desc">Manage shoe sizes, colors & real-time inventory</div>
             </div>
           </div>
 
-          <div class="col-md-6">
-            <label class="form-label fw-semibold small text-muted">OFFICIAL PHONE</label>
-            <div class="input-group">
-              <span class="input-group-text bg-light border-end-0" style="border-radius: var(--radius-md) 0 0 var(--radius-md); border-color: var(--light-border);">
-                <i class="fa-solid fa-phone text-muted"></i>
-              </span>
-              <input type="text" class="form-control-modern form-control border-start-0" style="border-radius: 0 var(--radius-md) var(--radius-md) 0;" name="memberPhone" placeholder="998901234567" required>
+          <div class="feature-pill-item">
+            <div class="feature-pill-icon">
+              <i class="fa-solid fa-chart-line"></i>
+            </div>
+            <div>
+              <div class="feature-pill-title">Live Sales Analytics</div>
+              <div class="feature-pill-desc">Track daily revenues & order dispatch status</div>
             </div>
           </div>
 
-          <div class="col-md-6">
-            <label class="form-label fw-semibold small text-muted">ADMIN PASSWORD</label>
-            <div class="input-group">
-              <span class="input-group-text bg-light border-end-0" style="border-radius: var(--radius-md) 0 0 var(--radius-md); border-color: var(--light-border);">
-                <i class="fa-solid fa-lock text-muted"></i>
-              </span>
-              <input type="password" id="signupPassword" class="form-control-modern form-control border-start-0 border-end-0" name="memberPassword" placeholder="••••••••" required>
-              <button class="btn btn-light border border-start-0 btn-toggle-password" data-target="#signupPassword" type="button" style="border-radius: 0 var(--radius-md) var(--radius-md) 0; border-color: var(--light-border);">
-                <i class="fa-solid fa-eye text-muted"></i>
-              </button>
+          <div class="feature-pill-item">
+            <div class="feature-pill-icon">
+              <i class="fa-solid fa-shield-halved"></i>
             </div>
-          </div>
-
-          <div class="col-12">
-            <label class="form-label fw-semibold small text-muted">STORE LOGO (OPTIONAL)</label>
-            <div class="d-flex align-items-center gap-3">
-              <input type="file" id="memberImageInput" class="form-control-modern form-control flex-grow-1" name="memberImage" accept="image/*">
-              <img id="memberImagePreview" src="" alt="Logo preview" class="rounded-circle border d-none" style="width: 52px; height: 52px; object-fit: cover;">
+            <div>
+              <div class="feature-pill-title">Verified Brand Console</div>
+              <div class="feature-pill-desc">High-security JWT & session protection</div>
             </div>
-          </div>
-
-          <div class="col-12 mt-4">
-            <button type="submit" class="btn-gold w-100 py-3 fs-6" style="background: linear-gradient(135deg, #ff4655, #f59e0b);">
-              <span>Create Brand Account</span>
-              <i class="fa-solid fa-arrow-right ms-1"></i>
-            </button>
           </div>
         </div>
-      </form>
+      </div>
 
-      <div class="text-center mt-4">
-        <span class="text-muted small">Already registered?</span>
-        <a href="/admin/login" class="text-warning fw-bold text-decoration-none ms-1 small">Sign in to console</a>
+      <!-- Bottom Tagline -->
+      <div class="left-footer-tagline">
+        Partnering with 1,200+ luxury stores worldwide.
       </div>
     </div>
+
+    <!-- 2. RIGHT REGISTRATION FORM PANEL -->
+    <div class="auth-form-panel">
+      <!-- Top Language Selector -->
+      <div class="d-flex justify-content-end mb-1">
+        <a href="javascript:void(0)" class="lang-pill-btn">
+          <i class="fa-solid fa-globe text-muted"></i>
+          <span>English</span>
+          <i class="fa-solid fa-chevron-down text-muted" style="font-size: 0.65rem;"></i>
+        </a>
+      </div>
+
+      <!-- Form Heading -->
+      <div>
+        <h2 class="form-title">Create Store Account</h2>
+        <p class="form-subtitle">Set up your brand administration console</p>
+
+        <!-- Signup Form -->
+        <form id="signupForm" action="/admin/signup" method="POST" enctype="multipart/form-data">
+          <!-- 1. Brand / Store Name -->
+          <div class="mb-3">
+            <label class="custom-form-label">Brand / Store Name</label>
+            <div class="custom-input-box">
+              <div class="input-icon-pill">
+                <i class="fa-solid fa-store"></i>
+              </div>
+              <input
+                type="text"
+                class="custom-input-field"
+                name="memberNick"
+                placeholder="e.g. KIXORA Flagship Store"
+                autocomplete="organization"
+                required
+              />
+            </div>
+          </div>
+
+          <!-- 2. Two-Column Row: Official Phone & Password -->
+          <div class="row g-2.5 mb-3">
+            <div class="col-sm-6">
+              <label class="custom-form-label">Official Phone</label>
+              <div class="custom-input-box">
+                <div class="input-icon-pill">
+                  <i class="fa-solid fa-phone"></i>
+                </div>
+                <input
+                  type="text"
+                  class="custom-input-field"
+                  name="memberPhone"
+                  placeholder="998901234567"
+                  autocomplete="tel"
+                  required
+                />
+              </div>
+            </div>
+
+            <div class="col-sm-6">
+              <label class="custom-form-label">Admin Password</label>
+              <div class="custom-input-box">
+                <div class="input-icon-pill">
+                  <i class="fa-solid fa-lock"></i>
+                </div>
+                <input
+                  type="password"
+                  id="signupPassword"
+                  class="custom-input-field"
+                  name="memberPassword"
+                  placeholder="••••••••"
+                  autocomplete="new-password"
+                  required
+                />
+                <button
+                  type="button"
+                  id="toggleSignupPasswordBtn"
+                  class="input-action-btn"
+                  title="Show / Hide Password"
+                >
+                  <i class="fa-solid fa-eye" id="toggleSignupPasswordIcon"></i>
+                </button>
+              </div>
+            </div>
+          </div>
+
+          <!-- 3. Store Logo Upload with Live Preview -->
+          <div class="mb-3.5">
+            <label class="custom-form-label">Store Logo / Brand Image (Optional)</label>
+            <label for="memberImageInput" class="upload-logo-card">
+              <div class="d-flex align-items-center gap-2.5">
+                <div class="rounded-circle bg-light border d-flex align-items-center justify-content-center text-muted" style="width: 40px; height: 40px;">
+                  <i class="fa-solid fa-cloud-arrow-up text-orange" style="color: #ea580c;"></i>
+                </div>
+                <div>
+                  <div class="small fw-bold text-dark" id="uploadStatusText">Click to upload brand logo</div>
+                  <div class="text-muted" style="font-size: 0.74rem;">PNG, JPG, WEBP (Max 5MB)</div>
+                </div>
+              </div>
+
+              <!-- Live preview thumbnail -->
+              <img
+                id="memberImagePreview"
+                src=""
+                alt="Logo preview"
+                class="rounded-circle border d-none"
+                style="width: 42px; height: 42px; object-fit: cover; box-shadow: 0 2px 8px rgba(0,0,0,0.1);"
+              />
+            </label>
+            <input
+              type="file"
+              id="memberImageInput"
+              class="d-none"
+              name="memberImage"
+              accept="image/*"
+            />
+          </div>
+
+          <!-- Submit Button -->
+          <button type="submit" class="btn-kixora-primary mt-2">
+            <span>Create Brand Account</span>
+            <i class="fa-solid fa-arrow-right"></i>
+          </button>
+        </form>
+
+        <!-- Divider -->
+        <div class="auth-divider">or</div>
+
+        <!-- Sign In Card Box -->
+        <a href="/admin/login" class="login-card-box">
+          <i class="fa-solid fa-arrow-right-to-bracket text-muted"></i>
+          <span>Already registered? <strong style="color: #ea580c;">Sign in to console</strong></span>
+        </a>
+      </div>
+
+      <div style="height: 4px;"></div>
+    </div>
+
   </div>
 </div>
 
+<!-- Scripts for Image Upload Preview & Validation -->
 <script src="/js/signup.js"></script>
+<script>
+  $(document).ready(function() {
+    // Password visibility toggle
+    $('#toggleSignupPasswordBtn').on('click', function() {
+      const passwordInput = $('#signupPassword');
+      const icon = $('#toggleSignupPasswordIcon');
+      const isPassword = passwordInput.attr('type') === 'password';
+
+      passwordInput.attr('type', isPassword ? 'text' : 'password');
+      if (isPassword) {
+        icon.removeClass('fa-eye').addClass('fa-eye-slash');
+      } else {
+        icon.removeClass('fa-eye-slash').addClass('fa-eye');
+      }
+    });
+
+    // Image Upload Text Update
+    $('#memberImageInput').on('change', function() {
+      if (this.files && this.files[0]) {
+        $('#uploadStatusText').text(this.files[0].name);
+      }
+    });
+  });
+</script>
 
 <%- include('includes/footer') %>
-
