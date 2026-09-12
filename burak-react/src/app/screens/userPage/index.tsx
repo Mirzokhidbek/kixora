@@ -3,14 +3,12 @@ import {
   Typography,
   Box,
   Card,
-  CardContent,
   Avatar,
   Grid,
   Chip,
   Button,
   LinearProgress,
   TextField,
-  Divider,
 } from "@mui/material";
 import EmojiEventsIcon from "@mui/icons-material/EmojiEvents";
 import ShoppingBagIcon from "@mui/icons-material/ShoppingBag";
