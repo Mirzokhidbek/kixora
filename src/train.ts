@@ -17,16 +17,17 @@
       1. Virtual DOM & Reconciliation (Diffing algorithm)
       2. Material UI (MUI): `ThemeProvider`, `createTheme`, Custom palette & typography.
       3. React Router DOM: `<BrowserRouter>`, `<Routes>`, `<Route>`, `<NavLink>`, `useNavigate`, `useLocation`.
-      4. Header & Navbar Architecture (Dars 59-60):
-         - `NavbarHome`: Asosiy landing page uchun transparent/hero fonli navbar.
-         - `NavbarOther`: Ichki sahifalar (`/products`, `/orders`, `/user`, `/help`) uchun to'q fonli va sticky navbar.
-         - `Navbar`: Dinamik ravishda `location.pathname === "/"` bo'yicha tegishli navbarni tanlab render qiladi.
-         - Cart Badge: Savatdagi mahsulotlar soni indikatori.
-         - User Auth Menu: Avatar dropdown orqali Profile, My Orders va Logout boshqaruvi.
-         - Mobile Drawer: Mobil ekranlar uchun yon tomondan chiquvchi qulay menyu.
-      5. Luxury Footer Architecture:
-         - Brand gastronomiya tavsifi va ijtimoiy tarmoqlar (Instagram, Telegram, YouTube, Facebook).
-         - Restoran menyu toifalari va buyurtma kuzatish havolalari.
-         - Kontakt ma'lumotlari, manzil va ish vaqti.
-         - VIP Club Newsletter obuna formasi va mualliflik huquqi (Copyright).
+      4. Header & Navbar Architecture:
+         - Unified Luxury Charcoal Black navbar across all pages.
+         - Glassmorphic Pill capsule menu, Cart badge, and User Avatar capsule.
+      5. HomePage Sectional Architecture (Dars 61 & 62):
+         - `Statistics.tsx`: 12+ yillik tajriba, 150+ taomlar, 250K+ mijozlar va sertifikatlar.
+         - `PopularDishes.tsx`: Eng ko'p buyurtma qilinuvchi imzoli steyklar va kaboblar.
+         - `NewDishes.tsx`: Qishki mavsumning yangi shirinliklari va ichimliklari.
+         - `Advertisement.tsx`: CZN Burak jonli olovli shou va VIP stol band qilish banneri.
+         - `ActiveUsers.tsx`: VIP foodie hamjamiyatining samimiy sharhlari va baholari.
+      6. ProductsPage Nested Routing & Architecture (Dars 63 & 64):
+         - Nested Route: `<Route path="/" element={<Products />} />` & `<Route path="/:productId" element={<ChosenProduct />} />`.
+         - `Products.tsx`: Toifalar bo'yicha filter, qidiruv va savatga qo'shish.
+         - `ChosenProduct.tsx`: Tanlangan taomning ko'p burchakli fotogalereyasi, porsiya va pishirish darajasi tanlovi, soni hisoblagichi va savatga joylash.
 */
