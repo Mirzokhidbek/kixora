@@ -1,6 +1,6 @@
 import { Box, Typography, Card, CardContent, Button, Avatar, Chip } from "@mui/material";
 import PauseCircleFilledIcon from "@mui/icons-material/PauseCircleFilled";
-import DeleteOutlineIcon from "@mui/icons-material/DeleteOutline";
+import DeleteIcon from "@mui/icons-material/Delete";
 import PaymentIcon from "@mui/icons-material/Payment";
 
 export function PausedOrders() {
@@ -84,7 +84,7 @@ export function PausedOrders() {
             ))}
 
             <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "center", pt: 1 }}>
-              <Button color="error" startIcon={<DeleteOutlineIcon />}>
+              <Button color="error" startIcon={<DeleteIcon />}>
                 Cancel Order
               </Button>
               <Button variant="contained" color="primary" startIcon={<PaymentIcon />} sx={{ fontWeight: 800, px: 3 }}>
