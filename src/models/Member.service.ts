@@ -17,6 +17,20 @@ class MemberService {
     this.memberModel = MemberModel;
   }
 
+  /** SPA: Get Active Restaurant Details with Lean Query **/
+  public async getRestaurant(): Promise<Member> {
+    const result = await this.memberModel
+      .findOne({
+        memberType: MemberType.RESTAURANT,
+        memberStatus: MemberStatus.ACTIVE,
+      })
+      .lean()
+      .exec();
+    if (!result) throw new Errors(HTTPCode.NOT_FOUND, Message.NO_DATA_FOUND);
+
+    return result as unknown as Member;
+  }
+
   /** SPA SIGNUP (USER) **/
   public async signup(input: MemberInput): Promise<Member> {
     const salt = await bcrypt.genSalt();
@@ -58,6 +72,47 @@ class MemberService {
 
     const result = await this.memberModel.findById(member._id).exec();
     return (result as any).toJSON() as Member;
+  }
+
+  /** SPA: Get Authenticated Member Detail **/
+  public async getMemberDetail(member: Member): Promise<Member> {
+    const memberId = shapeIntoMongooseObjectId(member._id);
+    const result = await this.memberModel
+      .findOne({ _id: memberId, memberStatus: MemberStatus.ACTIVE })
+      .exec();
+    if (!result) throw new Errors(HTTPCode.NOT_FOUND, Message.NO_DATA_FOUND);
+
+    return result.toJSON() as Member;
+  }
+
+  /** SPA: Update Member Profile & Image **/
+  public async updateMember(
+    member: Member,
+    input: MemberUpdateInput
+  ): Promise<Member> {
+    const memberId = shapeIntoMongooseObjectId(member._id);
+    const result = await this.memberModel
+      .findOneAndUpdate({ _id: memberId }, input, { new: true })
+      .exec();
+    if (!result) throw new Errors(HTTPCode.NOT_MODIFIED, Message.UPDATE_FAILED);
+
+    return (result as any).toJSON() as Member;
+  }
+
+  /** SPA: Get Top 4 Active Users by Points **/
+  public async getTopUsers(): Promise<Member[]> {
+    const result = await this.memberModel
+      .find({
+        memberType: MemberType.USER,
+        memberStatus: MemberStatus.ACTIVE,
+        memberPoints: { $gte: 0 },
+      })
+      .sort({ memberPoints: -1 })
+      .limit(4)
+      .exec();
+    if (!result) throw new Errors(HTTPCode.NOT_FOUND, Message.NO_DATA_FOUND);
+
+    return result as unknown as Member[];
   }
 
   /** BSSR SIGNUP (ADMIN / RESTAURANT) **/
