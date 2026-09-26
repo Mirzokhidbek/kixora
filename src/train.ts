@@ -13,23 +13,20 @@
       Token-Based Authentication (JWT / SPA React)
       Browser Storages: Cookie, LocalStorage, SessionStorage
 
-  - SPA Restaurant & Lean Query Architecture (Dars 67):
-      1. `GET /member/restaurant`:
-         - Faol restoran ma'lumotlarini qaytaradi.
-         - `.lean()`: Mongoose Document o'rniga yengil va tezkor sof JavaScript obyekti (POJO) qaytarib, o'qish tezligini 3-5 baravar oshiradi.
-
-  - MongoDB Aggregation & Products Pipeline (Dars 68):
-      1. `GET /product/all` (URL Query vs Params):
-         - `req.query`: `page`, `limit`, `order`, `productCollection`, `search`.
-         - Aggregation Pipeline:
-           - `$match`: `productStatus: PROCESS`, ixtiyoriy `productCollection` va `productName` regex search.
-           - `$sort`: `createdAt: -1` yoki `productPrice: 1` yoki `productViews: -1`.
-           - `$skip`: `(page - 1) * limit`.
-           - `$limit`: `limit`.
-
-  - Product Details & View Tracking System (Dars 69):
-      1. `GET /product/:id` (`req.params.id`):
-         - `View` Schema (`viewGroup`, `memberId`, `viewRefId`).
-         - `ViewService.checkViewExistence`: Autentifikatsiyadan o'tgan foydalanuvchi ushbu mahsulotni oldin ko'rganligini tekshiradi.
-         - Agar ko'rmagan bo'lsa: `ViewService.insertMemberView` orqali yangi View yozuvi kiritiladi va mahsulotning `productViews` ko'rsatkichi `$inc: { productViews: 1 }` orqali 1 taga oshiriladi.
+  - SPA Order Architecture & Aggregation Lookup (Dars 70 & 71):
+      1. Schemas & Models:
+         - `Order.model.ts`: `orderTotal`, `orderDelivery`, `orderStatus` (PAUSE, PROCESS, FINISH, DELETE), `memberId`.
+         - `OrderItem.model.ts`: `itemQuantity`, `itemPrice`, `orderId`, `productId`.
+      2. `POST /order/create`:
+         - `req.body`: `OrderItemInput[]`.
+         - Mahsulotlar jami summasini va yetkazib berish narxini hisoblaydi, `Order` hujjatini va unga bog'langan barcha `OrderItem` larni yaratadi.
+      3. `GET /order/all` (Advanced MongoDB Aggregation):
+         - `$match`: `memberId` va `orderStatus` (PAUSE, PROCESS, FINISH).
+         - `$sort`: `{ updatedAt: -1 }`.
+         - `$skip` & `$limit`: Sahifalash.
+         - `$lookup` (orderitems): `orderId` orqali buyurtmadagi elementlarni birlashtiradi.
+         - `$lookup` (products): `productId` orqali taomlarning to'liq ma'lumotlarini (nomi, narxi, rasmlari) avtomatik yuklaydi.
+      4. `POST /order/update`:
+         - Buyurtma statusini o'zgartiradi (`PAUSE` -> `PROCESS` -> `FINISH`).
+         - Agar `FINISH` bo'lsa, har $10 uchun foydalanuvchiga 1 ta sodiqlik balli (`memberPoints`) qo'shiladi.
 */
