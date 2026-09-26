@@ -13,20 +13,30 @@
       Token-Based Authentication (JWT / SPA React)
       Browser Storages: Cookie, LocalStorage, SessionStorage
 
-  - SPA Order Architecture & Aggregation Lookup (Dars 70 & 71):
-      1. Schemas & Models:
-         - `Order.model.ts`: `orderTotal`, `orderDelivery`, `orderStatus` (PAUSE, PROCESS, FINISH, DELETE), `memberId`.
-         - `OrderItem.model.ts`: `itemQuantity`, `itemPrice`, `orderId`, `productId`.
-      2. `POST /order/create`:
-         - `req.body`: `OrderItemInput[]`.
-         - Mahsulotlar jami summasini va yetkazib berish narxini hisoblaydi, `Order` hujjatini va unga bog'langan barcha `OrderItem` larni yaratadi.
-      3. `GET /order/all` (Advanced MongoDB Aggregation):
-         - `$match`: `memberId` va `orderStatus` (PAUSE, PROCESS, FINISH).
-         - `$sort`: `{ updatedAt: -1 }`.
-         - `$skip` & `$limit`: Sahifalash.
-         - `$lookup` (orderitems): `orderId` orqali buyurtmadagi elementlarni birlashtiradi.
-         - `$lookup` (products): `productId` orqali taomlarning to'liq ma'lumotlarini (nomi, narxi, rasmlari) avtomatik yuklaydi.
-      4. `POST /order/update`:
-         - Buyurtma statusini o'zgartiradi (`PAUSE` -> `PROCESS` -> `FINISH`).
-         - Agar `FINISH` bo'lsa, har $10 uchun foydalanuvchiga 1 ta sodiqlik balli (`memberPoints`) qo'shiladi.
+  - SPA Order Management & Status Transitions (Dars 72):
+      1. `POST /order/update`:
+         - `req.body`: `{ orderId: string, orderStatus: OrderStatus }`.
+         - Foydalanuvchining buyurtma statusini yangilaydi (`PAUSE` -> `PROCESS` -> `FINISH` yoki `DELETE`).
+         - `FINISH` statusiga o'tganda, to'langan har $10 uchun foydalanuvchiga 1 ta sodiqlik bali (`memberPoints`) qo'shiladi.
+
+  - React Foundations & Hooks Paradigm (Dars 73):
+      1. Class vs Functional Components:
+         - Class Components: `this.state`, `this.setState`, Lifecycle metodlari (`componentDidMount`, `componentDidUpdate`, `componentWillUnmount`).
+         - Functional Components: Hooklar (`useState`, `useEffect`), soddaroq sintaksis, xotirani tejash va unumdorlik.
+      2. `useState`: Mahalliy holat (state)ni saqlash va yangilash.
+      3. `useEffect`: Nojo'ya ta'sirlar (side-effects)ni boshqarish:
+         - `useEffect(() => {}, [])`: `componentDidMount` (birlamchi renderdan so'ng 1 marta ishlaydi).
+         - `useEffect(() => {}, [dep])`: `componentDidUpdate` (bog'liqlik o'zgarganda ishlaydi).
+         - `useEffect(() => () => {}, [])`: `componentWillUnmount` (komponent o'chirilganda tozalash).
+
+  - Redux Architecture & Redux Toolkit (Dars 74):
+      1. Redux tamoyili: `Store` (yagona global holat), `Actions` (hodisalar), `Reducers` (holatni o'zgartiruvchi sof funksiyalar), `Dispatch` (action yuborish), `Selector` (state dan ma'lumot o'qish).
+      2. Redux Toolkit (`@reduxjs/toolkit` & `react-redux`):
+         - `configureStore`: Bir nechta reducerlarni yagona markaziy do'konga birlashtiradi.
+         - `createSlice`: Reducer va Actionlarni bir joyda ixcham hosil qiladi.
+         - Immer JS integratsiyasi: Obyektlarni chuqur nusxalamasdan to'g'ridan-to'g'ri mutatsiya qilish imkoniyati.
+      3. Loyihada yaratilgan Slicelar:
+         - `homePageSlice`: `popularDishes`, `newDishes`, `topUsers`.
+         - `productsPageSlice`: `restaurant`, `chosenProduct`, `products`.
+         - `ordersPageSlice`: `pausedOrders`, `processOrders`, `finishedOrders`.
 */
