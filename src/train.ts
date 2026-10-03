@@ -55,12 +55,11 @@
       2. `useGlobals()` Custom Hook:
          - Istalgan komponentdan turib `const { authMember, setAuthMember } = useGlobals();` orqali global foydalanuvchi ma'lumotlariga kirish va boshqarish imkoniyatini beradi.
 
-  - UserPage & Orders Business Logic (Dars 83 & 84):
-      1. `UserPage`:
-         - `MemberService.updateMember()` orqali shaxsiy ma'lumotlar, manzil, telefon va tasvirni tahrirlash.
-         - VIP ochkolar (*Loyalty Tier progress*) va buyurtmalar statistikasini aks ettirish.
-      2. `OrdersPage`:
-         - `PausedOrders`: To'lov kutilayotgan buyurtmalar. `Pay & Cook` bosilganda `OrderStatus.PROCESS` holatiga o'tadi; `Cancel Order` bosilganda `OrderStatus.DELETE` bo'ladi.
-         - `ProcessOrders`: Oshxonada tayyorlanayotgan va yo'lda bo'lgan taomlar. `Confirm Delivery` bosilganda `OrderStatus.FINISH` holatiga o'tadi va foydalanuvchiga +10 VIP ball qo'shiladi.
-         - `FinishedOrders`: Yetkazib berilgan buyurtmalar tarixi va e-chek (*E-Receipt*) yuklab olish imkoniyati.
+  - Full Page & Button Interactions Audit (Dars 83-85):
+      1. `HomePage`: `Statistics`, `PopularDishes` ("Add to Cart" + navigate), `NewDishes` ("Add to Cart" + navigate), `Advertisement` ("Book VIP Show Table" WhatsApp + YouTube reel), `ActiveUsers`, `Events` ("Reserve Invitation").
+      2. `ProductsPage`: Category tabs, search filter, sorting chips, favorite toggle heart, pagination, dynamic image preview, "Add to Cart" toast, portion size pricing calculator, and related recommendations.
+      3. `OrdersPage`: `PausedOrders` ("Pay & Cook" & "Cancel Order"), `ProcessOrders` ("Confirm Delivery +10 Pts" & animated cooking bar), `FinishedOrders` ("Download E-Receipt").
+      4. `UserPage`: `MemberInfo` (tier progress, order metrics), `MemberSettings` (live `MemberService.updateMember` form submission with feedback snackbars).
+      5. `HelpPage`: FAQ accordions, concierge hotline, contact inquiry form submission with snackbars.
+      6. `Navbar` & `Footer`: Live cart badge count, drawer toggle, user profile menu with logout, newsletter VIP subscription, legal & menu direct links.
 */

@@ -1,3 +1,4 @@
+import { useState } from "react";
 import {
   Box,
   Container,
@@ -7,6 +8,8 @@ import {
   IconButton,
   TextField,
   Button,
+  Snackbar,
+  Alert,
 } from "@mui/material";
 import RestaurantMenuIcon from "@mui/icons-material/RestaurantMenu";
 import InstagramIcon from "@mui/icons-material/Instagram";
@@ -17,8 +20,25 @@ import PhoneIcon from "@mui/icons-material/Phone";
 import LocationOnIcon from "@mui/icons-material/LocationOn";
 import AccessTimeIcon from "@mui/icons-material/AccessTime";
 import SendIcon from "@mui/icons-material/Send";
+import { useNavigate } from "react-router-dom";
 
 export function Footer() {
+  const navigate = useNavigate();
+  const [email, setEmail] = useState("");
+  const [toastOpen, setToastOpen] = useState(false);
+  const [toastMsg, setToastMsg] = useState("");
+
+  const handleSubscribe = () => {
+    if (!email || !email.includes("@")) {
+      setToastMsg("Please enter a valid email address.");
+      setToastOpen(true);
+      return;
+    }
+    setToastMsg("Thank you for joining Burak VIP Club!");
+    setToastOpen(true);
+    setEmail("");
+  };
+
   return (
     <Box
       component="footer"
@@ -36,7 +56,10 @@ export function Footer() {
         <Grid container spacing={5} sx={{ mb: 6 }}>
           {/* Col 1: Brand & Socials */}
           <Grid size={{ xs: 12, md: 4 }}>
-            <Box sx={{ display: "flex", alignItems: "center", gap: 1.5, mb: 2.5 }}>
+            <Box
+              onClick={() => navigate("/")}
+              sx={{ display: "flex", alignItems: "center", gap: 1.5, mb: 2.5, cursor: "pointer" }}
+            >
               <Box
                 sx={{
                   width: 40,
@@ -96,19 +119,19 @@ export function Footer() {
               Explore Menu
             </Typography>
             <Box sx={{ display: "flex", flexDirection: "column", gap: 1.2 }}>
-              <Link href="/products" color="inherit" underline="hover" sx={{ "&:hover": { color: "#f59e0b" } }}>
+              <Link onClick={() => navigate("/products")} sx={{ cursor: "pointer", "&:hover": { color: "#f59e0b" } }} color="inherit" underline="hover">
                 Signature Steaks
               </Link>
-              <Link href="/products" color="inherit" underline="hover" sx={{ "&:hover": { color: "#f59e0b" } }}>
+              <Link onClick={() => navigate("/products")} sx={{ cursor: "pointer", "&:hover": { color: "#f59e0b" } }} color="inherit" underline="hover">
                 Handcrafted Kebabs
               </Link>
-              <Link href="/products" color="inherit" underline="hover" sx={{ "&:hover": { color: "#f59e0b" } }}>
+              <Link onClick={() => navigate("/products")} sx={{ cursor: "pointer", "&:hover": { color: "#f59e0b" } }} color="inherit" underline="hover">
                 Turkish Desserts
               </Link>
-              <Link href="/products" color="inherit" underline="hover" sx={{ "&:hover": { color: "#f59e0b" } }}>
+              <Link onClick={() => navigate("/products")} sx={{ cursor: "pointer", "&:hover": { color: "#f59e0b" } }} color="inherit" underline="hover">
                 Beverages & Drinks
               </Link>
-              <Link href="/orders" color="inherit" underline="hover" sx={{ "&:hover": { color: "#f59e0b" } }}>
+              <Link onClick={() => navigate("/orders")} sx={{ cursor: "pointer", "&:hover": { color: "#f59e0b" } }} color="inherit" underline="hover">
                 Track My Order
               </Link>
             </Box>
@@ -148,6 +171,8 @@ export function Footer() {
                 size="small"
                 placeholder="Your email address"
                 variant="outlined"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
                 sx={{
                   bgcolor: "rgba(255,255,255,0.05)",
                   borderRadius: 2,
@@ -159,7 +184,7 @@ export function Footer() {
                 variant="contained"
                 color="primary"
                 sx={{ minWidth: 44, px: 2, borderRadius: 2 }}
-                onClick={() => alert("Thank you for subscribing to Burak VIP Club!")}
+                onClick={handleSubscribe}
               >
                 <SendIcon fontSize="small" />
               </Button>
@@ -183,17 +208,28 @@ export function Footer() {
             &copy; {new Date().getFullYear()} Burak Restaurant Group. All Rights Reserved.
           </Typography>
           <Box sx={{ display: "flex", gap: 3 }}>
-            <Link href="/help" color="inherit" underline="hover" variant="caption" sx={{ color: "#64748b" }}>
+            <Link onClick={() => navigate("/help")} sx={{ cursor: "pointer", color: "#64748b" }} underline="hover" variant="caption">
               Privacy Policy
             </Link>
-            <Link href="/help" color="inherit" underline="hover" variant="caption" sx={{ color: "#64748b" }}>
+            <Link onClick={() => navigate("/help")} sx={{ cursor: "pointer", color: "#64748b" }} underline="hover" variant="caption">
               Terms of Service
             </Link>
-            <Link href="/help" color="inherit" underline="hover" variant="caption" sx={{ color: "#64748b" }}>
+            <Link onClick={() => navigate("/help")} sx={{ cursor: "pointer", color: "#64748b" }} underline="hover" variant="caption">
               FAQ & Support
             </Link>
           </Box>
         </Box>
+
+        <Snackbar
+          open={toastOpen}
+          autoHideDuration={3500}
+          onClose={() => setToastOpen(false)}
+          anchorOrigin={{ vertical: "bottom", horizontal: "center" }}
+        >
+          <Alert severity="success" sx={{ width: "100%", borderRadius: 3, fontWeight: 700 }}>
+            {toastMsg}
+          </Alert>
+        </Snackbar>
       </Container>
     </Box>
   );
