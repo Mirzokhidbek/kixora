@@ -12,31 +12,55 @@
       Session-Based Authentication (BSSR / EJS Cookies)
       Token-Based Authentication (JWT / SPA React)
       Browser Storages: Cookie, LocalStorage, SessionStorage
+      CORS (Cross-Origin Resource Sharing):
+        - `cors({ credentials: true, origin: true })`
+        - Brauzer xavfsizlik siyosati tufayli turli xil portlardagi (React `http://localhost:5173` va Node backend `http://localhost:3001`) so'rovlarning cookie va headerlar bilan to'siqsiz almashinishini ta'minlaydi.
 
-  - SPA Order Management & Status Transitions (Dars 72):
-      1. `POST /order/update`:
-         - `req.body`: `{ orderId: string, orderStatus: OrderStatus }`.
-         - Foydalanuvchining buyurtma statusini yangilaydi (`PAUSE` -> `PROCESS` -> `FINISH` yoki `DELETE`).
-         - `FINISH` statusiga o'tganda, to'langan har $10 uchun foydalanuvchiga 1 ta sodiqlik bali (`memberPoints`) qo'shiladi.
+  - Frontend Configuration & API Services (Dars 75 & 76):
+      1. Environmental Variables:
+         - `.env`: `VITE_API_URL=http://localhost:3001`
+         - `src/lib/config.ts`: `serverApi = import.meta.env.VITE_API_URL || "http://localhost:3001"`
+      2. API Services Layer:
+         - `ProductService`: `getProducts(inquiry)`, `getProduct(id)`.
+         - `MemberService`: `getRestaurant()`, `getTopUsers()`, `getMemberDetail()`, `login()`, `signup()`, `logout()`, `updateMember(data)`.
+         - `OrderService`: `createOrder(cartItems)`, `getMyOrders(inquiry)`, `updateOrder(input)`.
 
-  - React Foundations & Hooks Paradigm (Dars 73):
-      1. Class vs Functional Components:
-         - Class Components: `this.state`, `this.setState`, Lifecycle metodlari (`componentDidMount`, `componentDidUpdate`, `componentWillUnmount`).
-         - Functional Components: Hooklar (`useState`, `useEffect`), soddaroq sintaksis, xotirani tejash va unumdorlik.
-      2. `useState`: Mahalliy holat (state)ni saqlash va yangilash.
-      3. `useEffect`: Nojo'ya ta'sirlar (side-effects)ni boshqarish:
-         - `useEffect(() => {}, [])`: `componentDidMount` (birlamchi renderdan so'ng 1 marta ishlaydi).
-         - `useEffect(() => {}, [dep])`: `componentDidUpdate` (bog'liqlik o'zgarganda ishlaydi).
-         - `useEffect(() => () => {}, [])`: `componentWillUnmount` (komponent o'chirilganda tozalash).
-
-  - Redux Architecture & Redux Toolkit (Dars 74):
-      1. Redux tamoyili: `Store` (yagona global holat), `Actions` (hodisalar), `Reducers` (holatni o'zgartiruvchi sof funksiyalar), `Dispatch` (action yuborish), `Selector` (state dan ma'lumot o'qish).
-      2. Redux Toolkit (`@reduxjs/toolkit` & `react-redux`):
-         - `configureStore`: Bir nechta reducerlarni yagona markaziy do'konga birlashtiradi.
-         - `createSlice`: Reducer va Actionlarni bir joyda ixcham hosil qiladi.
-         - Immer JS integratsiyasi: Obyektlarni chuqur nusxalamasdan to'g'ridan-to'g'ri mutatsiya qilish imkoniyati.
-      3. Loyihada yaratilgan Slicelar:
-         - `homePageSlice`: `popularDishes`, `newDishes`, `topUsers`.
+  - ProductsPage Type Integration & Redux Data-Flow (Dars 77 & 78):
+      1. Type Integration:
+         - `Product`, `ProductInquiry`, `ProductCollection`, `ProductSize`, `ProductStatus`.
+         - `Member`, `MemberType`, `MemberStatus`.
+         - `import type { Member }` qoidasi: Faqat tiplardan iborat fayllarni import qilishda runtime xatoliklarning oldini olish uchun `import type` sintaksisidan foydalaniladi.
+      2. Redux Slice & Selectors:
          - `productsPageSlice`: `restaurant`, `chosenProduct`, `products`.
-         - `ordersPageSlice`: `pausedOrders`, `processOrders`, `finishedOrders`.
+         - `ProductsPage/index.tsx`: `MemberService.getRestaurant()` orqali faol restoran ma'lumotlarini yuklaydi.
+      3. `Products.tsx` Inquiry & Handlers:
+         - `productsSearch` State: `page`, `limit`, `order`, `productCollection`, `search`.
+         - Handlers: `searchHandler`, `collectionHandler`, `orderHandler`, `paginationHandler`, `chosenProductHandler`.
+
+  - Basket Architecture & Custom Hook (Dars 80):
+      1. `useBasket` Hook (`src/app/hooks/useBasket.ts`):
+         - `cartItems` State: `localStorage.getItem("cart_items")` orqali saqlanadi va brauzer yangilanganda ham yo'qolmaydi.
+         - `onAdd(product, quantity)`: Mahsulot mavjud bo'lsa `quantity` oshiriladi, bo'lmasa yangi element qo'shiladi.
+         - `onRemove(item)`: Soni 1 taga kamaytiriladi, 1 bo'lsa savatdan o'chiriladi.
+         - `onDelete(item)`: Bitta mahsulotni to'liq o'chirish.
+         - `onDeleteAll()`: Savatni butunlay tozalash.
+      2. `BasketDrawer.tsx`:
+         - O'ng tomondan chiquvchi interaktiv panel: Har bir taom surati, soni hisoblagichi, yetkazib berish xizmati narxi va umumiy summa hisobi.
+         - `Checkout`: Foydalanuvchi tizimga kirmagan bo'lsa `AuthModal` ni ochadi, kirgan bo'lsa `OrderService.createOrder` ni chaqirib buyurtmani rasmiylashtiradi.
+
+  - Global State & Context Hook (Dars 82):
+      1. `ContextProvider` (`src/app/context/ContextProvider.tsx`):
+         - `GlobalContext`: `authMember`, `setAuthMember`, `orderBuilder`, `setOrderBuilder`.
+         - `localStorage.setItem("member_data", ...)` orqali foydalanuvchi autentifikatsiya holatini doimiy ushlab turadi.
+      2. `useGlobals()` Custom Hook:
+         - Istalgan komponentdan turib `const { authMember, setAuthMember } = useGlobals();` orqali global foydalanuvchi ma'lumotlariga kirish va boshqarish imkoniyatini beradi.
+
+  - UserPage & Orders Business Logic (Dars 83 & 84):
+      1. `UserPage`:
+         - `MemberService.updateMember()` orqali shaxsiy ma'lumotlar, manzil, telefon va tasvirni tahrirlash.
+         - VIP ochkolar (*Loyalty Tier progress*) va buyurtmalar statistikasini aks ettirish.
+      2. `OrdersPage`:
+         - `PausedOrders`: To'lov kutilayotgan buyurtmalar. `Pay & Cook` bosilganda `OrderStatus.PROCESS` holatiga o'tadi; `Cancel Order` bosilganda `OrderStatus.DELETE` bo'ladi.
+         - `ProcessOrders`: Oshxonada tayyorlanayotgan va yo'lda bo'lgan taomlar. `Confirm Delivery` bosilganda `OrderStatus.FINISH` holatiga o'tadi va foydalanuvchiga +10 VIP ball qo'shiladi.
+         - `FinishedOrders`: Yetkazib berilgan buyurtmalar tarixi va e-chek (*E-Receipt*) yuklab olish imkoniyati.
 */

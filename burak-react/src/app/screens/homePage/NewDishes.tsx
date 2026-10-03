@@ -16,7 +16,11 @@ import { useNavigate } from "react-router-dom";
 import { retrieveNewDishes } from "./selector";
 import { serverApi } from "../../../lib/config";
 
-export function NewDishes() {
+interface NewDishesProps {
+  onAdd?: (item: any) => void;
+}
+
+export function NewDishes({ onAdd }: NewDishesProps) {
   const navigate = useNavigate();
   const newDishes = useSelector(retrieveNewDishes);
 
@@ -147,7 +151,7 @@ export function NewDishes() {
                       sx={{ borderRadius: 2, fontWeight: 700, fontSize: "0.75rem" }}
                       onClick={(e) => {
                         e.stopPropagation();
-                        alert(`Added ${dish.productName} to Cart!`);
+                        if (onAdd) onAdd(dish);
                       }}
                     >
                       Add

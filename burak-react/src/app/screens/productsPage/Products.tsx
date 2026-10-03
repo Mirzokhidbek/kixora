@@ -27,21 +27,25 @@ import LocalFireDepartmentIcon from "@mui/icons-material/LocalFireDepartment";
 import VisibilityIcon from "@mui/icons-material/Visibility";
 import { useNavigate } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
-import { Dispatch } from "@reduxjs/toolkit";
+import type { Dispatch } from "@reduxjs/toolkit";
 
 import ProductService from "../../services/ProductService";
 import { setProducts } from "./slice";
 import { retrieveProducts, retrieveRestaurant } from "./selector";
-import { Product, ProductInquiry } from "../../../lib/types/product";
+import type { Product, ProductInquiry } from "../../../lib/types/product";
 import { ProductCollection } from "../../../lib/enums/common.enum";
 import { serverApi } from "../../../lib/config";
+
+interface ProductsProps {
+  onAdd?: (item: any) => void;
+}
 
 /** REDUX DISPATCH **/
 const actionDispatch = (dispatch: Dispatch) => ({
   setProducts: (data: Product[]) => dispatch(setProducts(data)),
 });
 
-export function Products() {
+export function Products({ onAdd }: ProductsProps) {
   const navigate = useNavigate();
   const { setProducts } = actionDispatch(useDispatch());
   const products = useSelector(retrieveProducts);
@@ -468,6 +472,7 @@ export function Products() {
                       sx={{ borderRadius: 2.5, px: 2, fontWeight: 700, fontSize: "0.8rem" }}
                       onClick={(e) => {
                         e.stopPropagation();
+                        if (onAdd) onAdd(product);
                         setToastMsg(`Added "${product.productName}" to Cart!`);
                         setToastOpen(true);
                       }}

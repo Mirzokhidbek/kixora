@@ -1,7 +1,7 @@
 import { createSlice } from "@reduxjs/toolkit";
 import type { PayloadAction } from "@reduxjs/toolkit";
-import { Product } from "../../../lib/types/product";
-import { Member } from "../../../lib/types/member";
+import type { Product } from "../../../lib/types/product";
+import type { Member } from "../../../lib/types/member";
 
 interface HomePageState {
   popularDishes: Product[];

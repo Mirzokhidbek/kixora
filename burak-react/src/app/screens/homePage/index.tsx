@@ -1,7 +1,7 @@
 import { useEffect } from "react";
 import { Box } from "@mui/material";
 import { useDispatch } from "react-redux";
-import { Dispatch } from "@reduxjs/toolkit";
+import type { Dispatch } from "@reduxjs/toolkit";
 
 import { Statistics } from "./Statistics";
 import { PopularDishes } from "./PopularDishes";
@@ -15,6 +15,10 @@ import MemberService from "../../services/MemberService";
 import { setPopularDishes, setNewDishes, setTopUsers } from "./slice";
 import { ProductCollection } from "../../../lib/enums/common.enum";
 
+interface HomePageProps {
+  onAdd?: (item: any) => void;
+}
+
 /** REDUX SLICE DISPATCH SETUP **/
 const actionDispatch = (dispatch: Dispatch) => ({
   setPopularDishes: (data: any) => dispatch(setPopularDishes(data)),
@@ -22,7 +26,7 @@ const actionDispatch = (dispatch: Dispatch) => ({
   setTopUsers: (data: any) => dispatch(setTopUsers(data)),
 });
 
-export function HomePage() {
+export function HomePage({ onAdd }: HomePageProps) {
   const { setPopularDishes, setNewDishes, setTopUsers } =
     actionDispatch(useDispatch());
 
@@ -64,10 +68,10 @@ export function HomePage() {
       <Statistics />
 
       {/* 2. Most Popular Signature Dishes */}
-      <PopularDishes />
+      <PopularDishes onAdd={onAdd} />
 
       {/* 3. New Culinary Arrivals */}
-      <NewDishes />
+      <NewDishes onAdd={onAdd} />
 
       {/* 4. Live CZN Burak Show Banner */}
       <Advertisement />

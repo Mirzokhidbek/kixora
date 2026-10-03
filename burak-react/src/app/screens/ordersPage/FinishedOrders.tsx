@@ -1,35 +1,39 @@
-import { Box, Typography, Card, CardContent, Button, Avatar, Chip } from "@mui/material";
+import { Box, Typography, Card, CardContent, Avatar, Chip, Button } from "@mui/material";
 import CheckCircleIcon from "@mui/icons-material/CheckCircle";
-import ReplayIcon from "@mui/icons-material/Replay";
+import ReceiptIcon from "@mui/icons-material/Receipt";
+import { useSelector } from "react-redux";
+
+import { retrieveFinishedOrders } from "./selector";
+import { serverApi } from "../../../lib/config";
+import type { Order, OrderItem } from "../../../lib/types/order";
 
 export function FinishedOrders() {
-  const finishedList = [
-    {
-      id: "BK-94710",
-      date: "Aug 26, 2026 &bull; 13:20",
-      total: 56.4,
-      items: [
-        {
-          name: "Sultan Meter Kebab",
-          quantity: 1,
-          price: 36.5,
-          img: "https://images.unsplash.com/photo-1555939594-58d7cb561ad1?auto=format&fit=crop&w=150&q=80",
-        },
-        {
-          name: "Golden Cheddar Burger",
-          quantity: 1,
-          price: 19.9,
-          img: "https://images.unsplash.com/photo-1568901346375-23c9450c58cd?auto=format&fit=crop&w=150&q=80",
-        },
-      ],
-    },
-  ];
+  const finishedOrders = useSelector(retrieveFinishedOrders);
+
+  const getImageSrc = (img?: string) => {
+    if (!img) return "https://images.unsplash.com/photo-1519869325930-281384150729?auto=format&fit=crop&w=150&q=80";
+    return img.startsWith("http") ? img : `${serverApi}/${img}`;
+  };
+
+  if (finishedOrders.length === 0) {
+    return (
+      <Box sx={{ textAlign: "center", py: 8 }}>
+        <CheckCircleIcon sx={{ fontSize: 60, color: "#94a3b8", mb: 2 }} />
+        <Typography variant="h6" sx={{ fontWeight: 700, mb: 1 }}>
+          No Completed Orders Yet
+        </Typography>
+        <Typography variant="body2" color="text.secondary">
+          Completed orders and receipts will appear here once delivered.
+        </Typography>
+      </Box>
+    );
+  }
 
   return (
     <Box sx={{ display: "flex", flexDirection: "column", gap: 3 }}>
-      {finishedList.map((order) => (
+      {finishedOrders.map((order: Order) => (
         <Card
-          key={order.id}
+          key={order._id}
           sx={{
             borderRadius: 4,
             border: "1px solid #e2e8f0",
@@ -39,62 +43,73 @@ export function FinishedOrders() {
         >
           <Box
             sx={{
-              bgcolor: "#0f172a",
+              bgcolor: "#064e3b",
               color: "#fff",
               px: 3,
               py: 2,
               display: "flex",
               justifyContent: "space-between",
               alignItems: "center",
+              flexWrap: "wrap",
+              gap: 1,
             }}
           >
             <Box sx={{ display: "flex", alignItems: "center", gap: 1.5 }}>
-              <CheckCircleIcon sx={{ color: "#10b981" }} />
+              <CheckCircleIcon sx={{ color: "#34d399" }} />
               <Typography variant="subtitle1" sx={{ fontWeight: 800 }}>
-                Order #{order.id}
+                Order #{order._id?.slice(-6)?.toUpperCase()}
               </Typography>
             </Box>
-            <Chip label="DELIVERED" size="small" sx={{ bgcolor: "#10b981", color: "#fff", fontWeight: 800 }} />
+            <Chip label="DELIVERED &bull; COMPLETED" size="small" sx={{ bgcolor: "#34d399", color: "#064e3b", fontWeight: 800 }} />
           </Box>
 
           <CardContent sx={{ p: 3 }}>
-            {order.items.map((item, idx) => (
-              <Box
-                key={idx}
-                sx={{
-                  display: "flex",
-                  justifyContent: "space-between",
-                  alignItems: "center",
-                  bgcolor: "#f8fafc",
-                  p: 1.5,
-                  borderRadius: 3,
-                  mb: 1.5,
-                }}
-              >
-                <Box sx={{ display: "flex", alignItems: "center", gap: 2 }}>
-                  <Avatar src={item.img} variant="rounded" sx={{ width: 48, height: 48, borderRadius: 2 }} />
-                  <div>
-                    <Typography variant="body1" sx={{ fontWeight: 700 }}>
-                      {item.name}
-                    </Typography>
-                    <Typography variant="caption" color="text.secondary">
-                      Quantity: {item.quantity}x
-                    </Typography>
-                  </div>
+            {order.orderItems?.map((item: OrderItem, idx: number) => {
+              const product = order.productData?.[idx];
+              return (
+                <Box
+                  key={item._id || idx}
+                  sx={{
+                    display: "flex",
+                    justifyContent: "space-between",
+                    alignItems: "center",
+                    bgcolor: "#f8fafc",
+                    p: 1.5,
+                    borderRadius: 3,
+                    mb: 2,
+                  }}
+                >
+                  <Box sx={{ display: "flex", alignItems: "center", gap: 2 }}>
+                    <Avatar src={getImageSrc(product?.productImages?.[0])} variant="rounded" sx={{ width: 52, height: 52, borderRadius: 2 }} />
+                    <div>
+                      <Typography variant="body1" sx={{ fontWeight: 700 }}>
+                        {product?.productName || "Gourmet Ottoman Recipe"}
+                      </Typography>
+                      <Typography variant="caption" color="text.secondary">
+                        Qty: {item.itemQuantity}x &bull; Delivered
+                      </Typography>
+                    </div>
+                  </Box>
+                  <Typography variant="subtitle1" sx={{ fontWeight: 800, color: "#0f172a" }}>
+                    ${((item.itemPrice || 0) * (item.itemQuantity || 1)).toFixed(2)}
+                  </Typography>
                 </Box>
-                <Typography variant="subtitle1" sx={{ fontWeight: 800 }}>
-                  ${item.price.toFixed(2)}
-                </Typography>
-              </Box>
-            ))}
+              );
+            })}
 
-            <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "center", pt: 1 }}>
-              <Typography variant="subtitle1" sx={{ fontWeight: 800, color: "#0f172a" }}>
-                Total Paid: ${order.total.toFixed(2)}
+            <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "center", pt: 2, borderTop: "1px solid #f1f5f9", flexWrap: "wrap", gap: 2 }}>
+              <Typography variant="body2" sx={{ color: "#64748b", fontWeight: 600 }}>
+                Delivered & Bonus +10 VIP Points Claimed
               </Typography>
-              <Button variant="outlined" color="primary" startIcon={<ReplayIcon />} sx={{ fontWeight: 800, borderRadius: 2 }}>
-                Reorder Again
-              </Button>
+
+              <Box sx={{ display: "flex", alignItems: "center", gap: 2 }}>
+                <Typography variant="h6" sx={{ fontWeight: 800, color: "#0f172a" }}>
+                  Total: ${order.orderTotal?.toFixed(2)}
+                </Typography>
+                <Button variant="outlined" size="small" startIcon={<ReceiptIcon />} sx={{ borderRadius: 2 }}>
+                  Download E-Receipt
+                </Button>
+              </Box>
             </Box>
           </CardContent>
         </Card>

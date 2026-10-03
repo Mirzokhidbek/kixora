@@ -15,6 +15,9 @@ import {
   Alert,
   Breadcrumbs,
   Link,
+  Card,
+  CardMedia,
+  CardContent,
 } from "@mui/material";
 import AddShoppingCartIcon from "@mui/icons-material/AddShoppingCart";
 import ArrowBackIcon from "@mui/icons-material/ArrowBack";
@@ -24,17 +27,26 @@ import VerifiedIcon from "@mui/icons-material/Verified";
 import LocalShippingIcon from "@mui/icons-material/LocalShipping";
 import RestaurantIcon from "@mui/icons-material/Restaurant";
 import VisibilityIcon from "@mui/icons-material/Visibility";
+import InventoryIcon from "@mui/icons-material/Inventory";
+import StorefrontIcon from "@mui/icons-material/Storefront";
 
 import ProductService from "../../services/ProductService";
 import { setChosenProduct } from "./slice";
-import { retrieveChosenProduct } from "./selector";
+import { retrieveChosenProduct, retrieveRestaurant, retrieveProducts } from "./selector";
 import { serverApi } from "../../../lib/config";
+import type { Product } from "../../../lib/types/product";
 
-export function ChosenProduct() {
+interface ChosenProductProps {
+  onAdd?: (product: any, quantity?: number) => void;
+}
+
+export function ChosenProduct({ onAdd }: ChosenProductProps) {
   const { productId } = useParams<{ productId: string }>();
   const navigate = useNavigate();
   const dispatch = useDispatch();
   const product = useSelector(retrieveChosenProduct);
+  const restaurant = useSelector(retrieveRestaurant);
+  const allProducts = useSelector(retrieveProducts);
 
   const [quantity, setQuantity] = useState<number>(1);
   const [selectedPortion, setSelectedPortion] = useState<string>("NORMAL");
@@ -46,10 +58,13 @@ export function ChosenProduct() {
       const productService = new ProductService();
       productService
         .getProduct(productId)
-        .then((data) => dispatch(setChosenProduct(data)))
+        .then((data) => {
+          dispatch(setChosenProduct(data));
+          setActiveImgIndex(0);
+        })
         .catch((err) => {
           console.log("Error loading chosen product:", err);
-          // Fallback demo product
+          // Demo fallback
           dispatch(
             setChosenProduct({
               _id: productId,
@@ -83,14 +98,32 @@ export function ChosenProduct() {
     ? product.productImages
     : ["https://images.unsplash.com/photo-1558030006-450675393462?auto=format&fit=crop&w=800&q=80"];
 
-  const unitPrice = product ? product.productPrice : 48.0;
+  const basePrice = product ? product.productPrice : 48.0;
+  const portionMultiplier = selectedPortion === "LARGE" ? 1.3 : selectedPortion === "SET" ? 1.5 : 1.0;
+  const unitPrice = basePrice * portionMultiplier;
   const totalPrice = unitPrice * quantity;
+
+  // Filter other related dishes
+  const relatedDishes = allProducts.filter((p: Product) => p._id !== productId).slice(0, 3);
+
+  const handleAddToCart = () => {
+    if (onAdd && product) {
+      onAdd(
+        {
+          ...product,
+          productPrice: unitPrice,
+        },
+        quantity
+      );
+    }
+    setToastOpen(true);
+  };
 
   return (
     <Box sx={{ py: 6, minHeight: "85vh", bgcolor: "#f8fafc" }}>
       <Container maxWidth="lg">
         {/* Breadcrumb Navigation */}
-        <Box sx={{ mb: 4, display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+        <Box sx={{ mb: 4, display: "flex", justifyContent: "space-between", alignItems: "center", flexWrap: "wrap", gap: 2 }}>
           <Breadcrumbs aria-label="breadcrumb">
             <Link
               underline="hover"
@@ -183,13 +216,23 @@ export function ChosenProduct() {
           {/* Right Column: Culinary Details & Basket Customization */}
           <Grid size={{ xs: 12, md: 6 }}>
             <Box sx={{ display: "flex", flexDirection: "column", height: "100%" }}>
-              <Box sx={{ display: "flex", alignItems: "center", gap: 1.5, mb: 1.5 }}>
+              <Box sx={{ display: "flex", alignItems: "center", gap: 1.5, mb: 1.5, flexWrap: "wrap" }}>
                 <Chip
                   label={product?.productCollection || "CHEF SIGNATURE"}
                   sx={{ bgcolor: "#0f172a", color: "#f59e0b", fontWeight: 800, fontSize: "0.75rem" }}
                   size="small"
                 />
-                <Box sx={{ display: "flex", alignItems: "center", gap: 0.5, color: "#64748b", fontSize: "0.85rem" }}>
+
+                {restaurant && (
+                  <Chip
+                    icon={<StorefrontIcon sx={{ color: "#f59e0b !important", fontSize: 16 }} />}
+                    label={restaurant.memberNick}
+                    size="small"
+                    sx={{ bgcolor: "rgba(245, 158, 11, 0.12)", color: "#d97706", fontWeight: 700 }}
+                  />
+                )}
+
+                <Box sx={{ display: "flex", alignItems: "center", gap: 0.5, color: "#64748b", fontSize: "0.85rem", ml: "auto" }}>
                   <VisibilityIcon sx={{ fontSize: 16, color: "#f59e0b" }} />
                   <span>{product?.productViews || 0} views</span>
                 </Box>
@@ -206,9 +249,19 @@ export function ChosenProduct() {
                 </Typography>
               </Box>
 
-              <Typography variant="h4" sx={{ fontWeight: 800, color: "#0f172a", mb: 3 }}>
-                ${unitPrice.toFixed(2)}
-              </Typography>
+              <Box sx={{ display: "flex", alignItems: "baseline", gap: 2, mb: 3 }}>
+                <Typography variant="h4" sx={{ fontWeight: 800, color: "#0f172a" }}>
+                  ${unitPrice.toFixed(2)}
+                </Typography>
+                {product?.productLeftCount !== undefined && (
+                  <Box sx={{ display: "flex", alignItems: "center", gap: 0.5, color: "#10b981" }}>
+                    <InventoryIcon sx={{ fontSize: 16 }} />
+                    <Typography variant="caption" sx={{ fontWeight: 700 }}>
+                      {product.productLeftCount} in stock
+                    </Typography>
+                  </Box>
+                )}
+              </Box>
 
               <Typography variant="body1" color="text.secondary" sx={{ lineHeight: 1.8, mb: 4 }}>
                 {product?.productDesc ||
@@ -274,7 +327,7 @@ export function ChosenProduct() {
                   color="primary"
                   size="large"
                   startIcon={<AddShoppingCartIcon />}
-                  onClick={() => setToastOpen(true)}
+                  onClick={handleAddToCart}
                   sx={{
                     flexGrow: 1,
                     py: 1.5,
@@ -312,6 +365,41 @@ export function ChosenProduct() {
             </Box>
           </Grid>
         </Grid>
+
+        {/* Related Dishes Recommendation Section */}
+        {relatedDishes.length > 0 && (
+          <Box sx={{ mt: 10 }}>
+            <Typography variant="h4" sx={{ fontWeight: 800, mb: 3 }}>
+              Pairs Perfectly With
+            </Typography>
+            <Grid container spacing={3}>
+              {relatedDishes.map((rel: Product) => (
+                <Grid key={rel._id} size={{ xs: 12, sm: 6, md: 4 }}>
+                  <Card
+                    sx={{
+                      borderRadius: 3,
+                      border: "1px solid #e2e8f0",
+                      cursor: "pointer",
+                      "&:hover": { transform: "translateY(-4px)", boxShadow: "0 12px 25px rgba(0,0,0,0.08)" },
+                      transition: "all 0.2s ease",
+                    }}
+                    onClick={() => navigate(`/products/${rel._id}`)}
+                  >
+                    <CardMedia component="img" height="150" image={getImageSrc(rel.productImages?.[0])} alt={rel.productName} />
+                    <CardContent sx={{ p: 2 }}>
+                      <Typography variant="subtitle1" sx={{ fontWeight: 700, mb: 0.5 }}>
+                        {rel.productName}
+                      </Typography>
+                      <Typography variant="body2" color="text.secondary" sx={{ fontWeight: 800, color: "#0f172a" }}>
+                        ${rel.productPrice.toFixed(2)}
+                      </Typography>
+                    </CardContent>
+                  </Card>
+                </Grid>
+              ))}
+            </Grid>
+          </Box>
+        )}
 
         {/* Confirmation Toast */}
         <Snackbar

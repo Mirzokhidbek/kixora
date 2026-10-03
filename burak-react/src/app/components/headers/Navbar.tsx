@@ -24,15 +24,39 @@ import PersonIcon from "@mui/icons-material/Person";
 import LogoutIcon from "@mui/icons-material/Logout";
 import { NavLink, useNavigate, useLocation } from "react-router-dom";
 
-export function Navbar() {
+import { BasketDrawer } from "./BasketDrawer";
+import type { CartItem } from "../../../lib/types/cart";
+import type { Member } from "../../../lib/types/member";
+
+interface NavbarProps {
+  cartItems: CartItem[];
+  onAdd: (item: any) => void;
+  onRemove: (item: CartItem) => void;
+  onDelete: (item: CartItem) => void;
+  onDeleteAll: () => void;
+  onCheckout: () => void;
+  member: Member | null;
+  onLoginClick: () => void;
+  onLogoutClick: () => void;
+}
+
+export function Navbar({
+  cartItems,
+  onAdd,
+  onRemove,
+  onDelete,
+  onDeleteAll,
+  onCheckout,
+  member,
+  onLoginClick,
+  onLogoutClick,
+}: NavbarProps) {
   const navigate = useNavigate();
   const location = useLocation();
 
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
   const [mobileOpen, setMobileOpen] = useState(false);
-
-  const isAuth = true;
-  const userNick = "Miro";
+  const [basketOpen, setBasketOpen] = useState(false);
 
   const handleMenuOpen = (event: React.MouseEvent<HTMLElement>) => {
     setAnchorEl(event.currentTarget);
@@ -49,6 +73,11 @@ export function Navbar() {
     { title: "Account", path: "/user" },
     { title: "Help", path: "/help" },
   ];
+
+  const totalCartCount = cartItems.reduce(
+    (count, item) => count + item.quantity,
+    0
+  );
 
   return (
     <Box sx={{ position: "sticky", top: 0, zIndex: 1200 }}>
@@ -159,10 +188,10 @@ export function Navbar() {
                   border: "1px solid rgba(255, 255, 255, 0.12)",
                   "&:hover": { background: "rgba(245, 158, 11, 0.2)", color: "#f59e0b" },
                 }}
-                onClick={() => navigate("/orders")}
+                onClick={() => setBasketOpen(true)}
               >
                 <Badge
-                  badgeContent={3}
+                  badgeContent={totalCartCount}
                   sx={{
                     "& .MuiBadge-badge": {
                       bgcolor: "#f59e0b",
@@ -177,7 +206,7 @@ export function Navbar() {
               </IconButton>
 
               {/* User Account / Auth Capsule */}
-              {isAuth ? (
+              {member ? (
                 <>
                   <Box
                     onClick={handleMenuOpen}
@@ -198,6 +227,7 @@ export function Navbar() {
                     }}
                   >
                     <Avatar
+                      src={member.memberImage}
                       sx={{
                         width: 32,
                         height: 32,
@@ -207,13 +237,13 @@ export function Navbar() {
                         fontSize: "0.85rem",
                       }}
                     >
-                      {userNick.charAt(0)}
+                      {member.memberNick?.charAt(0)?.toUpperCase()}
                     </Avatar>
                     <Typography
                       variant="body2"
                       sx={{ color: "#fff", fontWeight: 700, display: { xs: "none", sm: "block" } }}
                     >
-                      {userNick}
+                      {member.memberNick}
                     </Typography>
                   </Box>
 
@@ -254,7 +284,7 @@ export function Navbar() {
                     <MenuItem
                       onClick={() => {
                         handleMenuClose();
-                        alert("Logged out");
+                        onLogoutClick();
                       }}
                       sx={{ color: "#ef4444" }}
                     >
@@ -266,7 +296,7 @@ export function Navbar() {
                 <Button
                   variant="contained"
                   color="primary"
-                  onClick={() => navigate("/user")}
+                  onClick={onLoginClick}
                   sx={{ borderRadius: 99, px: 3, fontWeight: 700 }}
                 >
                   Sign In
@@ -285,7 +315,7 @@ export function Navbar() {
         </Container>
       </AppBar>
 
-      {/* Mobile Drawer */}
+      {/* Mobile Navigation Drawer */}
       <Drawer
         anchor="right"
         open={mobileOpen}
@@ -323,6 +353,21 @@ export function Navbar() {
           ))}
         </List>
       </Drawer>
+
+      {/* Basket Drawer */}
+      <BasketDrawer
+        open={basketOpen}
+        onClose={() => setBasketOpen(false)}
+        cartItems={cartItems}
+        onAdd={onAdd}
+        onRemove={onRemove}
+        onDelete={onDelete}
+        onDeleteAll={onDeleteAll}
+        onCheckout={() => {
+          setBasketOpen(false);
+          onCheckout();
+        }}
+      />
     </Box>
   );
 }

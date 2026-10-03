@@ -18,11 +18,14 @@ import { useNavigate } from "react-router-dom";
 import { retrievePopularDishes } from "./selector";
 import { serverApi } from "../../../lib/config";
 
-export function PopularDishes() {
+interface PopularDishesProps {
+  onAdd?: (item: any) => void;
+}
+
+export function PopularDishes({ onAdd }: PopularDishesProps) {
   const navigate = useNavigate();
   const popularDishes = useSelector(retrievePopularDishes);
 
-  // Fallback signature items if database is empty initially
   const defaultDishes = [
     {
       _id: "1",
@@ -185,7 +188,7 @@ export function PopularDishes() {
                       sx={{ borderRadius: 2.5, px: 2, fontWeight: 700, fontSize: "0.8rem" }}
                       onClick={(e) => {
                         e.stopPropagation();
-                        alert(`Added ${dish.productName} to Cart!`);
+                        if (onAdd) onAdd(dish);
                       }}
                     >
                       Add

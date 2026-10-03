@@ -13,11 +13,22 @@ import EditIcon from "@mui/icons-material/Edit";
 import ShoppingBagIcon from "@mui/icons-material/ShoppingBag";
 import FavoriteIcon from "@mui/icons-material/Favorite";
 import LocationOnIcon from "@mui/icons-material/LocationOn";
+import type { Member } from "../../../lib/types/member";
+import { serverApi } from "../../../lib/config";
 
-export function MemberInfo() {
-  const currentPoints = 450;
+interface MemberInfoProps {
+  member?: Member | null;
+}
+
+export function MemberInfo({ member }: MemberInfoProps) {
+  const currentPoints = member?.memberPoints || 450;
   const targetPoints = 600;
-  const progress = (currentPoints / targetPoints) * 100;
+  const progress = Math.min(100, (currentPoints / targetPoints) * 100);
+
+  const getImageSrc = (img?: string) => {
+    if (!img) return "";
+    return img.startsWith("http") ? img : `${serverApi}/${img}`;
+  };
 
   return (
     <Box sx={{ mb: 4 }}>
@@ -43,6 +54,7 @@ export function MemberInfo() {
         >
           <Box sx={{ display: "flex", alignItems: "center", gap: 3 }}>
             <Avatar
+              src={getImageSrc(member?.memberImage)}
               sx={{
                 width: 96,
                 height: 96,
@@ -54,13 +66,13 @@ export function MemberInfo() {
                 border: "4px solid rgba(255,255,255,0.15)",
               }}
             >
-              M
+              {member?.memberNick?.charAt(0)?.toUpperCase() || "M"}
             </Avatar>
 
             <div>
               <Box sx={{ display: "flex", alignItems: "center", gap: 1.5, mb: 0.5 }}>
                 <Typography variant="h4" sx={{ fontWeight: 800 }}>
-                  Miro Developer
+                  {member?.memberNick || "Guest Foodie"}
                 </Typography>
                 <Chip
                   icon={<EmojiEventsIcon sx={{ color: "#000 !important", fontSize: 16 }} />}
@@ -75,10 +87,10 @@ export function MemberInfo() {
                 />
               </Box>
               <Typography variant="body2" sx={{ color: "#94a3b8", mb: 0.5 }}>
-                mirodeveloper7@gmail.com &bull; +998 90 808 08 07
+                {member?.memberPhone || "+998 90 808 08 07"} &bull; {member?.memberAddress || "Tashkent, Uzbekistan"}
               </Typography>
               <Typography variant="caption" sx={{ color: "#cbd5e1" }}>
-                Member since: January 2026 &bull; Verified Food Enthusiast
+                {member?.memberDesc || "Verified Burak VIP Guest & Culinary Connoisseur"}
               </Typography>
             </div>
           </Box>
@@ -106,7 +118,7 @@ export function MemberInfo() {
               Loyalty Tier Progress: <strong style={{ color: "#f59e0b" }}>{currentPoints} pts</strong> / {targetPoints} pts
             </Typography>
             <Typography variant="subtitle2" sx={{ color: "#f59e0b", fontWeight: 700 }}>
-              150 pts to PLATINUM VIP
+              {Math.max(0, targetPoints - currentPoints)} pts to PLATINUM VIP
             </Typography>
           </Box>
           <LinearProgress
@@ -148,7 +160,7 @@ export function MemberInfo() {
               </Box>
               <div>
                 <Typography variant="caption" color="text.secondary" sx={{ fontWeight: 600 }}>BURAK POINTS</Typography>
-                <Typography variant="h5" sx={{ fontWeight: 800 }}>450 pts</Typography>
+                <Typography variant="h5" sx={{ fontWeight: 800 }}>{currentPoints} pts</Typography>
               </div>
             </Box>
           </Card>
