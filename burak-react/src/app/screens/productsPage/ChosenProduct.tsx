@@ -1,262 +1,330 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
+import { useDispatch, useSelector } from "react-redux";
 import {
   Container,
   Typography,
   Box,
   Grid,
-  Card,
-  CardMedia,
-  Chip,
   Button,
   Rating,
+  Chip,
   IconButton,
   Divider,
   Snackbar,
   Alert,
+  Breadcrumbs,
+  Link,
 } from "@mui/material";
-import ArrowBackIcon from "@mui/icons-material/ArrowBack";
-import AddIcon from "@mui/icons-material/Add";
-import RemoveIcon from "@mui/icons-material/Remove";
 import AddShoppingCartIcon from "@mui/icons-material/AddShoppingCart";
-import LocalFireDepartmentIcon from "@mui/icons-material/LocalFireDepartment";
+import ArrowBackIcon from "@mui/icons-material/ArrowBack";
+import RemoveIcon from "@mui/icons-material/Remove";
+import AddIcon from "@mui/icons-material/Add";
 import VerifiedIcon from "@mui/icons-material/Verified";
+import LocalShippingIcon from "@mui/icons-material/LocalShipping";
 import RestaurantIcon from "@mui/icons-material/Restaurant";
-import DeliveryDiningIcon from "@mui/icons-material/DeliveryDining";
-import { PRODUCTS_LIST } from "./Products";
+import VisibilityIcon from "@mui/icons-material/Visibility";
+
+import ProductService from "../../services/ProductService";
+import { setChosenProduct } from "./slice";
+import { retrieveChosenProduct } from "./selector";
+import { serverApi } from "../../../lib/config";
 
 export function ChosenProduct() {
-  const { productId } = useParams();
+  const { productId } = useParams<{ productId: string }>();
   const navigate = useNavigate();
+  const dispatch = useDispatch();
+  const product = useSelector(retrieveChosenProduct);
 
-  const product = PRODUCTS_LIST.find((p) => p.id === Number(productId)) || PRODUCTS_LIST[0];
+  const [quantity, setQuantity] = useState<number>(1);
+  const [selectedPortion, setSelectedPortion] = useState<string>("NORMAL");
+  const [activeImgIndex, setActiveImgIndex] = useState<number>(0);
+  const [toastOpen, setToastOpen] = useState<boolean>(false);
 
-  const [quantity, setQuantity] = useState(1);
-  const [selectedSize, setSelectedSize] = useState(product.size || "NORMAL");
-  const [activeImage, setActiveImage] = useState(product.image);
-  const [toastOpen, setToastOpen] = useState(false);
+  useEffect(() => {
+    if (productId) {
+      const productService = new ProductService();
+      productService
+        .getProduct(productId)
+        .then((data) => dispatch(setChosenProduct(data)))
+        .catch((err) => {
+          console.log("Error loading chosen product:", err);
+          // Fallback demo product
+          dispatch(
+            setChosenProduct({
+              _id: productId,
+              productName: "Burak Giant Tomahawk Steak",
+              productPrice: 48.0,
+              productLeftCount: 20,
+              productCollection: "DISH" as any,
+              productStatus: "PROCESS" as any,
+              productViews: 1245,
+              productImages: [
+                "https://images.unsplash.com/photo-1558030006-450675393462?auto=format&fit=crop&w=800&q=80",
+                "https://images.unsplash.com/photo-1544025162-d76694265947?auto=format&fit=crop&w=800&q=80",
+                "https://images.unsplash.com/photo-1555939594-58d7cb561ad1?auto=format&fit=crop&w=800&q=80",
+              ],
+              productDesc:
+                "45-day dry-aged USDA Prime beef ribeye steak, seasoned with Mediterranean sea salt crystals and seared on open oak embers. Served with clarified Turkish butter and grilled shallots.",
+              createdAt: "",
+              updatedAt: "",
+            })
+          );
+        });
+    }
+  }, [productId, dispatch]);
 
-  const galleryImages = [
-    product.image,
-    "https://images.unsplash.com/photo-1544025162-d76694265947?auto=format&fit=crop&w=800&q=80",
-    "https://images.unsplash.com/photo-1555939594-58d7cb561ad1?auto=format&fit=crop&w=800&q=80",
-  ];
-
-  const handleAddToCart = () => {
-    setToastOpen(true);
+  const getImageSrc = (img?: string) => {
+    if (!img) return "https://images.unsplash.com/photo-1544025162-d76694265947?auto=format&fit=crop&w=800&q=80";
+    return img.startsWith("http") ? img : `${serverApi}/${img}`;
   };
 
+  const images = product?.productImages?.length
+    ? product.productImages
+    : ["https://images.unsplash.com/photo-1558030006-450675393462?auto=format&fit=crop&w=800&q=80"];
+
+  const unitPrice = product ? product.productPrice : 48.0;
+  const totalPrice = unitPrice * quantity;
+
   return (
-    <Box sx={{ py: 6, minHeight: "85vh" }}>
+    <Box sx={{ py: 6, minHeight: "85vh", bgcolor: "#f8fafc" }}>
       <Container maxWidth="lg">
-        {/* Back Button */}
-        <Button
-          startIcon={<ArrowBackIcon />}
-          onClick={() => navigate("/products")}
-          sx={{ mb: 4, color: "#64748b", fontWeight: 700, "&:hover": { color: "#0f172a" } }}
-        >
-          Back to Restaurant Menu
-        </Button>
-
-        <Grid container spacing={6}>
-          {/* Left Column: Gallery */}
-          <Grid size={{ xs: 12, md: 6 }}>
-            <Card
-              sx={{
-                borderRadius: 4,
-                overflow: "hidden",
-                border: "1px solid #e2e8f0",
-                boxShadow: "0 12px 30px rgba(15,23,42,0.08)",
-                mb: 2,
-              }}
+        {/* Breadcrumb Navigation */}
+        <Box sx={{ mb: 4, display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+          <Breadcrumbs aria-label="breadcrumb">
+            <Link
+              underline="hover"
+              color="inherit"
+              sx={{ cursor: "pointer", fontWeight: 600 }}
+              onClick={() => navigate("/")}
             >
-              <CardMedia
-                component="img"
-                height="420"
-                image={activeImage}
-                alt={product.name}
-                sx={{ objectFit: "cover" }}
-              />
-            </Card>
+              Home
+            </Link>
+            <Link
+              underline="hover"
+              color="inherit"
+              sx={{ cursor: "pointer", fontWeight: 600 }}
+              onClick={() => navigate("/products")}
+            >
+              Menu
+            </Link>
+            <Typography color="text.primary" sx={{ fontWeight: 700 }}>
+              {product?.productName || "Product Detail"}
+            </Typography>
+          </Breadcrumbs>
 
-            {/* Thumbnail switcher */}
-            <Box sx={{ display: "flex", gap: 2 }}>
-              {galleryImages.map((img, idx) => (
+          <Button
+            variant="outlined"
+            startIcon={<ArrowBackIcon />}
+            onClick={() => navigate("/products")}
+            sx={{ borderRadius: 3, fontWeight: 700 }}
+          >
+            Back to Menu
+          </Button>
+        </Box>
+
+        {/* Main Product Presentation */}
+        <Grid container spacing={6}>
+          {/* Left Column: Image Gallery */}
+          <Grid size={{ xs: 12, md: 6 }}>
+            <Box sx={{ display: "flex", flexDirection: "column", gap: 2 }}>
+              {/* Large Active Image */}
+              <Box
+                sx={{
+                  borderRadius: 4,
+                  overflow: "hidden",
+                  boxShadow: "0 16px 40px rgba(15, 23, 42, 0.1)",
+                  border: "1px solid #e2e8f0",
+                  height: { xs: 320, md: 450 },
+                  bgcolor: "#fff",
+                }}
+              >
                 <Box
-                  key={idx}
-                  onClick={() => setActiveImage(img)}
+                  component="img"
+                  src={getImageSrc(images[activeImgIndex])}
+                  alt={product?.productName}
                   sx={{
-                    width: 90,
-                    height: 75,
-                    borderRadius: 3,
-                    overflow: "hidden",
-                    cursor: "pointer",
-                    border: activeImage === img ? "2.5px solid #f59e0b" : "1px solid #e2e8f0",
-                    transition: "0.2s",
-                    "&:hover": { transform: "scale(1.05)" },
+                    width: "100%",
+                    height: "100%",
+                    objectFit: "cover",
+                    transition: "transform 0.4s ease",
+                    "&:hover": { transform: "scale(1.03)" },
                   }}
-                >
-                  <Box component="img" src={img} sx={{ width: "100%", height: "100%", objectFit: "cover" }} />
+                />
+              </Box>
+
+              {/* Thumbnails Row */}
+              {images.length > 1 && (
+                <Box sx={{ display: "flex", gap: 2 }}>
+                  {images.map((img, idx) => (
+                    <Box
+                      key={idx}
+                      onClick={() => setActiveImgIndex(idx)}
+                      sx={{
+                        width: 90,
+                        height: 90,
+                        borderRadius: 3,
+                        overflow: "hidden",
+                        cursor: "pointer",
+                        border: idx === activeImgIndex ? "2.5px solid #f59e0b" : "1px solid #e2e8f0",
+                        boxShadow: idx === activeImgIndex ? "0 4px 12px rgba(245, 158, 11, 0.3)" : "none",
+                        opacity: idx === activeImgIndex ? 1 : 0.65,
+                        transition: "all 0.2s ease",
+                      }}
+                    >
+                      <Box component="img" src={getImageSrc(img)} alt="thumbnail" sx={{ width: "100%", height: "100%", objectFit: "cover" }} />
+                    </Box>
+                  ))}
                 </Box>
-              ))}
+              )}
             </Box>
           </Grid>
 
-          {/* Right Column: Details & Ordering */}
+          {/* Right Column: Culinary Details & Basket Customization */}
           <Grid size={{ xs: 12, md: 6 }}>
-            <Box sx={{ display: "flex", alignItems: "center", gap: 1.5, mb: 1 }}>
-              <Chip
-                label={product.collection}
-                color="primary"
-                sx={{ fontWeight: 800, fontSize: "0.75rem", borderRadius: 1.5 }}
-              />
-              {product.isPopular && (
+            <Box sx={{ display: "flex", flexDirection: "column", height: "100%" }}>
+              <Box sx={{ display: "flex", alignItems: "center", gap: 1.5, mb: 1.5 }}>
                 <Chip
-                  icon={<LocalFireDepartmentIcon sx={{ color: "#fff !important", fontSize: 16 }} />}
-                  label="CHEF CHOICE"
-                  sx={{ bgcolor: "#ef4444", color: "#fff", fontWeight: 800, fontSize: "0.75rem" }}
-                />
-              )}
-            </Box>
-
-            <Typography variant="h3" sx={{ fontWeight: 800, mb: 1.5 }}>
-              {product.name}
-            </Typography>
-
-            {/* Rating & Reviews */}
-            <Box sx={{ display: "flex", alignItems: "center", gap: 1, mb: 2.5 }}>
-              <Rating value={product.rating} precision={0.1} readOnly size="medium" />
-              <Typography variant="subtitle1" sx={{ fontWeight: 800, color: "#0f172a" }}>
-                {product.rating}
-              </Typography>
-              <Typography variant="body2" color="text.secondary">
-                ({product.reviews} Verified Foodie Reviews)
-              </Typography>
-            </Box>
-
-            {/* Price */}
-            <Typography variant="h3" sx={{ fontWeight: 800, color: "#0f172a", mb: 3 }}>
-              ${product.price.toFixed(2)}
-            </Typography>
-
-            <Typography variant="body1" sx={{ color: "#475569", lineHeight: 1.8, mb: 3 }}>
-              {product.desc}
-            </Typography>
-
-            <Divider sx={{ my: 3 }} />
-
-            {/* Portion / Size Selector */}
-            <Typography variant="subtitle2" sx={{ fontWeight: 700, mb: 1.5, color: "#0f172a" }}>
-              SELECT PORTION / VOLUME:
-            </Typography>
-            <Box sx={{ display: "flex", gap: 1.5, mb: 3 }}>
-              {["NORMAL", "LARGE", "SET"].map((size) => (
-                <Button
-                  key={size}
-                  variant={selectedSize === size ? "contained" : "outlined"}
-                  color="primary"
-                  onClick={() => setSelectedSize(size)}
-                  sx={{
-                    borderRadius: 2.5,
-                    px: 3,
-                    fontWeight: 700,
-                    borderColor: selectedSize === size ? "primary.main" : "#cbd5e1",
-                    color: selectedSize === size ? "#000" : "#475569",
-                  }}
-                >
-                  {size}
-                </Button>
-              ))}
-            </Box>
-
-            {/* Quantity Selector & Add Button */}
-            <Box sx={{ display: "flex", alignItems: "center", gap: 3, mb: 4 }}>
-              <Box
-                sx={{
-                  display: "flex",
-                  alignItems: "center",
-                  bgcolor: "#f1f5f9",
-                  borderRadius: 3,
-                  p: 0.5,
-                  border: "1px solid #cbd5e1",
-                }}
-              >
-                <IconButton
+                  label={product?.productCollection || "CHEF SIGNATURE"}
+                  sx={{ bgcolor: "#0f172a", color: "#f59e0b", fontWeight: 800, fontSize: "0.75rem" }}
                   size="small"
-                  onClick={() => setQuantity(Math.max(1, quantity - 1))}
-                  sx={{ color: "#0f172a" }}
-                >
-                  <RemoveIcon fontSize="small" />
-                </IconButton>
-                <Typography sx={{ px: 2, fontWeight: 800, fontSize: "1.1rem" }}>{quantity}</Typography>
-                <IconButton size="small" onClick={() => setQuantity(quantity + 1)} sx={{ color: "#0f172a" }}>
-                  <AddIcon fontSize="small" />
-                </IconButton>
+                />
+                <Box sx={{ display: "flex", alignItems: "center", gap: 0.5, color: "#64748b", fontSize: "0.85rem" }}>
+                  <VisibilityIcon sx={{ fontSize: 16, color: "#f59e0b" }} />
+                  <span>{product?.productViews || 0} views</span>
+                </Box>
               </Box>
 
-              <Button
-                variant="contained"
-                color="primary"
-                size="large"
-                fullWidth
-                onClick={handleAddToCart}
-                startIcon={<AddShoppingCartIcon />}
-                sx={{
-                  borderRadius: 3,
-                  py: 1.6,
-                  fontWeight: 800,
-                  fontSize: "1.05rem",
-                  boxShadow: "0 8px 24px rgba(245, 158, 11, 0.35)",
-                }}
-              >
-                Add To Basket &bull; ${(product.price * quantity).toFixed(2)}
-              </Button>
-            </Box>
+              <Typography variant="h3" sx={{ fontWeight: 800, mb: 1.5, fontSize: { xs: "1.8rem", md: "2.5rem" } }}>
+                {product?.productName || "Signature Dish"}
+              </Typography>
 
-            {/* Guarantees Box */}
-            <Box sx={{ p: 2.5, bgcolor: "#f8fafc", borderRadius: 3, border: "1px solid #e2e8f0" }}>
-              <Grid container spacing={2}>
-                <Grid size={{ xs: 6 }}>
-                  <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
-                    <VerifiedIcon sx={{ color: "#10b981", fontSize: 20 }} />
-                    <Typography variant="caption" sx={{ fontWeight: 700 }}>
-                      100% Halal Certified Meat
-                    </Typography>
-                  </Box>
-                </Grid>
-                <Grid size={{ xs: 6 }}>
-                  <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
-                    <DeliveryDiningIcon sx={{ color: "primary.main", fontSize: 20 }} />
-                    <Typography variant="caption" sx={{ fontWeight: 700 }}>
-                      Insulated Thermal Box Delivery
-                    </Typography>
-                  </Box>
-                </Grid>
-                <Grid size={{ xs: 12 }}>
-                  <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
-                    <RestaurantIcon sx={{ color: "#6366f1", fontSize: 20 }} />
-                    <Typography variant="caption" sx={{ fontWeight: 700 }}>
-                      Handcrafted Fresh Upon Order Confirmation
-                    </Typography>
-                  </Box>
-                </Grid>
-              </Grid>
+              <Box sx={{ display: "flex", alignItems: "center", gap: 1.5, mb: 2 }}>
+                <Rating value={5} readOnly precision={0.5} sx={{ color: "#f59e0b" }} />
+                <Typography variant="body2" sx={{ color: "#475569", fontWeight: 700 }}>
+                  5.0 &bull; 180+ Verified Foodie Reviews
+                </Typography>
+              </Box>
+
+              <Typography variant="h4" sx={{ fontWeight: 800, color: "#0f172a", mb: 3 }}>
+                ${unitPrice.toFixed(2)}
+              </Typography>
+
+              <Typography variant="body1" color="text.secondary" sx={{ lineHeight: 1.8, mb: 4 }}>
+                {product?.productDesc ||
+                  "A masterclass in Ottoman gastronomy, prepared with heritage butchery and cooked over open wood flames."}
+              </Typography>
+
+              <Divider sx={{ mb: 4 }} />
+
+              {/* Portion Selector */}
+              <Box sx={{ mb: 4 }}>
+                <Typography variant="subtitle2" sx={{ fontWeight: 800, mb: 1.5 }}>
+                  Select Portion Size
+                </Typography>
+                <Box sx={{ display: "flex", gap: 1.5 }}>
+                  {["NORMAL", "LARGE", "SET"].map((size) => (
+                    <Button
+                      key={size}
+                      variant={selectedPortion === size ? "contained" : "outlined"}
+                      color={selectedPortion === size ? "primary" : "inherit"}
+                      onClick={() => setSelectedPortion(size)}
+                      sx={{
+                        borderRadius: 3,
+                        px: 3,
+                        fontWeight: 700,
+                        borderColor: selectedPortion === size ? "primary.main" : "#cbd5e1",
+                      }}
+                    >
+                      {size}
+                    </Button>
+                  ))}
+                </Box>
+              </Box>
+
+              {/* Quantity Counter & Add to Basket Button */}
+              <Box sx={{ display: "flex", alignItems: "center", gap: 3, mb: 5 }}>
+                <Box
+                  sx={{
+                    display: "flex",
+                    alignItems: "center",
+                    border: "1.5px solid #cbd5e1",
+                    borderRadius: 3,
+                    bgcolor: "#fff",
+                    p: 0.5,
+                  }}
+                >
+                  <IconButton
+                    size="small"
+                    onClick={() => setQuantity(Math.max(1, quantity - 1))}
+                    disabled={quantity <= 1}
+                  >
+                    <RemoveIcon fontSize="small" />
+                  </IconButton>
+                  <Typography sx={{ px: 2.5, fontWeight: 800, fontSize: "1.1rem" }}>
+                    {quantity}
+                  </Typography>
+                  <IconButton size="small" onClick={() => setQuantity(quantity + 1)}>
+                    <AddIcon fontSize="small" />
+                  </IconButton>
+                </Box>
+
+                <Button
+                  variant="contained"
+                  color="primary"
+                  size="large"
+                  startIcon={<AddShoppingCartIcon />}
+                  onClick={() => setToastOpen(true)}
+                  sx={{
+                    flexGrow: 1,
+                    py: 1.5,
+                    borderRadius: 3,
+                    fontWeight: 800,
+                    fontSize: "1.05rem",
+                    boxShadow: "0 10px 25px rgba(245, 158, 11, 0.3)",
+                  }}
+                >
+                  Add to Cart &bull; ${totalPrice.toFixed(2)}
+                </Button>
+              </Box>
+
+              {/* Culinary Guarantees */}
+              <Box sx={{ mt: "auto", display: "flex", flexDirection: "column", gap: 1.5 }}>
+                <Box sx={{ display: "flex", alignItems: "center", gap: 1.5, color: "#334155" }}>
+                  <VerifiedIcon sx={{ color: "#10b981", fontSize: 20 }} />
+                  <Typography variant="body2" sx={{ fontWeight: 600 }}>
+                    100% Halal Certified Prime Cuts
+                  </Typography>
+                </Box>
+                <Box sx={{ display: "flex", alignItems: "center", gap: 1.5, color: "#334155" }}>
+                  <LocalShippingIcon sx={{ color: "primary.main", fontSize: 20 }} />
+                  <Typography variant="body2" sx={{ fontWeight: 600 }}>
+                    Delivered in Temperature-Controlled Thermal Vaults
+                  </Typography>
+                </Box>
+                <Box sx={{ display: "flex", alignItems: "center", gap: 1.5, color: "#334155" }}>
+                  <RestaurantIcon sx={{ color: "#6366f1", fontSize: 20 }} />
+                  <Typography variant="body2" sx={{ fontWeight: 600 }}>
+                    Signature Recipe by Chef CZN Burak
+                  </Typography>
+                </Box>
+              </Box>
             </Box>
           </Grid>
         </Grid>
-      </Container>
 
-      {/* Toast Notification */}
-      <Snackbar
-        open={toastOpen}
-        autoHideDuration={3000}
-        onClose={() => setToastOpen(false)}
-        anchorOrigin={{ vertical: "bottom", horizontal: "right" }}
-      >
-        <Alert onClose={() => setToastOpen(false)} severity="success" sx={{ width: "100%", borderRadius: 2 }}>
-          Added {quantity}x "{product.name}" to your basket!
-        </Alert>
-      </Snackbar>
+        {/* Confirmation Toast */}
+        <Snackbar
+          open={toastOpen}
+          autoHideDuration={3000}
+          onClose={() => setToastOpen(false)}
+          anchorOrigin={{ vertical: "bottom", horizontal: "center" }}
+        >
+          <Alert severity="success" sx={{ width: "100%", borderRadius: 3, fontWeight: 700 }}>
+            Added {quantity}x "{product?.productName}" to your order cart!
+          </Alert>
+        </Snackbar>
+      </Container>
     </Box>
   );
 }
