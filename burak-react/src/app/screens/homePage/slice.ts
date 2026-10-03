@@ -1,10 +1,12 @@
 import { createSlice } from "@reduxjs/toolkit";
 import type { PayloadAction } from "@reduxjs/toolkit";
+import { Product } from "../../../lib/types/product";
+import { Member } from "../../../lib/types/member";
 
 interface HomePageState {
-  popularDishes: any[];
-  newDishes: any[];
-  topUsers: any[];
+  popularDishes: Product[];
+  newDishes: Product[];
+  topUsers: Member[];
 }
 
 const initialState: HomePageState = {
@@ -17,13 +19,13 @@ export const homePageSlice = createSlice({
   name: "homePage",
   initialState,
   reducers: {
-    setPopularDishes: (state, action: PayloadAction<any[]>) => {
+    setPopularDishes: (state, action: PayloadAction<Product[]>) => {
       state.popularDishes = action.payload;
     },
-    setNewDishes: (state, action: PayloadAction<any[]>) => {
+    setNewDishes: (state, action: PayloadAction<Product[]>) => {
       state.newDishes = action.payload;
     },
-    setTopUsers: (state, action: PayloadAction<any[]>) => {
+    setTopUsers: (state, action: PayloadAction<Member[]>) => {
       state.topUsers = action.payload;
     },
   },

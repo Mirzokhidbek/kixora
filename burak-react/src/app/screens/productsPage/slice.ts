@@ -1,10 +1,12 @@
 import { createSlice } from "@reduxjs/toolkit";
 import type { PayloadAction } from "@reduxjs/toolkit";
+import { Product } from "../../../lib/types/product";
+import { Member } from "../../../lib/types/member";
 
 interface ProductsPageState {
-  restaurant: any | null;
-  chosenProduct: any | null;
-  products: any[];
+  restaurant: Member | null;
+  chosenProduct: Product | null;
+  products: Product[];
 }
 
 const initialState: ProductsPageState = {
@@ -17,13 +19,13 @@ export const productsPageSlice = createSlice({
   name: "productsPage",
   initialState,
   reducers: {
-    setRestaurant: (state, action: PayloadAction<any>) => {
+    setRestaurant: (state, action: PayloadAction<Member | null>) => {
       state.restaurant = action.payload;
     },
-    setChosenProduct: (state, action: PayloadAction<any>) => {
+    setChosenProduct: (state, action: PayloadAction<Product | null>) => {
       state.chosenProduct = action.payload;
     },
-    setProducts: (state, action: PayloadAction<any[]>) => {
+    setProducts: (state, action: PayloadAction<Product[]>) => {
       state.products = action.payload;
     },
   },
