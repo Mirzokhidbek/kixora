@@ -13,8 +13,8 @@ const orderService = new OrderService();
 const orderController = {
   /** SPA: Create order (prices are taken from the DB, client prices are ignored) **/
   createOrder: async (req: Request, res: Response) => {
-    const lines = parse(orderCreateSchema, req.body);
-    res.status(HTTPCode.CREATED).json(await orderService.createOrder(req.member!, lines));
+    const input = parse(orderCreateSchema, req.body);
+    res.status(HTTPCode.CREATED).json(await orderService.createOrder(req.member!, input));
   },
 
   getMyOrders: async (req: Request, res: Response) => {

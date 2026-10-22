@@ -443,7 +443,7 @@
     <div class="auth-form-panel">
       <!-- Top Language Selector -->
       <div class="d-flex justify-content-end mb-1">
-        <a href="javascript:void(0)" class="lang-pill-btn">
+        <a href="#" class="lang-pill-btn">
           <i class="fa-solid fa-globe text-muted"></i>
           <span>English</span>
           <i class="fa-solid fa-chevron-down text-muted" style="font-size: 0.65rem;"></i>
@@ -579,7 +579,7 @@
 
 <!-- Scripts for Image Upload Preview & Validation -->
 <script src="/js/signup.js"></script>
-<script>
+<script nonce="<%= cspNonce %>">
   $(document).ready(function() {
     // Password visibility toggle
     $('#toggleSignupPasswordBtn').on('click', function() {

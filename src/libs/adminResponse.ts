@@ -10,5 +10,7 @@ export function sendAdminAlert(res: Response, message: string, redirectTo: strin
   res
     .status(status)
     .type("html")
-    .send(`<script>alert(${safe(message)}); window.location.replace(${safe(redirectTo)});</script>`);
+    .send(
+      `<script nonce="${res.locals.cspNonce || ""}">alert(${safe(message)}); window.location.replace(${safe(redirectTo)});</script>`
+    );
 }

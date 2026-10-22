@@ -118,6 +118,10 @@ $(document).ready(function () {
     $("#editProductCollection").val(collection);
     $("#editProductSize").val(size);
     $("#editProductDesc").val(desc);
+    $("#editProductMaterial").val($(this).data("material") || "");
+    $("#editProductMidsole").val($(this).data("midsole") || "");
+    $("#editProductOutsole").val($(this).data("outsole") || "");
+    $("#editProductWeight").val($(this).data("weight") || "");
 
     // Current images (a missing file shows a placeholder so the admin can see it needs replacing)
     const images = $(this).data("images") || [];
@@ -173,6 +177,10 @@ $(document).ready(function () {
       productCollection: $("#editProductCollection").val() || undefined,
       productSize: $("#editProductSize").val() || undefined,
       productDesc: $("#editProductDesc").val().trim(),
+      productMaterial: $("#editProductMaterial").val().trim(),
+      productMidsole: $("#editProductMidsole").val().trim(),
+      productOutsole: $("#editProductOutsole").val().trim(),
+      productWeight: $("#editProductWeight").val().trim(),
     };
 
     const saveBtn = $("#saveEditProductBtn");

@@ -50,6 +50,8 @@ $(document).ready(function () {
     const btn = $(this);
     const orderId = btn.data("id");
     const nextStatus = btn.data("next");
+    const confirmText = btn.data("confirm");
+    if (confirmText && !confirm(confirmText)) return;
 
     btn.prop("disabled", true).html('<i class="fa-solid fa-spinner fa-spin"></i> Updating...');
 
@@ -62,7 +64,7 @@ $(document).ready(function () {
         window.location.reload();
       })
       .catch((err) => {
-        alert("Failed to update order fulfillment status!");
+        alert(err.response?.data?.message || "Failed to update order fulfillment status!");
         console.error(err);
         btn.prop("disabled", false);
       });

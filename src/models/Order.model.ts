@@ -24,6 +24,11 @@ const orderSchema = new Schema(
       required: true,
       ref: "Member",
     },
+    /** Shipping details captured at checkout (snapshot, independent of later profile edits) */
+    orderRecipient: { type: String, default: "" },
+    orderPhone: { type: String, default: "" },
+    orderAddress: { type: String, default: "" },
+    orderNote: { type: String, default: "" },
   },
   { timestamps: true }
 );

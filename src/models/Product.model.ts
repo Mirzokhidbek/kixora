@@ -51,6 +51,11 @@ const productSchema = new Schema(
     productDesc: {
       type: String,
     },
+    /** Specifications shown on the product page (optional, filled by the admin) */
+    productMaterial: { type: String, default: "" },
+    productMidsole: { type: String, default: "" },
+    productOutsole: { type: String, default: "" },
+    productWeight: { type: String, default: "" },
     productImages: {
       type: [String],
       default: [],

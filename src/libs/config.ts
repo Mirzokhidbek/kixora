@@ -48,6 +48,16 @@ export const env = {
   geminiApiKey: process.env.GEMINI_API_KEY || "",
   firebaseProjectId: process.env.FIREBASE_PROJECT_ID || "kixora-99964",
   googleClientId: process.env.GOOGLE_CLIENT_ID || "",
+  /**
+   * "test": a simulated provider confirms payments instantly (no real money).
+   * "manual": orders wait until the admin confirms the payment.
+   * Defaults to manual in production so test payments are never on by accident.
+   */
+  paymentMode: (process.env.PAYMENT_MODE === "test" || process.env.PAYMENT_MODE === "manual"
+    ? process.env.PAYMENT_MODE
+    : isProduction
+    ? "manual"
+    : "test") as "test" | "manual",
 };
 
 export const MORGAN_FORMAT = `:method :url :response-time ms [:status] \n`;

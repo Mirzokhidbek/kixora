@@ -98,6 +98,18 @@ export function ChosenProduct({ onAdd }: ChosenProductProps) {
     );
   }
 
+  const specRows: [string, string][] = (
+    [
+      ["Collection", product.productCollection ? String(product.productCollection).replace("_", " ") : ""],
+      ["Available Sizes (EU)", product.productSizes?.length ? product.productSizes.join(", ") : ""],
+      ["Colors", product.productColors?.length ? product.productColors.join(", ") : ""],
+      ["Upper Material", product.productMaterial || ""],
+      ["Midsole", product.productMidsole || ""],
+      ["Outsole", product.productOutsole || ""],
+      ["Weight", product.productWeight || ""],
+    ] as [string, string][]
+  ).filter(([, value]) => value);
+
   const ratingAvg = reviewSummary?.ratingAvg ?? product.ratingAvg ?? 0;
   const reviewCount = reviewSummary?.reviewCount ?? product.reviewCount ?? 0;
 
@@ -481,34 +493,23 @@ export function ChosenProduct({ onAdd }: ChosenProductProps) {
 
           {activeTab === 0 && (
             <Typography variant="body1" sx={{ color: "#4b5563", lineHeight: 1.8, maxWidth: 800 }}>
-              {product.productDesc ||
-                "Engineered with premium technical fabrics, high-resilience foam midsole, and durable rubber outsole for supreme traction. The breathable upper hugs your foot with a glove-like fit, delivering unmatched comfort on the street or the track."}
+              {product.productDesc || "No description has been added for this product yet."}
             </Typography>
           )}
 
           {activeTab === 1 && (
+            // Real product data (previously hardcoded "Carbon Shank", "290g" for every product)
             <Box sx={{ maxWidth: 600, display: "flex", flexDirection: "column", gap: 1.5 }}>
-              <Box sx={{ display: "flex", justifyContent: "space-between", py: 0.8, borderBottom: "1px solid #f3f4f6" }}>
-                <Typography variant="body2" sx={{ color: "#6b7280" }}>Upper Material</Typography>
-                <Typography variant="body2" sx={{ fontWeight: 700 }}>Engineered Knit & Suede Overlays</Typography>
-              </Box>
-              <Box sx={{ display: "flex", justifyContent: "space-between", py: 0.8, borderBottom: "1px solid #f3f4f6" }}>
-                <Typography variant="body2" sx={{ color: "#6b7280" }}>Midsole</Typography>
-                <Typography variant="body2" sx={{ fontWeight: 700 }}>Responsive Foam + Carbon Shank</Typography>
-              </Box>
-              <Box sx={{ display: "flex", justifyContent: "space-between", py: 0.8, borderBottom: "1px solid #f3f4f6" }}>
-                <Typography variant="body2" sx={{ color: "#6b7280" }}>Outsole</Typography>
-                <Typography variant="body2" sx={{ fontWeight: 700 }}>Multi-Directional Traction Rubber</Typography>
-              </Box>
-              <Box sx={{ display: "flex", justifyContent: "space-between", py: 0.8 }}>
-                <Typography variant="body2" sx={{ color: "#6b7280" }}>Weight</Typography>
-                <Typography variant="body2" sx={{ fontWeight: 700 }}>290g (Size EU 42)</Typography>
-              </Box>
+              {specRows.map(([label, value], idx) => (
+                <Box
+                  key={label}
+                  sx={{ display: "flex", justifyContent: "space-between", py: 0.8, borderBottom: idx < specRows.length - 1 ? "1px solid #f3f4f6" : "none" }}
+                >
+                  <Typography variant="body2" sx={{ color: "#6b7280" }}>{label}</Typography>
+                  <Typography variant="body2" sx={{ fontWeight: 700, textAlign: "right" }}>{value}</Typography>
+                </Box>
+              ))}
             </Box>
-          )}
-
-          {activeTab === 3 && (
-            <ProductReviews productId={product._id} onSummaryChange={handleSummaryChange} />
           )}
 
           {activeTab === 2 && (

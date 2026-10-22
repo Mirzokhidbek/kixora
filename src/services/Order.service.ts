@@ -2,6 +2,9 @@ import OrderModel from "../models/Order.model";
 import OrderItemModel from "../models/OrderItem.model";
 import MemberModel from "../models/Member.model";
 import ProductModel from "../models/Product.model";
+import PaymentModel from "../models/Payment.model";
+import crypto from "crypto";
+import { PaymentMethod, PaymentStatus } from "../libs/enums/payment.enum";
 import { AuthPayload } from "../libs/types/member";
 import { Order, OrderDashboardMetrics, OrderItem } from "../libs/types/order";
 import { Product } from "../libs/types/product";
@@ -10,15 +13,17 @@ import Errors, { HTTPCode, Message } from "../libs/Errors";
 import { OrderStatus } from "../libs/enums/order.enum";
 import { ProductStatus } from "../libs/enums/product.enum";
 import {
+  OrderActor,
   allowedSourceStatuses,
   calculateTotals,
   mergeOrderLines,
+  mergeOrderLinesBySize,
   pointsForTotal,
 } from "../libs/orderRules";
 import { z } from "zod";
 import { orderCreateSchema, orderInquirySchema, orderUpdateSchema } from "../libs/validation";
 
-type OrderLines = z.infer<typeof orderCreateSchema>;
+type OrderCreate = z.infer<typeof orderCreateSchema>;
 type OrderInquiry = z.infer<typeof orderInquirySchema>;
 type OrderUpdate = z.infer<typeof orderUpdateSchema>;
 
@@ -29,6 +34,7 @@ class OrderService {
   private readonly orderItemModel = OrderItemModel;
   private readonly memberModel = MemberModel;
   private readonly productModel = ProductModel;
+  private readonly paymentModel = PaymentModel;
 
   /**
    * SPA: Create order.
@@ -36,9 +42,10 @@ class OrderService {
    * with conditional atomic decrements. If any step fails, completed steps are
    * compensated so no partial order or lost stock remains.
    */
-  public async createOrder(member: AuthPayload, input: OrderLines): Promise<Order> {
+  public async createOrder(member: AuthPayload, input: OrderCreate): Promise<Order> {
     const memberId = shapeIntoMongooseObjectId(member._id);
-    const lines = mergeOrderLines(input);
+    const lines = mergeOrderLines(input.items); // per product: stock & price
+    const itemLines = mergeOrderLinesBySize(input.items); // per product+size: what to ship
 
     const products = await this.productModel
       .find({
@@ -50,6 +57,13 @@ class OrderService {
     const productById = new Map(products.map((p) => [String(p._id), p]));
     if (productById.size !== lines.length) {
       throw new Errors(HTTPCode.BAD_REQUEST, Message.OUT_OF_STOCK);
+    }
+    // A chosen size must be one the product is actually offered in
+    for (const l of itemLines) {
+      const sizes = productById.get(l.productId)!.productSizes || [];
+      if (l.itemSize !== undefined && sizes.length && !sizes.includes(l.itemSize)) {
+        throw new Errors(HTTPCode.BAD_REQUEST, Message.INVALID_SIZE);
+      }
     }
 
     const reserved: { productId: string; itemQuantity: number }[] = [];
@@ -78,12 +92,17 @@ class OrderService {
         orderTotal: totals.total,
         orderDelivery: totals.delivery,
         memberId,
+        orderRecipient: input.shipping.recipient,
+        orderPhone: input.shipping.phone,
+        orderAddress: input.shipping.address,
+        orderNote: input.shipping.note || "",
       });
       orderId = newOrder._id;
 
       await this.orderItemModel.insertMany(
-        lines.map((l) => ({
+        itemLines.map((l) => ({
           itemQuantity: l.itemQuantity,
+          itemSize: l.itemSize,
           itemPrice: productById.get(l.productId)!.productPrice,
           orderId: newOrder._id,
           productId: shapeIntoMongooseObjectId(l.productId),
@@ -140,9 +159,41 @@ class OrderService {
     return this.transitionOrder(input.orderId, input.orderStatus, "member", member._id);
   }
 
-  /** BSSR: Admin status change **/
+  /**
+   * BSSR: Admin status change.
+   * PAUSE → PROCESS means the admin confirmed the payment (cash, transfer, terminal),
+   * so a MANUAL payment is recorded.
+   */
   public async updateOrderByAdmin(input: OrderUpdate): Promise<Order> {
+    if (input.orderStatus === OrderStatus.PROCESS) {
+      return this.markPaid(input.orderId, PaymentMethod.MANUAL, "admin");
+    }
     return this.transitionOrder(input.orderId, input.orderStatus, "admin");
+  }
+
+  /**
+   * Confirms payment for an unpaid order exactly once: the atomic PAUSE → PROCESS
+   * transition guarantees a single winner, and the unique Payment.orderId index
+   * guarantees a single ledger row.
+   */
+  public async markPaid(
+    orderIdRaw: string,
+    method: PaymentMethod,
+    confirmedBy: "provider" | "admin",
+    memberIdRaw?: string,
+    providerTxnId?: string
+  ): Promise<Order> {
+    const order = await this.transitionOrder(orderIdRaw, OrderStatus.PROCESS, memberIdRaw ? "payment" : "admin", memberIdRaw);
+    await this.paymentModel.create({
+      orderId: order._id,
+      memberId: order.memberId,
+      amount: order.orderTotal,
+      paymentMethod: method,
+      paymentStatus: PaymentStatus.PAID,
+      providerTxnId: providerTxnId || `${method.toLowerCase()}_${crypto.randomBytes(8).toString("hex")}`,
+      confirmedBy,
+    });
+    return order;
   }
 
   /**
@@ -152,7 +203,7 @@ class OrderService {
   private async transitionOrder(
     orderIdRaw: string,
     to: OrderStatus,
-    actor: "member" | "admin",
+    actor: OrderActor,
     memberIdRaw?: string
   ): Promise<Order> {
     const from = allowedSourceStatuses(to, actor);
@@ -177,6 +228,14 @@ class OrderService {
     } else if (to === OrderStatus.DELETE) {
       const items = await this.orderItemModel.find({ orderId: result._id }).lean<OrderItem[]>().exec();
       await this.restoreStock(items.map((i) => ({ productId: i.productId, itemQuantity: i.itemQuantity })));
+      // A cancelled paid order is marked refunded in the ledger (the refund itself is
+      // done by the provider/admin; in test mode no money moved)
+      await this.paymentModel
+        .updateOne(
+          { orderId: result._id, paymentStatus: PaymentStatus.PAID },
+          { $set: { paymentStatus: PaymentStatus.REFUNDED, refundedAt: new Date() } }
+        )
+        .exec();
     }
     return result;
   }
@@ -199,6 +258,16 @@ class OrderService {
             },
           },
           { $unwind: { path: "$memberData", preserveNullAndEmptyArrays: true } },
+          {
+            $lookup: {
+              from: "payments",
+              localField: "_id",
+              foreignField: "orderId",
+              as: "paymentData",
+              pipeline: [{ $project: { _id: 0, paymentMethod: 1, paymentStatus: 1, amount: 1, paidAt: 1 } }],
+            },
+          },
+          { $unwind: { path: "$paymentData", preserveNullAndEmptyArrays: true } },
           { $lookup: { from: "orderitems", localField: "_id", foreignField: "orderId", as: "orderItems" } },
           {
             $lookup: {

@@ -9,7 +9,7 @@
 import axios from "axios";
 import { serverApi } from "../../lib/config";
 import type { CartItem } from "../../lib/types/cart";
-import type { Order, OrderInquiry, OrderItemInput, OrderUpdateInput } from "../../lib/types/order";
+import type { Order, OrderInquiry, OrderItemInput, OrderUpdateInput, ShippingInfo } from "../../lib/types/order";
 
 class OrderService {
   private readonly path: string;
@@ -23,18 +23,15 @@ class OrderService {
    * @param cartItems - Current items in user basket
    * @returns Newly created Order document
    */
-  public async createOrder(cartItems: CartItem[]): Promise<Order> {
-    const orderItems: OrderItemInput[] = cartItems.map((item) => ({
+  public async createOrder(cartItems: CartItem[], shipping: ShippingInfo): Promise<Order> {
+    const items: OrderItemInput[] = cartItems.map((item) => ({
       productId: item._id,
       itemQuantity: item.quantity,
+      itemSize: item.size,
       // no price: the server always charges the catalog price
     }));
-
     const url = `${this.path}/order/create`;
-    const result = await axios.post(url, orderItems, {
-      withCredentials: true,
-    });
-
+    const result = await axios.post(url, { items, shipping }, { withCredentials: true });
     return result.data;
   }
 

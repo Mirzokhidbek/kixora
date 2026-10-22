@@ -171,7 +171,7 @@
   </header>
 
   <!-- Active Tab Highlight Script -->
-  <script>
+  <script nonce="<%= cspNonce %>">
     $(document).ready(function() {
       const currentPath = window.location.pathname;
       if (currentPath.includes('/admin/product')) {

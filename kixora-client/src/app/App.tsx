@@ -16,7 +16,8 @@ import customTheme from "./MaterialTheme/theme";
 import { Navbar } from "./components/headers/Navbar";
 import { Footer } from "./components/footers/Footer";
 import { AuthModal } from "./components/auth/AuthModal";
-import { CheckoutModal } from "./components/checkout/CheckoutModal";
+import { CheckoutModal, type CheckoutRequest } from "./components/checkout/CheckoutModal";
+import PaymentService from "./services/PaymentService";
 
 // Lazy-loaded routes for optimal Lighthouse performance and smaller initial bundles
 const HomePage = lazy(() => import("./screens/homePage").then(m => ({ default: m.HomePage })));
@@ -29,7 +30,6 @@ import { useBasket } from "./hooks/useBasket";
 import { useGlobals } from "./hooks/useGlobals";
 import MemberService from "./services/MemberService";
 import OrderService from "./services/OrderService";
-import { OrderStatus } from "../lib/enums/common.enum";
 import { sweetTopSuccessAlert, sweetErrorAlert, sweetTopSmallSuccessAlert } from "../lib/sweetAlert";
 
 export default function App() {
@@ -79,21 +79,33 @@ export default function App() {
     setCheckoutOpen(true);
   };
 
-  const handleConfirmOrder = async (shippingInfo: any) => {
+  /**
+   * Creates the order (stock is reserved, the server computes the total), then:
+   * - TEST: the simulated provider confirms payment → order moves to "process"
+   * - MANUAL: the order waits in "paused" until the store confirms the payment
+   * The client never marks an order as paid itself.
+   */
+  const handleConfirmOrder = async ({ shipping, paymentMethod }: CheckoutRequest) => {
     try {
       const orderService = new OrderService();
-      const createdOrder = await orderService.createOrder(cartItems);
-      if (createdOrder?._id) {
-        await orderService.updateOrder({
-          orderId: createdOrder._id,
-          orderStatus: OrderStatus.PROCESS,
-        });
-      }
+      const createdOrder = await orderService.createOrder(cartItems, shipping);
       onDeleteAll();
       setOrderBuilder(new Date());
-      sweetTopSuccessAlert("Luxury Order placed successfully! Tracking shipment...", 3000);
+
+      let tab = "paused";
+      if (paymentMethod === "TEST") {
+        try {
+          await new PaymentService().payWithTestProvider(createdOrder._id);
+          tab = "process";
+          sweetTopSuccessAlert("Order placed and test payment confirmed!", 3000);
+        } catch {
+          sweetErrorAlert("Order placed, but the test payment failed. You can retry from your orders.");
+        }
+      } else {
+        sweetTopSuccessAlert("Order placed! The store will confirm your payment.", 3000);
+      }
       setTimeout(() => {
-        window.location.href = "/orders?tab=process";
+        window.location.href = `/orders?tab=${tab}`;
       }, 700);
     } catch (err: any) {
       if (err.response?.status === 401) {

@@ -174,7 +174,7 @@
 </main>
 
 <!-- Chart.js Colorful Initialization Script (Vibrant Colors Applied ONLY to the Charts) -->
-<script>
+<script nonce="<%= cspNonce %>">
   $(document).ready(function() {
     // 1. Revenue Chart with Vibrant Gradient & Colored Points
     const months = <%- JSON.stringify(orderMetrics && orderMetrics.monthlySales ? orderMetrics.monthlySales.months : ["Jan", "Feb", "Mar", "Apr", "May", "Jun"]) %>;

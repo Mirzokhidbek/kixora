@@ -3,6 +3,7 @@ import memberController from "./controllers/member.controller";
 import productController from "./controllers/product.controller";
 import orderController from "./controllers/order.controller";
 import engagementController from "./controllers/engagement.controller";
+import paymentController from "./controllers/payment.controller";
 import makeUploader from "./libs/uploader";
 import { aiSearchLimiter, authLimiter, engagementLimiter, orderLimiter } from "./libs/rateLimiter";
 import { retrieveAuth, verifyAuth } from "./middlewares/auth";
@@ -45,5 +46,9 @@ router.delete("/product/:id/reviews/me", verifyAuth, engagementLimiter, engageme
 router.post("/order/create", verifyAuth, orderLimiter, orderController.createOrder);
 router.get("/order/all", verifyAuth, orderController.getMyOrders);
 router.post("/order/update", verifyAuth, orderController.updateOrder);
+
+/** Payment **/
+router.get("/payment/config", paymentController.getConfig);
+router.post("/payment/test/pay", verifyAuth, orderLimiter, paymentController.payWithTestProvider);
 
 export default router;

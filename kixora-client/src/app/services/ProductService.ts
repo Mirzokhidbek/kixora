@@ -108,6 +108,11 @@ class ProductService {
    * @returns List of matching Product objects
    */
   public async getProducts(inquiry: ProductInquiry): Promise<Product[]> {
+    return (await this.getProductsPage(inquiry)).products;
+  }
+
+  /** Products plus the total match count (from the X-Total-Count header) for pagination */
+  public async getProductsPage(inquiry: ProductInquiry): Promise<{ products: Product[]; total: number }> {
     try {
       let url = `${this.path}/product/all?order=${inquiry.order || "createdAt"}&page=${inquiry.page}&limit=${inquiry.limit}`;
       if (inquiry.productCollection) {
@@ -124,21 +129,17 @@ class ProductService {
       }
 
       const result = await axios.get(url, { withCredentials: true });
-      if (Array.isArray(result.data)) {
-        return result.data;
-      }
-      if (result.data && Array.isArray(result.data.data)) {
-        return result.data.data;
-      }
-      return [];
+      const products: Product[] = Array.isArray(result.data) ? result.data : [];
+      const header = Number(result.headers["x-total-count"]);
+      return { products, total: Number.isFinite(header) ? header : products.length };
     } catch (err) {
       console.log("Error, getProducts:", err);
-      return [];
+      return { products: [], total: 0 };
     }
   }
 
   /**
-   * Fetch a single dish by MongoDB ObjectId and increments view counter.
+   * Fetch a single product by MongoDB ObjectId and increments view counter.
    * @param productId - MongoDB ObjectId string
    * @returns Detailed Product object
    */
