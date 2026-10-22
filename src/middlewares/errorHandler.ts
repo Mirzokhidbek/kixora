@@ -1,6 +1,7 @@
 import { NextFunction, Request, Response } from "express";
 import multer from "multer";
 import Errors, { HTTPCode, Message } from "../libs/Errors";
+import { logger } from "../libs/logger";
 
 /** 404 for unknown API routes */
 export const notFound = (req: Request, res: Response) => {
@@ -21,7 +22,7 @@ export const errorHandler = (err: unknown, req: Request, res: Response, _next: N
   } else if ((err as { type?: string })?.type === "entity.parse.failed") {
     error = new Errors(HTTPCode.BAD_REQUEST, Message.INVALID_INPUT);
   } else {
-    console.error(`Unhandled error on ${req.method} ${req.originalUrl}:`, err);
+    logger.error("Unhandled request error", { method: req.method, path: req.originalUrl, err });
     error = Errors.standard;
   }
 

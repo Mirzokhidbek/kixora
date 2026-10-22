@@ -1,42 +1,47 @@
 import "dotenv/config"; // must be first: config.ts reads process.env at import time
+import { initMonitoring, flushMonitoring } from "./libs/logger";
+initMonitoring();
 import mongoose from "mongoose";
 import { env } from "./libs/config";
 import app from "./app";
 import { closeRedis } from "./libs/redis";
+import { logger } from "./libs/logger";
 
 mongoose.set("strictQuery", true);
 
 process.on("unhandledRejection", (reason: any) => {
-  console.error("⚠️ Unhandled Rejection:", reason?.message || reason);
+  logger.error("Unhandled promise rejection", { err: reason });
 });
 
 // An uncaught exception leaves the process in an unknown state: log and exit so
 // the process manager (PM2 / Railway) restarts a clean instance.
 process.on("uncaughtException", (err) => {
-  console.error("💥 Uncaught Exception:", err);
-  process.exit(1);
+  logger.error("Uncaught exception, exiting", { err });
+  flushMonitoring().finally(() => process.exit(1));
 });
 
 // Listen immediately so platform health checks pass while the DB connects
 const server = app.listen(env.port, "0.0.0.0", () => {
-  console.log(`========================================`);
-  console.log(`🚀 KIXORA Server running on Port: ${env.port}`);
-  console.log(`👑 Admin: http://localhost:${env.port}/admin`);
-  console.log(`🌐 REST API: http://localhost:${env.port}/`);
-  console.log(`========================================`);
+  logger.info("KIXORA server started", {
+    port: env.port,
+    admin: `http://localhost:${env.port}/admin`,
+    api: `http://localhost:${env.port}/`,
+    paymentMode: env.paymentMode,
+    redis: Boolean(env.redisUrl),
+  });
 });
 
 mongoose
   .connect(env.mongoUrl)
-  .then(() => console.log("✅ MongoDB connection succeeded"))
+  .then(() => logger.info("MongoDB connected"))
   .catch((err) => {
-    console.error("❌ MongoDB connection failed:", err.message);
+    logger.error("MongoDB connection failed", { err });
     if (env.isProduction) process.exit(1);
   });
 
 // Graceful shutdown: finish in-flight requests, then close the DB connection
 const shutdown = (signal: string) => {
-  console.log(`${signal} received, shutting down...`);
+  logger.info("Shutting down", { signal });
   server.close(() => {
     Promise.allSettled([mongoose.connection.close(), closeRedis()]).finally(() => process.exit(0));
   });

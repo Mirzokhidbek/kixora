@@ -16,6 +16,8 @@ const memberSchema = new Schema(
     memberNick: {
       type: String,
       required: true,
+      // one account per nickname (admin login and the store profile look members up by nick)
+      index: { unique: true },
     },
     memberPhone: {
       type: String,

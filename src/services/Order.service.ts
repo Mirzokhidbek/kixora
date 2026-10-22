@@ -22,6 +22,7 @@ import {
 } from "../libs/orderRules";
 import { z } from "zod";
 import { orderCreateSchema, orderInquirySchema, orderUpdateSchema } from "../libs/validation";
+import { logger } from "../libs/logger";
 
 type OrderCreate = z.infer<typeof orderCreateSchema>;
 type OrderInquiry = z.infer<typeof orderInquirySchema>;
@@ -126,7 +127,7 @@ class OrderService {
         this.productModel
           .updateOne({ _id: l.productId }, { $inc: { productLeftCount: l.itemQuantity } })
           .exec()
-          .catch((e) => console.error("Failed to restore stock:", l.productId, e))
+          .catch((e) => logger.error("Failed to restore stock", { productId: String(l.productId), err: e }))
       )
     );
   }

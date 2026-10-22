@@ -1,4 +1,5 @@
 import { createClient } from "redis";
+import { logger } from "./logger";
 
 /**
  * Optional shared Redis connection (REDIS_URL).
@@ -14,10 +15,10 @@ export function getRedis(): RedisClient | null {
   if (!url) return null;
   if (!client) {
     client = createClient({ url });
-    client.on("error", (err) => console.error("⚠️ Redis error:", err.message));
+    client.on("error", (err) => logger.warn("Redis error", { err: err.message }));
     client.connect().then(
-      () => console.log("✅ Redis connected"),
-      (err) => console.error("❌ Redis connection failed:", err.message)
+      () => logger.info("Redis connected"),
+      (err) => logger.error("Redis connection failed", { err })
     );
   }
   return client;

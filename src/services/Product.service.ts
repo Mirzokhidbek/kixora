@@ -13,6 +13,7 @@ import { ViewGroup } from "../libs/enums/view.enum";
 import { extractAISearchIntent } from "../libs/aiSearch";
 import { z } from "zod";
 import { productCreateSchema, productInquirySchema, productUpdateSchema } from "../libs/validation";
+import { logger } from "../libs/logger";
 
 type ProductInquiry = z.infer<typeof productInquirySchema>;
 type ProductCreate = z.infer<typeof productCreateSchema> & { productImages: string[] };
@@ -29,7 +30,7 @@ async function removeUploads(images: string[]) {
       .filter((file): file is string => Boolean(file))
       .map((file) =>
         fs.unlink(file).catch((err) => {
-          if (err.code !== "ENOENT") console.error("Failed to remove upload:", file, err.message);
+          if (err.code !== "ENOENT") logger.error("Failed to remove upload", { file, err });
         })
       )
   );
