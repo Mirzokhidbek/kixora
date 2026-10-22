@@ -4,15 +4,15 @@ import { useDispatch } from "react-redux";
 import type { Dispatch } from "@reduxjs/toolkit";
 
 import { HeroBanner } from "./HeroBanner";
-import { PopularDishes } from "./PopularDishes";
+import { PopularPicks } from "./PopularPicks";
 import { ValuePropsBar } from "./ValuePropsBar";
 import { CategoryShowcase } from "./CategoryShowcase";
-import { NewDishes } from "./NewDishes";
+import { NewArrivals } from "./NewArrivals";
 import { BrandVideo } from "./BrandVideo";
 import { NewArrivalsBanner } from "./NewArrivalsBanner";
 
 import ProductService from "../../services/ProductService";
-import { setPopularDishes, setNewDishes } from "./slice";
+import { setPopularPicks, setNewArrivals } from "./slice";
 
 interface HomePageProps {
   onAdd?: (item: any) => void;
@@ -20,13 +20,13 @@ interface HomePageProps {
 
 /** REDUX SLICE DISPATCH SETUP **/
 const actionDispatch = (dispatch: Dispatch) => ({
-  setPopularDishes: (data: any) => dispatch(setPopularDishes(data)),
-  setNewDishes: (data: any) => dispatch(setNewDishes(data)),
+  setPopularPicks: (data: any) => dispatch(setPopularPicks(data)),
+  setNewArrivals: (data: any) => dispatch(setNewArrivals(data)),
 });
 
 export function HomePage({ onAdd }: HomePageProps) {
   const dispatch = useDispatch();
-  const { setPopularDishes, setNewDishes } = useMemo(
+  const { setPopularPicks, setNewArrivals } = useMemo(
     () => actionDispatch(dispatch),
     [dispatch]
   );
@@ -40,7 +40,7 @@ export function HomePage({ onAdd }: HomePageProps) {
         limit: 8,
         order: "productViews",
       })
-      .then((data) => setPopularDishes(data))
+      .then((data) => setPopularPicks(data))
       .catch((err) => console.log("Popular shoes fetch error:", err));
 
     productService
@@ -49,9 +49,9 @@ export function HomePage({ onAdd }: HomePageProps) {
         limit: 8,
         order: "createdAt",
       })
-      .then((data) => setNewDishes(data))
+      .then((data) => setNewArrivals(data))
       .catch((err) => console.log("New shoes fetch error:", err));
-  }, [setPopularDishes, setNewDishes]);
+  }, [setPopularPicks, setNewArrivals]);
 
   return (
     <Box sx={{ width: "100%", overflowX: "hidden", bgcolor: "#ffffff" }}>
@@ -60,10 +60,10 @@ export function HomePage({ onAdd }: HomePageProps) {
 
 
       {/* 2. Popular Picks (Best Sellers 4-Card Grid with Solid Black "Add to Cart" Buttons) */}
-      <PopularDishes onAdd={onAdd} />
+      <PopularPicks onAdd={onAdd} />
 
       {/* 3. Fresh Arrivals / Latest Drops Grid */}
-      <NewDishes onAdd={onAdd} />
+      <NewArrivals onAdd={onAdd} />
 
       {/* 4. Value Props Bar (Free Shipping, Secure Payments, Easy Returns, 24/7 Support) */}
       <ValuePropsBar />
