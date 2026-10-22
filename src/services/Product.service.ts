@@ -1,3 +1,5 @@
+import fs from "fs/promises";
+import path from "path";
 import ProductModel from "../models/Product.model";
 import { AISearchResponse, Product, ProductDashboardMetrics } from "../libs/types/product";
 import Errors, { HTTPCode, Message } from "../libs/Errors";
@@ -17,6 +19,21 @@ type ProductCreate = z.infer<typeof productCreateSchema> & { productImages: stri
 type ProductUpdate = z.infer<typeof productUpdateSchema>;
 
 const LOW_STOCK_THRESHOLD = 5;
+
+const PRODUCT_UPLOAD_PATH = /^public\/uploads\/products\/[\w.-]+$/;
+
+/** Deletes product upload files by exact stored path; never touches anything else */
+async function removeUploads(images: string[]) {
+  await Promise.all(
+    images
+      .filter((img) => PRODUCT_UPLOAD_PATH.test(img))
+      .map((img) =>
+        fs.unlink(path.resolve(img)).catch((err) => {
+          if (err.code !== "ENOENT") console.error("Failed to remove upload:", img, err.message);
+        })
+      )
+  );
+}
 
 class ProductService {
   private readonly productModel = ProductModel;
@@ -102,6 +119,34 @@ class ProductService {
       .exec();
     if (!result) throw new Errors(HTTPCode.NOT_FOUND, Message.NO_DATA_FOUND);
     return result;
+  }
+
+  /**
+   * BSSR: Replace a product's images.
+   * Old files are removed only when they are this product's own uploads and no
+   * other product references them; a missing old file is not an error.
+   */
+  public async replaceProductImages(id: string, newImages: string[]): Promise<Product> {
+    const productId = shapeIntoMongooseObjectId(id);
+    const before = await this.productModel.findById(productId).select("productImages").lean<Product>().exec();
+    if (!before) {
+      await removeUploads(newImages); // nothing to attach them to
+      throw new Errors(HTTPCode.NOT_FOUND, Message.NO_DATA_FOUND);
+    }
+
+    const result = await this.productModel
+      .findByIdAndUpdate(productId, { $set: { productImages: newImages } }, { new: true })
+      .lean<Product>()
+      .exec();
+
+    const stale = (before.productImages || []).filter((img) => !newImages.includes(img));
+    const stillUsed = await this.productModel
+      .find({ productImages: { $in: stale } })
+      .distinct("productImages")
+      .exec();
+    await removeUploads(stale.filter((img) => !stillUsed.includes(img)));
+
+    return result!;
   }
 
   /** BSSR: Catalog metrics computed inside MongoDB **/

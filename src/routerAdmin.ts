@@ -29,6 +29,12 @@ routerAdmin.post(
   makeUploader("products").array("productImages", 5),
   adminController.createNewProduct
 );
+routerAdmin.post(
+  "/product/:id/images",
+  verifyAdmin,
+  makeUploader("products").array("productImages", 5),
+  adminController.replaceProductImages
+);
 routerAdmin.post("/product/:id", verifyAdmin, adminController.updateChosenProduct);
 routerAdmin.post("/product/:id/update", verifyAdmin, adminController.updateChosenProduct);
 

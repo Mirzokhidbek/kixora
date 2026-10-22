@@ -119,8 +119,45 @@ $(document).ready(function () {
     $("#editProductSize").val(size);
     $("#editProductDesc").val(desc);
 
+    // Current images (a missing file shows a placeholder so the admin can see it needs replacing)
+    const images = $(this).data("images") || [];
+    const current = $("#editCurrentImages").empty();
+    if (!images.length) current.append('<span class="text-muted small">No images</span>');
+    images.forEach((src) => {
+      $("<img>")
+        .attr({ src, alt: "" })
+        .addClass("rounded border")
+        .css({ width: 64, height: 64, objectFit: "cover" })
+        .on("error", function () {
+          $(this).replaceWith(
+            '<div class="rounded border d-flex align-items-center justify-content-center text-danger small" style="width:64px;height:64px;font-size:0.65rem;">Missing</div>'
+          );
+        })
+        .appendTo(current);
+    });
+    $("#editProductImages").val("");
+    $("#editNewImagesPreview").empty();
+
     const editModal = new bootstrap.Modal(document.getElementById("editProductModal"));
     editModal.show();
+  });
+
+  // Preview newly chosen replacement images
+  $("#editProductImages").on("change", function () {
+    const preview = $("#editNewImagesPreview").empty();
+    const files = Array.from(this.files || []);
+    if (files.length > 5) {
+      alert("You can upload up to 5 images.");
+      this.value = "";
+      return;
+    }
+    files.forEach((file) => {
+      $("<img>")
+        .attr({ src: URL.createObjectURL(file), alt: "" })
+        .addClass("rounded border border-dark")
+        .css({ width: 64, height: 64, objectFit: "cover" })
+        .appendTo(preview);
+    });
   });
 
   // 6. Submit Product Edit via AJAX
@@ -131,22 +168,32 @@ $(document).ready(function () {
       productName: $("#editProductName").val().trim(),
       productPrice: Number($("#editProductPrice").val()),
       productLeftCount: Number($("#editProductLeftCount").val()),
-      productCollection: $("#editProductCollection").val(),
-      productSize: $("#editProductSize").val(),
+      // empty selects are omitted (undefined is dropped by JSON) so a value the
+      // dropdown doesn't list is kept instead of being sent as null
+      productCollection: $("#editProductCollection").val() || undefined,
+      productSize: $("#editProductSize").val() || undefined,
       productDesc: $("#editProductDesc").val().trim(),
     };
 
     const saveBtn = $("#saveEditProductBtn");
     saveBtn.prop("disabled", true).html('<i class="fa-solid fa-spinner fa-spin me-1"></i> Saving...');
 
+    // Details first, then (optionally) the new images
+    const files = Array.from($("#editProductImages")[0].files || []);
     axios
       .post(`/admin/product/${id}/update`, payload)
+      .then(() => {
+        if (!files.length) return;
+        const formData = new FormData();
+        files.forEach((file) => formData.append("productImages", file));
+        return axios.post(`/admin/product/${id}/images`, formData);
+      })
       .then(() => {
         window.location.reload();
       })
       .catch((err) => {
         saveBtn.prop("disabled", false).html('<i class="fa-solid fa-check me-1"></i> Save Changes');
-        alert("Failed to update product details. Please try again.");
+        alert(err.response?.data?.message || "Failed to update product. Please try again.");
         console.error(err);
       });
   });

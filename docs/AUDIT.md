@@ -121,3 +121,92 @@ Bundan tashqari HTTP orqali tekshirilgan hujumlar: eski kodda yozilgan kalit bil
 - **Ko'chirilgan:** `src/models/*.service.ts` → `src/services/`, `src/schema/*.model.ts` → `src/models/`, `restaurant.controller.ts` → `admin.controller.ts`, `PopularDishes.tsx` → `PopularPicks.tsx`, `NewDishes.tsx` → `NewArrivals.tsx`
 - **O'chirilgan:** `cookies.txt`, `src/schema/`, ishlatilmaydigan 6 ta klient komponenti
 - **Qayta yozilgan:** `app.ts`, `server.ts`, `router.ts`, `routerAdmin.ts`, barcha controller'lar va servislar, `libs/config.ts`, `libs/uploader.ts`, `libs/aiSearch.ts`
+
+---
+
+## 8. Like va izoh (review) tizimi — 2-bosqich
+
+### Topilgan muammolar
+
+| ID | Muammo | Qayerda edi | Ta'siri |
+|---|---|---|---|
+| E-1 | Backend'da like, comment yoki review uchun model ham, API ham yo'q edi | `src/models/` | Admin qaysi mahsulot yoqib qolganini ham, mijozlar fikrini ham ko'ra olmasdi |
+| E-2 | Admin panelda like ko'rsatkichi va izohlarni moderatsiya qilish imkoniyati yo'q edi | `src/views/` | Spam yoki haqoratli izohni boshqarib bo'lmasdi |
+| E-3 | Like (wishlist) faqat brauzerning `localStorage` ida saqlanardi | `useWishlist.ts` | Akkauntga bog'lanmagan edi, qurilmalar o'rtasida sinxronlanmasdi, bitta brauzerdagi turli foydalanuvchilar ro'yxatni bo'lishardi |
+| E-4 | Wishlist'da mahsulotning eski nusxasi saqlanardi | `useWishlist.ts` | Narx o'zgarsa ham eski narx ko'rinardi, o'chirilgan mahsulotlar ro'yxatda qolardi |
+| E-5 | Har bir komponent `useWishlist()` ning alohida nusxasidan foydalanardi | Navbar, Products, ChosenProduct | Navbar'dagi hisoblagich yangilanmasdi, "Clear" bosilganda boshqa komponent eski ro'yxatni qayta yozib qo'yardi |
+| E-6 | Bosh sahifadagi yurakchalar oddiy `useState` edi | `PopularPicks.tsx`, `NewArrivals.tsx` | Like sahifa yangilanganda yo'qolardi |
+| E-7 | **Soxta reytinglar:** "4.8 (128 reviews)", "4.8 (1.2k)", "4.9 (840)" | `ChosenProduct.tsx`, `Products.tsx`, `NewArrivals.tsx` | Xaridorni chalg'itadi (iste'molchi huquqlari xavfi) |
+| E-8 | "In Stock" yozuvi doimiy edi | `ChosenProduct.tsx` | Qoldiq 0 bo'lsa ham "In Stock" ko'rinardi |
+| E-9 | **`setAuthMember` har render'da qayta yaratilardi**, `App.tsx` dagi effekt esa unga bog'langan edi | `ContextProvider.tsx` | Login qilgan foydalanuvchi uchun `/member/detail` ga cheksiz so'rovlar ketardi (brauzerda o'lchandi: 8 soniyada 102 ta so'rov) |
+
+### Yechim
+
+**Backend**
+- **Modellar:**
+  - `ProductLike`: `{memberId, productId}`, unique index.
+  - `ProductReview`: `{memberId, productId, reviewRating 1–5, reviewComment ≤1000, reviewStatus VISIBLE|HIDDEN, adminReply}`, har bir (foydalanuvchi, mahsulot) juftligi uchun bitta izoh.
+  - `Product` ga hisoblagichlar qo'shildi: `productLikes`, `ratingAvg`, `reviewCount`.
+- **Like:** idempotent. Unique index va `upsert` tufayli takroriy yoki parallel bosishlar bir marta hisoblanadi. Hisoblagich faqat yangi qator yaratilganda yoki rostdan o'chirilganda o'zgaradi. Liked ro'yxati mahsulotning **joriy** ma'lumotini qaytaradi.
+- **Review:** faqat **tasdiqlangan xaridor**, ya'ni mahsulot bo'lgan buyurtmasi `FINISH` statusida bo'lgan foydalanuvchi yoza oladi. `reviewStatus` va `adminReply` maydonlarini klient o'rnata olmaydi (whitelist). Har o'zgarishdan keyin (saqlash, o'chirish, yashirish) reyting faqat `VISIBLE` izohlar bo'yicha qayta hisoblanadi. Muallif yashirilgan izohini o'zi ko'radi, tahrir qilsa ham izoh yashirin qoladi.
+- **API:**
+  - `GET /product/liked`
+  - `POST /product/liked/sync` (mehmon ro'yxatini akkauntga birlashtirish)
+  - `POST|DELETE /product/:id/like`
+  - `GET /product/:id/reviews` (sahifalash va yulduzlar taqsimoti bilan)
+  - `GET|PUT|DELETE /product/:id/reviews/me`
+  - `GET /product/:id` endi login qilgan foydalanuvchi uchun `meLiked` qaytaradi.
+  - Saralashga `productLikes` va `ratingAvg` qo'shildi.
+- **Himoya:**
+  - Alohida `engagementLimiter` (production'da daqiqasiga 30 ta so'rov).
+  - Matndan boshqaruv belgilari olib tashlanadi.
+  - Izoh matni React va EJS'da ekranlangan holda chiqadi (stored XSS'ga E2E testi bor).
+
+**Admin panel**
+- **Yangi "Reviews" sahifasi** (`/admin/review/all`):
+  - VISIBLE/HIDDEN filtrlari va sonlari, sahifalash;
+  - Hide/Show, ochiq javob yozish (Reply) va o'chirish.
+- **Katalog:** "Likes" va "Rating" ustunlari qo'shildi.
+
+**Klient**
+- **Bitta umumiy wishlist store** (`useSyncExternalStore`):
+  - Login qilganda server asosiy manba bo'ladi, mehmon ro'yxati akkauntga birlashtiriladi.
+  - Logout qilganda ro'yxat tozalanadi.
+  - Like bosish optimistik: server rad etsa, o'zgarish qaytariladi.
+- **Bosh sahifadagi yurakchalar** umumiy wishlist'ga ulandi.
+- **Soxta reytinglar o'rniga haqiqiy `ratingAvg` va `reviewCount`.** Izoh bo'lmasa "No reviews yet" yoziladi.
+- **Stok holati** haqiqiy qoldiqdan olinadi.
+- **Mahsulot sahifasida "Reviews" tabi:**
+  - umumiy reyting va yulduzlar taqsimoti;
+  - o'z izohini yozish, tahrirlash yoki o'chirish;
+  - "Verified buyer" belgisi va do'kon javobi.
+- **`setAuthMember` `useCallback` bilan barqaror qilindi** (E-9).
+
+### Tekshiruv
+
+| Tekshiruv | Natija |
+|---|---|
+| Unit testlar (`test/engagement.test.ts` + avvalgilar) | ✅ 18/18 |
+| Asosiy E2E (regressiya) | ✅ 29/29 |
+| Like va review E2E: idempotent like, joriy narx, birlashtirish, xaridor bo'lmagan va hali yetkazilmagan buyurtma uchun 403, reytingning qayta hisoblanishi, moderatsiya, XSS ekranlanishi | ✅ 28/28 |
+| Brauzer: admin Hide/Show (reyting 5.0 → 0 → 5.0), katalog ustunlari, mehmon like → login → birlashish, Reviews tabida tahrirlash (sarlavha darhol 3.0), konsol xatosiz | ✅ |
+
+### Hali qilinmagan (📋)
+- Mahsulot sahifasidagi **"Specifications" tabi** ham kodga yozilgan soxta ma'lumot (material, og'irlik). Uni mahsulot maydonlaridan olish kerak.
+- ~~Admin tahrirlash oynasida rasmni almashtirish imkoniyati yo'q~~: ✅ qo'shildi (9-bo'lim).
+- **Izohga rasm qo'shish, "foydali" ovozi va so'kinish filtri yo'q.**
+- **Mahsulotlar sahifasida sahifalash noto'g'ri:** 3 ta mahsulot uchun 3 ta sahifa ko'rsatiladi (oldindan mavjud xato).
+
+---
+
+## 9. Admin panelda mahsulot rasmini almashtirish — 3-bosqich
+
+| ID | Muammo | Yechim | Holat |
+|---|---|---|---|
+| I-1 | Tahrirlash oynasida rasmni almashtirib bo'lmasdi. Rasm o'chib ketsa, mahsulotni qaytadan yaratishga to'g'ri kelardi. | Yangi `POST /admin/product/:id/images` (multipart `productImages`, 1–5 ta fayl, faqat admin). Oynada joriy rasmlar ko'rinadi (fayli yo'q bo'lsa "Missing" deb belgilanadi), yangi tanlangan rasmlarning ko'rinishi chiqadi. Saqlashda avval ma'lumotlar, keyin rasmlar yuboriladi. | ✅ |
+| I-2 | Eski rasm fayllari diskda qolib ketardi. | Eski fayl faqat quyidagi shartlarda o'chiriladi: aynan shu mahsulotning `public/uploads/products/...` dagi fayli bo'lsa va boshqa hech bir mahsulot unga havola qilmasa. Fayl allaqachon yo'q bo'lsa, xato hisoblanmaydi. Mahsulot topilmasa, yangi yuklangan fayllar o'chiriladi. | ✅ |
+| I-3 | Oyna o'lcham va kolleksiya uchun `null` yuborardi: `productSize: NORMAL` yoki `CASUAL` kolleksiyali mahsulot ro'yxatda bo'lmagani uchun tanlov bo'sh qolardi, validatsiya esa uni rad etardi. Natijada bunday mahsulotni umuman saqlab bo'lmasdi. | Bo'sh tanlov yuborilmaydi (joriy qiymat saqlanib qoladi). Oynaga "Standard release", EU 38 va "Casual" variantlari qo'shildi. | ✅ |
+
+**Tekshiruv:** vaqtinchalik bazada 11/11 API stsenariy o'tdi: SVG fayl, bo'sh so'rov va session'siz so'rov rad etildi; rasm almashtirildi; bir nechta rasm bilan almashtirildi; eski fayl diskdan o'chdi; noma'lum mahsulot uchun 404. Brauzerda "Missing" belgisi, yangi rasm ko'rinishi va saqlashdan keyin katalogda yangi rasm tekshirildi. Unit testlar 18/18.
+
+**Hodisa:** 2-bosqichdagi test tozalashida fayllarni yaratilish vaqti bo'yicha o'chirish natijasida foydalanuvchining "Nike Dunk Low." rasmi o'chib ketgan edi. Endi testlar faqat o'zlari yaratgan fayllarni aniq ro'yxat bo'yicha o'chiradi. Foydalanuvchi rasmni qayta yukladi, fayl joyida (`200 image/png`).
