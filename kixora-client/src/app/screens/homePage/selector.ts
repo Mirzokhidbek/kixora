@@ -3,14 +3,14 @@ import type { RootState } from "../../store";
 
 const selectHomePage = (state: RootState) => state.homePage;
 
-export const retrievePopularDishes = createSelector(
+export const retrievePopularPicks = createSelector(
   selectHomePage,
-  (homePage) => homePage.popularDishes
+  (homePage) => homePage.popularPicks
 );
 
-export const retrieveNewDishes = createSelector(
+export const retrieveNewArrivals = createSelector(
   selectHomePage,
-  (homePage) => homePage.newDishes
+  (homePage) => homePage.newArrivals
 );
 
 export const retrieveTopUsers = createSelector(

@@ -4,14 +4,14 @@ import type { Product } from "../../../lib/types/product";
 import type { Member } from "../../../lib/types/member";
 
 interface HomePageState {
-  popularDishes: Product[];
-  newDishes: Product[];
+  popularPicks: Product[];
+  newArrivals: Product[];
   topUsers: Member[];
 }
 
 const initialState: HomePageState = {
-  popularDishes: [],
-  newDishes: [],
+  popularPicks: [],
+  newArrivals: [],
   topUsers: [],
 };
 
@@ -19,11 +19,11 @@ export const homePageSlice = createSlice({
   name: "homePage",
   initialState,
   reducers: {
-    setPopularDishes: (state, action: PayloadAction<Product[]>) => {
-      state.popularDishes = Array.isArray(action.payload) ? action.payload : [];
+    setPopularPicks: (state, action: PayloadAction<Product[]>) => {
+      state.popularPicks = Array.isArray(action.payload) ? action.payload : [];
     },
-    setNewDishes: (state, action: PayloadAction<Product[]>) => {
-      state.newDishes = Array.isArray(action.payload) ? action.payload : [];
+    setNewArrivals: (state, action: PayloadAction<Product[]>) => {
+      state.newArrivals = Array.isArray(action.payload) ? action.payload : [];
     },
     setTopUsers: (state, action: PayloadAction<Member[]>) => {
       state.topUsers = Array.isArray(action.payload) ? action.payload : [];
@@ -31,7 +31,7 @@ export const homePageSlice = createSlice({
   },
 });
 
-export const { setPopularDishes, setNewDishes, setTopUsers } =
+export const { setPopularPicks, setNewArrivals, setTopUsers } =
   homePageSlice.actions;
 
 const homePageReducer = homePageSlice.reducer;

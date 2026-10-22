@@ -16,16 +16,16 @@ import FavoriteBorderIcon from "@mui/icons-material/FavoriteBorder";
 import FavoriteIcon from "@mui/icons-material/Favorite";
 import AddShoppingCartIcon from "@mui/icons-material/AddShoppingCart";
 import { useNavigate } from "react-router-dom";
-import { retrieveNewDishes } from "./selector";
+import { retrieveNewArrivals } from "./selector";
 import { getImageUrl } from "../../../lib/config";
 
-interface NewDishesProps {
+interface NewArrivalsProps {
   onAdd?: (item: any) => void;
 }
 
-export function NewDishes({ onAdd }: NewDishesProps) {
+export function NewArrivals({ onAdd }: NewArrivalsProps) {
   const navigate = useNavigate();
-  const newDishes = useSelector(retrieveNewDishes);
+  const newArrivals = useSelector(retrieveNewArrivals);
   const [favorites, setFavorites] = useState<string[]>([]);
 
   const toggleFavorite = (e: React.MouseEvent, id: string) => {
@@ -72,9 +72,9 @@ export function NewDishes({ onAdd }: NewDishesProps) {
     },
   ];
 
-  const rawList = Array.isArray(newDishes) ? newDishes : [];
+  const rawList = Array.isArray(newArrivals) ? newArrivals : [];
   // Showcase cards only when the catalog is empty; they can't be added to the basket
-  const list =
+  const list: any[] =
     rawList.length > 0
       ? rawList.slice(0, 4)
       : sampleArrivals.map((sample, idx) => ({

@@ -1,6 +1,6 @@
 /**
  * ============================================================================
- * PopularDishes.tsx - Best Sellers "Popular Picks" (Matching Mockup)
+ * PopularPicks.tsx - Best Sellers "Popular Picks" (Matching Mockup)
  * ============================================================================
  * Clean 4-card grid, discount badge, heart wishlist, color dots, rating,
  * price with strikethrough, and full-width Solid Black "Add to Cart →" button.
@@ -25,16 +25,16 @@ import FavoriteIcon from "@mui/icons-material/Favorite";
 import AddShoppingCartIcon from "@mui/icons-material/AddShoppingCart";
 import ArrowForwardIcon from "@mui/icons-material/ArrowForward";
 import { useNavigate } from "react-router-dom";
-import { retrievePopularDishes } from "./selector";
+import { retrievePopularPicks } from "./selector";
 import { getImageUrl } from "../../../lib/config";
 
-interface PopularDishesProps {
+interface PopularPicksProps {
   onAdd?: (item: any) => void;
 }
 
-export function PopularDishes({ onAdd }: PopularDishesProps) {
+export function PopularPicks({ onAdd }: PopularPicksProps) {
   const navigate = useNavigate();
-  const popularDishes = useSelector(retrievePopularDishes);
+  const popularPicks = useSelector(retrievePopularPicks);
   const [favorites, setFavorites] = useState<string[]>([]);
 
   const toggleFavorite = (e: React.MouseEvent, id: string) => {
@@ -89,7 +89,7 @@ export function PopularDishes({ onAdd }: PopularDishesProps) {
     },
   ];
 
-  const rawList = Array.isArray(popularDishes) ? popularDishes : [];
+  const rawList = Array.isArray(popularPicks) ? popularPicks : [];
   // Real products are shown with their real data only. Showcase cards are used
   // only when the catalog is empty, and they can never be added to the basket.
   const displayList =

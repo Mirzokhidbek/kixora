@@ -3,12 +3,12 @@ import { Box, Container, Typography, Button, Grid } from "@mui/material";
 import PlayCircleFilledWhiteIcon from "@mui/icons-material/PlayCircleFilledWhite";
 import WhatsAppIcon from "@mui/icons-material/WhatsApp";
 import FlashOnIcon from "@mui/icons-material/FlashOn";
-import { retrievePopularDishes } from "./selector";
+import { retrievePopularPicks } from "./selector";
 import { getImageUrl } from "../../../lib/config";
 
 export function Advertisement() {
-  const popularDishes = useSelector(retrievePopularDishes);
-  const featuredDish = popularDishes?.[0];
+  const popularPicks = useSelector(retrievePopularPicks);
+  const featuredDish = popularPicks?.[0];
   const featuredImage = getImageUrl(featuredDish?.productImages?.[0]);
 
   return (
