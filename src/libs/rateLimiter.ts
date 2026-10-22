@@ -1,8 +1,25 @@
-import rateLimit from "express-rate-limit";
+import rateLimit, { Options } from "express-rate-limit";
+import { RedisStore } from "rate-limit-redis";
+import { getRedis } from "./redis";
 import { Request, Response } from "express";
 import { sendAdminAlert } from "./adminResponse";
 
 const isProduction = process.env.NODE_ENV === "production";
+
+/**
+ * Shared counters in Redis when REDIS_URL is set (limits hold across all server
+ * instances); otherwise express-rate-limit's in-memory store.
+ */
+const redisStore = (prefix: string): Partial<Options> => {
+  const redis = getRedis();
+  if (!redis) return {};
+  return {
+    store: new RedisStore({
+      prefix: `rl:${prefix}:`,
+      sendCommand: (...args: string[]) => redis.sendCommand(args),
+    }),
+  };
+};
 
 /**
  * Helper to check if request originates from localhost / dev environment
@@ -24,6 +41,7 @@ const isLocalhost = (req: Request): boolean => {
  * Generous limits for high-performance eCommerce shopping while protecting against DDoS
  */
 export const globalLimiter = rateLimit({
+  ...redisStore("globalLimiter"),
   windowMs: 15 * 60 * 1000, // 15 minutes
   max: isProduction ? 1500 : 25000,
   standardHeaders: true, // Return rate limit info in `RateLimit-*` headers
@@ -40,6 +58,7 @@ export const globalLimiter = rateLimit({
  * Protects against brute-force password guessing and bot registrations.
  */
 export const authLimiter = rateLimit({
+  ...redisStore("authLimiter"),
   windowMs: 15 * 60 * 1000, // 15 minutes
   max: isProduction ? 25 : 200,
   standardHeaders: true,
@@ -56,6 +75,7 @@ export const authLimiter = rateLimit({
  * Protects executive admin portal against brute-force attacks.
  */
 export const adminAuthLimiter = rateLimit({
+  ...redisStore("adminAuthLimiter"),
   windowMs: 15 * 60 * 1000, // 15 minutes
   max: isProduction ? 15 : 100,
   standardHeaders: true,
@@ -76,6 +96,7 @@ export const adminAuthLimiter = rateLimit({
  * Every AI search costs a paid Gemini call, so it is limited separately.
  */
 export const aiSearchLimiter = rateLimit({
+  ...redisStore("aiSearchLimiter"),
   windowMs: 1 * 60 * 1000, // 1 minute
   max: isProduction ? 10 : 60,
   standardHeaders: true,
@@ -92,6 +113,7 @@ export const aiSearchLimiter = rateLimit({
  * Protects order creation from automated checkout spam.
  */
 export const orderLimiter = rateLimit({
+  ...redisStore("orderLimiter"),
   windowMs: 1 * 60 * 1000, // 1 minute
   max: isProduction ? 20 : 100,
   standardHeaders: true,
@@ -109,6 +131,7 @@ export const orderLimiter = rateLimit({
  * Stops scripted like-flipping and review spam.
  */
 export const engagementLimiter = rateLimit({
+  ...redisStore("engagementLimiter"),
   windowMs: 1 * 60 * 1000, // 1 minute
   max: isProduction ? 30 : 300,
   standardHeaders: true,
