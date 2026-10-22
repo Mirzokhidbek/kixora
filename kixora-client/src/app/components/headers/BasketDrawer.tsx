@@ -8,7 +8,6 @@ import {
   Avatar,
   Divider,
   TextField,
-  InputAdornment,
   Chip,
 } from "@mui/material";
 import CloseIcon from "@mui/icons-material/Close";

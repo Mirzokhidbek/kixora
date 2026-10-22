@@ -27,7 +27,6 @@ export interface Order {
 export interface OrderItemInput {
   productId: string;
   itemQuantity: number;
-  itemPrice: number;
 }
 
 export interface OrderInquiry {
