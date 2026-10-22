@@ -2,7 +2,10 @@ import { Box, Typography, Card, CardContent, Button, Avatar, Chip, Stack, Divide
 import PauseCircleFilledIcon from "@mui/icons-material/PauseCircleFilled";
 import DeleteOutlinedIcon from "@mui/icons-material/DeleteOutlined";
 import PaymentIcon from "@mui/icons-material/Payment";
+import { useEffect, useState } from "react";
 import { useSelector } from "react-redux";
+import PaymentService, { type PaymentConfig } from "../../services/PaymentService";
+import { sweetErrorAlert, sweetTopSmallSuccessAlert } from "../../../lib/sweetAlert";
 
 import { retrievePausedOrders } from "./selector";
 import { getImageUrl } from "../../../lib/config";
@@ -14,16 +17,37 @@ import { useGlobals } from "../../hooks/useGlobals";
 export function PausedOrders() {
   const pausedOrders = useSelector(retrievePausedOrders);
   const { setOrderBuilder } = useGlobals();
+  const [paymentConfig, setPaymentConfig] = useState<PaymentConfig | null>(null);
+  const [payingId, setPayingId] = useState<string | null>(null);
 
-  const handleUpdateOrder = async (orderId: string, orderStatus: OrderStatus) => {
+  useEffect(() => {
+    new PaymentService().getConfig().then(setPaymentConfig).catch(() => setPaymentConfig(null));
+  }, []);
+
+  /** Customers may only cancel an unpaid order; paying goes through PaymentService */
+  const handleCancelOrder = async (orderId: string) => {
     try {
-      const orderService = new OrderService();
-      await orderService.updateOrder({ orderId, orderStatus });
+      await new OrderService().updateOrder({ orderId, orderStatus: OrderStatus.DELETE });
       setOrderBuilder(new Date());
-    } catch (err) {
-      console.log("Error updating order:", err);
+    } catch (err: any) {
+      sweetErrorAlert(err?.response?.data?.message || "Could not cancel the order.");
     }
   };
+
+  const handleTestPay = async (orderId: string) => {
+    setPayingId(orderId);
+    try {
+      await new PaymentService().payWithTestProvider(orderId);
+      sweetTopSmallSuccessAlert("Test payment confirmed!");
+      setOrderBuilder(new Date());
+    } catch (err: any) {
+      sweetErrorAlert(err?.response?.data?.message || "Payment failed.");
+    } finally {
+      setPayingId(null);
+    }
+  };
+
+  const canTestPay = paymentConfig?.methods.includes("TEST") ?? false;
 
   if (pausedOrders.length === 0) {
     return (
@@ -150,16 +174,23 @@ export function PausedOrders() {
               <Button
                 color="error"
                 startIcon={<DeleteOutlinedIcon />}
-                onClick={() => handleUpdateOrder(order._id, OrderStatus.DELETE)}
+                onClick={() => handleCancelOrder(order._id)}
                 sx={{ fontWeight: 700, textTransform: "none" }}
               >
                 Cancel Order
               </Button>
 
+              {!canTestPay ? (
+                <Chip
+                  label="Awaiting payment confirmation from the store"
+                  sx={{ fontWeight: 700, bgcolor: "#fef3c7", color: "#92400e" }}
+                />
+              ) : (
               <Button
                 variant="contained"
                 startIcon={<PaymentIcon />}
-                onClick={() => handleUpdateOrder(order._id, OrderStatus.PROCESS)}
+                disabled={payingId === order._id}
+                onClick={() => handleTestPay(order._id)}
                 sx={{
                   bgcolor: "#111827",
                   color: "#ffffff",
@@ -173,8 +204,9 @@ export function PausedOrders() {
                   "&:hover": { bgcolor: "#000000", boxShadow: "none" },
                 }}
               >
-                Pay & Dispatch (${order.orderTotal?.toFixed(2)})
+                Test Pay (${order.orderTotal?.toFixed(2)})
               </Button>
+              )}
             </Box>
           </CardContent>
         </Card>

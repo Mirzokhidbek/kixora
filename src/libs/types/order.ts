@@ -7,6 +7,7 @@ export interface OrderItem {
   _id: Types.ObjectId;
   itemQuantity: number;
   itemPrice: number;
+  itemSize?: number;
   orderId: Types.ObjectId;
   productId: Types.ObjectId;
   createdAt: Date;
@@ -19,9 +20,14 @@ export interface Order {
   orderDelivery: number;
   orderStatus: OrderStatus;
   memberId: Types.ObjectId;
+  orderRecipient?: string;
+  orderPhone?: string;
+  orderAddress?: string;
+  orderNote?: string;
   createdAt: Date;
   updatedAt: Date;
   /** from MongoDB Aggregation Lookup **/
+  paymentData?: { paymentMethod: string; paymentStatus: string; amount: number; paidAt: Date };
   orderItems?: OrderItem[];
   productData?: Product[];
   memberData?: Member;

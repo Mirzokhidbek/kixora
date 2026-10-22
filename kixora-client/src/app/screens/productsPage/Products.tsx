@@ -70,12 +70,18 @@ export function Products({ onAdd }: ProductsProps) {
   const [toastOpen, setToastOpen] = useState(false);
   const [toastMsg, setToastMsg] = useState("");
 
+  const [totalProducts, setTotalProducts] = useState(0);
+  const pageCount = Math.max(1, Math.ceil(totalProducts / productsSearch.limit));
+
   useEffect(() => {
     setLoading(true);
     const productService = new ProductService();
     productService
-      .getProducts(productsSearch)
-      .then((data) => setProducts(data))
+      .getProductsPage(productsSearch)
+      .then(({ products: list, total }) => {
+        setProducts(list);
+        setTotalProducts(total);
+      })
       .catch((err) => console.log("Products fetch error:", err))
       .finally(() => setLoading(false));
   }, [productsSearch, setProducts]);
@@ -330,7 +336,7 @@ export function Products({ onAdd }: ProductsProps) {
               }}
             >
               <Typography variant="body2" sx={{ color: "#6b7280", fontWeight: 700 }}>
-                Showing <strong style={{ color: "#111827" }}>{products.length}</strong> items
+                Showing <strong style={{ color: "#111827" }}>{products.length}</strong> of {totalProducts} items
               </Typography>
 
               {/* Sort Order Selector */}
@@ -584,10 +590,11 @@ export function Products({ onAdd }: ProductsProps) {
             </Grid>
             )}
 
-            {/* Pagination */}
+            {/* Pagination (real page count; previously hardcoded to 3) */}
+            {pageCount > 1 && (
             <Box sx={{ display: "flex", justifyContent: "center", mt: 6 }}>
               <Pagination
-                count={3}
+                count={pageCount}
                 page={productsSearch.page}
                 onChange={paginationHandler}
                 sx={{
@@ -603,6 +610,7 @@ export function Products({ onAdd }: ProductsProps) {
                 }}
               />
             </Box>
+            )}
           </Grid>
         </Grid>
       </Container>

@@ -40,7 +40,7 @@ class ProductService {
   private readonly viewService = new ViewService();
 
   /** SPA: Get Products with filters, search, sorting & pagination **/
-  public async getProducts(inquiry: ProductInquiry): Promise<Product[]> {
+  public async getProducts(inquiry: ProductInquiry): Promise<{ products: Product[]; total: number }> {
     const match: T = { productStatus: ProductStatus.PROCESS };
     if (inquiry.productCollection) match.productCollection = inquiry.productCollection;
     if (inquiry.search) match.productName = { $regex: escapeRegex(inquiry.search), $options: "i" };
@@ -51,13 +51,17 @@ class ProductService {
     const sort: Record<string, 1 | -1> =
       inquiry.order === "productPrice" ? { productPrice: 1 } : { [inquiry.order]: -1 };
 
-    return this.productModel
-      .find(match)
-      .sort({ ...sort, _id: -1 })
-      .skip((inquiry.page - 1) * inquiry.limit)
-      .limit(inquiry.limit)
-      .lean<Product[]>()
-      .exec();
+    const [products, total] = await Promise.all([
+      this.productModel
+        .find(match)
+        .sort({ ...sort, _id: -1 })
+        .skip((inquiry.page - 1) * inquiry.limit)
+        .limit(inquiry.limit)
+        .lean<Product[]>()
+        .exec(),
+      this.productModel.countDocuments(match).exec(),
+    ]);
+    return { products, total };
   }
 
   /** SPA: Get Single Product & track unique member views **/

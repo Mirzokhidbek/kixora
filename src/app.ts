@@ -13,6 +13,7 @@ import { noSqlSanitizer } from "./libs/sanitizer";
 import { MORGAN_FORMAT, env } from "./libs/config";
 import { globalLimiter } from "./libs/rateLimiter";
 import { errorHandler, notFound } from "./middlewares/errorHandler";
+import { contentSecurityPolicy, cspNonce } from "./middlewares/csp";
 
 const MongoDBStore = ConnectMongoDB(session);
 const store = new MongoDBStore({ uri: env.mongoUrl, collection: "sessions" });
@@ -25,13 +26,15 @@ const app = express();
 app.set("trust proxy", 1);
 app.disable("x-powered-by");
 
-// HTTP security headers. CSP stays off because the admin EJS pages load CDN scripts.
+// HTTP security headers + Content-Security-Policy with per-request script nonces
 app.use(
   helmet({
-    contentSecurityPolicy: false,
+    contentSecurityPolicy: false, // configured separately below (needs the nonce)
     crossOriginResourcePolicy: { policy: "cross-origin" }, // lets the SPA display uploaded images
   })
 );
+app.use(cspNonce);
+app.use(contentSecurityPolicy);
 
 // CORS: only configured origins may send credentialed requests
 app.use(
@@ -44,6 +47,7 @@ app.use(
     credentials: true,
     methods: ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
     allowedHeaders: ["Content-Type", "Authorization", "X-Requested-With", "Accept", "Origin"],
+    exposedHeaders: ["X-Total-Count"],
   })
 );
 

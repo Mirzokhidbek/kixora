@@ -11,6 +11,10 @@ const orderItemSchema = new Schema(
       type: Number,
       required: true,
     },
+    /** EU size chosen by the customer (needed to ship the right pair) */
+    itemSize: {
+      type: Number,
+    },
 
     orderId: {
       type: Schema.Types.ObjectId,

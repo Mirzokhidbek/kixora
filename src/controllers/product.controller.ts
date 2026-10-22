@@ -10,7 +10,10 @@ const productController = {
   /** SPA: Products with filters, search, sorting & pagination **/
   getProducts: async (req: Request, res: Response) => {
     const inquiry = parse(productInquirySchema, req.query);
-    res.status(HTTPCode.OK).json(await productService.getProducts(inquiry));
+    const { products, total } = await productService.getProducts(inquiry);
+    // Total for pagination travels in a header so the body stays a plain array (backward compatible)
+    res.setHeader("X-Total-Count", String(total));
+    res.status(HTTPCode.OK).json(products);
   },
 
   /** SPA: Single product (+ unique view tracking for signed-in members) **/

@@ -12,6 +12,10 @@ export interface Product {
   productSize?: ProductSize;
   productVolume?: number;
   productDesc?: string;
+  productMaterial?: string;
+  productMidsole?: string;
+  productOutsole?: string;
+  productWeight?: string;
   productImages: string[];
   productViews: number;
   productLikes?: number;

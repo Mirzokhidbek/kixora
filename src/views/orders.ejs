@@ -123,8 +123,16 @@
                         <%= (order.memberData && order.memberData.memberNick) ? order.memberData.memberNick : 'Customer' %>
                       </div>
                       <div class="text-muted" style="font-size: 0.78rem;">
-                        <i class="fa-solid fa-phone me-1 text-muted" style="font-size: 0.7rem;"></i> <%= (order.memberData && order.memberData.memberPhone) ? order.memberData.memberPhone : 'N/A' %>
+                        <i class="fa-solid fa-phone me-1 text-muted" style="font-size: 0.7rem;"></i> <%= order.orderPhone || ((order.memberData && order.memberData.memberPhone) ? order.memberData.memberPhone : 'N/A') %>
                       </div>
+                      <div class="text-muted" style="font-size: 0.74rem; max-width: 220px;">
+                        <i class="fa-solid fa-location-dot me-1" style="font-size: 0.7rem;"></i>
+                        <%= order.orderAddress || 'No shipping address' %>
+                        <% if (order.orderRecipient) { %> · <%= order.orderRecipient %><% } %>
+                      </div>
+                      <% if (order.orderNote) { %>
+                        <div class="text-muted fst-italic" style="font-size: 0.72rem;">“<%= order.orderNote %>”</div>
+                      <% } %>
                     </div>
                   </div>
                 </td>
@@ -142,20 +150,20 @@
                             shoeImg = raw.startsWith('http') ? raw : '/' + raw.replace(/^public\//, '').replace(/^\//, '');
                           }
                           const shoeName = product ? product.productName : 'KIXORA Performance Sneaker';
-                          const shoeSize = (product && product.productSize) ? product.productSize : '42';
+                          const shoeSize = item.itemSize ? item.itemSize : null; // the size the customer ordered
                         %>
                         <div class="d-flex align-items-center gap-2 p-1 rounded-2 bg-light border" style="border-color: var(--border-light) !important;">
                           <img src="<%= shoeImg %>" 
                                alt="<%= shoeName %>" 
                                class="rounded-1"
                                style="width: 32px; height: 32px; object-fit: contain; background: #ffffff; padding: 2px;"
-                               onerror="this.src='/img/kixora/sneakers.jpg'">
+                               data-fallback-src="/img/kixora/sneakers.jpg">
                           <div class="overflow-hidden flex-grow-1">
                             <div class="fw-semibold text-dark text-truncate" style="font-size: 0.82rem;">
                               <%= shoeName %>
                             </div>
                             <div class="text-muted d-flex align-items-center gap-2" style="font-size: 0.74rem;">
-                              <span class="badge bg-white text-dark border px-1.5 py-0.5" style="font-size: 0.68rem; font-weight: 600;">EU <%= shoeSize %></span>
+                              <span class="badge bg-white text-dark border px-1.5 py-0.5" style="font-size: 0.68rem; font-weight: 600;"><%= shoeSize ? 'EU ' + shoeSize : 'Size n/a' %></span>
                               <span>x<%= item.itemQuantity %></span>
                               <span class="text-dark fw-semibold">$<%= Number(item.itemPrice || (order.orderTotal / (order.orderItems.length || 1))).toFixed(2) %></span>
                             </div>
@@ -173,9 +181,21 @@
                   <div class="fw-bold text-dark mb-0 font-monospace" style="font-size: 0.95rem;">
                     $<%= Number(order.orderTotal || 0).toFixed(2) %>
                   </div>
-                  <div class="text-muted d-flex align-items-center gap-1" style="font-size: 0.74rem;">
-                    <i class="fa-regular fa-credit-card"></i>
-                    <span>Card Verified</span>
+                  <!-- Real payment state from the Payment ledger (was a hardcoded "Card Verified") -->
+                  <div class="d-flex align-items-center gap-1" style="font-size: 0.74rem;">
+                    <% if (order.paymentData && order.paymentData.paymentStatus === 'PAID') { %>
+                      <i class="fa-solid fa-circle-check text-success"></i>
+                      <span class="text-success fw-semibold">Paid · <%= order.paymentData.paymentMethod %></span>
+                    <% } else if (order.paymentData && order.paymentData.paymentStatus === 'REFUNDED') { %>
+                      <i class="fa-solid fa-rotate-left text-secondary"></i>
+                      <span class="text-secondary fw-semibold">Refunded · <%= order.paymentData.paymentMethod %></span>
+                    <% } else if (order.orderStatus === 'PAUSE') { %>
+                      <i class="fa-regular fa-clock text-warning"></i>
+                      <span class="text-warning fw-semibold">Awaiting payment</span>
+                    <% } else { %>
+                      <i class="fa-regular fa-circle-question text-muted"></i>
+                      <span class="text-muted">No payment record</span>
+                    <% } %>
                   </div>
                 </td>
 
@@ -195,9 +215,9 @@
                           data-display-id="#KX-<%= String(order._id).slice(-6).toUpperCase() %>"
                           data-status="<%= order.orderStatus %>"
                           data-customer="<%= (order.memberData && order.memberData.memberNick) ? order.memberData.memberNick : 'Customer' %>"
-                          data-phone="<%= (order.memberData && order.memberData.memberPhone) ? order.memberData.memberPhone : 'N/A' %>"
+                          data-phone="<%= order.orderPhone || ((order.memberData && order.memberData.memberPhone) ? order.memberData.memberPhone : 'N/A') %>"
                           data-email="<%= (order.memberData && order.memberData.memberEmail) ? order.memberData.memberEmail : 'N/A' %>"
-                          data-address="<%= (order.memberData && order.memberData.memberAddress) ? order.memberData.memberAddress : 'Tashkent, Uzbekistan' %>"
+                          data-address="<%= order.orderAddress || ((order.memberData && order.memberData.memberAddress) ? order.memberData.memberAddress : 'N/A') %>"
                           data-total="<%= Number(order.orderTotal || 0).toFixed(2) %>"
                           data-date="<%= new Date(order.createdAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric', hour: '2-digit', minute: '2-digit' }) %>">
                     <i class="fa-solid fa-receipt me-1"></i> Slip
@@ -212,8 +232,17 @@
                               class="btn-brand-dark rounded-2 px-3 py-1 fw-semibold status-step-btn"
                               style="font-size: 0.8rem;"
                               data-id="<%= order._id %>" 
-                              data-next="PROCESS">
-                        <i class="fa-solid fa-truck-fast me-1"></i> Ship Order
+                              data-next="PROCESS"
+                              data-confirm="Confirm that payment for this order was received?">
+                        <i class="fa-solid fa-money-check-dollar me-1"></i> Confirm Payment
+                      </button>
+                      <button type="button"
+                              class="btn btn-sm btn-outline-danger rounded-2 px-2 py-1 status-step-btn ms-1"
+                              style="font-size: 0.78rem;"
+                              data-id="<%= order._id %>"
+                              data-next="DELETE"
+                              data-confirm="Cancel this order? Reserved stock will be returned.">
+                        Cancel
                       </button>
                     <% } else if (order.orderStatus === 'PROCESS') { %>
                       <button type="button" 
@@ -223,6 +252,18 @@
                               data-next="FINISH">
                         <i class="fa-solid fa-circle-check me-1"></i> Mark Delivered
                       </button>
+                      <button type="button"
+                              class="btn btn-sm btn-outline-danger rounded-2 px-2 py-1 status-step-btn ms-1"
+                              style="font-size: 0.78rem;"
+                              data-id="<%= order._id %>"
+                              data-next="DELETE"
+                              data-confirm="Cancel this paid order? Stock is returned and the payment is marked as refunded — refund the customer yourself.">
+                        Cancel
+                      </button>
+                    <% } else if (order.orderStatus === 'DELETE') { %>
+                      <span class="badge bg-light text-danger border px-2.5 py-1.5 rounded-2 fw-semibold" style="font-size: 0.75rem;">
+                        <i class="fa-solid fa-ban me-1"></i> Cancelled
+                      </span>
                     <% } else { %>
                       <span class="badge bg-light text-secondary border px-2.5 py-1.5 rounded-2 fw-semibold" style="font-size: 0.75rem;">
                         <i class="fa-solid fa-check-double me-1 text-success"></i> Completed

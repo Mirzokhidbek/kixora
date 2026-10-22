@@ -465,7 +465,7 @@
     <div class="auth-form-panel">
       <!-- Top Language Selector -->
       <div class="d-flex justify-content-end mb-2">
-        <a href="javascript:void(0)" class="lang-pill-btn">
+        <a href="#" class="lang-pill-btn">
           <i class="fa-solid fa-globe text-muted"></i>
           <span>English</span>
           <i class="fa-solid fa-chevron-down text-muted" style="font-size: 0.65rem;"></i>
@@ -530,7 +530,7 @@
               <input type="checkbox" name="rememberMe" checked />
               <span style="color: #475569; font-size: 0.88rem; font-weight: 600;">Remember me</span>
             </label>
-            <a href="javascript:void(0)" onclick="alert('Please contact KIXORA Master Director to reset your administrative credentials.')" class="forgot-link">
+            <a href="#" id="forgotPasswordLink" class="forgot-link">
               Forgot password?
             </a>
           </div>
@@ -560,7 +560,7 @@
 </div>
 
 <!-- Password Toggle Script -->
-<script>
+<script nonce="<%= cspNonce %>">
   $(document).ready(function() {
     $('#togglePasswordBtn').on('click', function() {
       const passwordInput = $('#adminPasswordInput');

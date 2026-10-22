@@ -85,6 +85,10 @@ export const productCreateSchema = z.object({
   productStatus: z.nativeEnum(ProductStatus).optional(),
   productSize: z.nativeEnum(ProductSize).optional(),
   productDesc: optionalText(2000),
+  productMaterial: optionalText(100),
+  productMidsole: optionalText(100),
+  productOutsole: optionalText(100),
+  productWeight: optionalText(50),
   productSizes: commaList(z.coerce.number().min(10).max(60)),
   productColors: commaList(z.string().trim().min(1).max(30)),
 });
@@ -141,15 +145,32 @@ export const adminReviewReplySchema = z.object({
 });
 
 // ---------- Order ----------
-export const orderCreateSchema = z
+export const orderItemsSchema = z
   .array(
     z.object({
       productId: objectId,
       itemQuantity: z.coerce.number().int().min(1).max(20),
+      itemSize: z.coerce.number().min(10).max(60).optional(),
     })
   )
   .min(1)
   .max(50);
+
+export const shippingSchema = z.object({
+  recipient: userText(2, 80),
+  phone: z.string().trim().regex(/^\+?[0-9\s()-]{7,20}$/, "Invalid phone number"),
+  address: userText(5, 300),
+  note: userText(0, 300).optional(),
+});
+
+export const orderCreateSchema = z.object({
+  items: orderItemsSchema,
+  shipping: shippingSchema,
+});
+
+export const orderPaySchema = z.object({
+  orderId: objectId,
+});
 
 export const orderInquirySchema = z.object({
   page: z.coerce.number().int().min(1).max(10_000).default(1),

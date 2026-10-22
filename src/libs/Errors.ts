@@ -30,11 +30,13 @@ export enum Message {
   INVALID_ID = "Invalid id format!",
   INVALID_INPUT = "Invalid input!",
   INVALID_GOOGLE_TOKEN = "Google sign-in could not be verified!",
+  INVALID_SIZE = "The selected size is not available for this product!",
   OUT_OF_STOCK = "Some products are unavailable or out of stock!",
   INVALID_STATUS_TRANSITION = "This order status change is not allowed!",
   INVALID_FILE = "Only JPG, PNG, WEBP or GIF images up to 5MB are allowed!",
   ADMIN_EXISTS = "An admin account already exists!",
   AI_UNAVAILABLE = "AI search is temporarily unavailable!",
+  TEST_PAYMENT_DISABLED = "Test payments are disabled. Please wait for the store to confirm your payment.",
   REVIEW_NOT_ALLOWED = "Only customers who received this product can review it!",
 }
 
