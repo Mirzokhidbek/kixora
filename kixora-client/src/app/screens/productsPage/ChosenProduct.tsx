@@ -52,7 +52,8 @@ export function ChosenProduct({ onAdd }: ChosenProductProps) {
   const [reviewSummary, setReviewSummary] = useState<ReviewSummary | null>(null);
   const handleSummaryChange = useCallback((s: ReviewSummary) => setReviewSummary(s), []);
 
-  const sizeList = [
+  // Only the sizes this product is actually offered in (the server rejects any other size)
+  const defaultSizes = [
     ProductSize.SIZE_38,
     ProductSize.SIZE_39,
     ProductSize.SIZE_40,
@@ -61,7 +62,9 @@ export function ChosenProduct({ onAdd }: ChosenProductProps) {
     ProductSize.SIZE_43,
     ProductSize.SIZE_44,
     ProductSize.SIZE_45,
-  ];
+  ] as string[];
+  const sizeList: string[] = product?.productSizes?.length ? product.productSizes.map(String) : defaultSizes;
+  const effectiveSize = sizeList.includes(selectedSize) ? selectedSize : sizeList[0];
 
   useEffect(() => {
     if (productId) {
@@ -118,7 +121,7 @@ export function ChosenProduct({ onAdd }: ChosenProductProps) {
 
   const handleAddToCart = () => {
     if (onAdd && product) {
-      onAdd(product, quantity, Number(selectedSize) || 42, "Standard");
+      onAdd(product, quantity, Number(effectiveSize), "Standard");
     }
   };
 
@@ -333,7 +336,7 @@ export function ChosenProduct({ onAdd }: ChosenProductProps) {
 
                 <Box sx={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: 1 }}>
                   {sizeList.map((size) => {
-                    const isSelected = selectedSize === size;
+                    const isSelected = effectiveSize === size;
                     return (
                       <Button
                         key={size}

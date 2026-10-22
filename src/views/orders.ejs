@@ -181,7 +181,7 @@
                   <div class="fw-bold text-dark mb-0 font-monospace" style="font-size: 0.95rem;">
                     $<%= Number(order.orderTotal || 0).toFixed(2) %>
                   </div>
-                  <!-- Real payment state from the Payment ledger (was a hardcoded "Card Verified") -->
+                  <%# Real payment state from the Payment ledger (replaces a hardcoded card label) %>
                   <div class="d-flex align-items-center gap-1" style="font-size: 0.74rem;">
                     <% if (order.paymentData && order.paymentData.paymentStatus === 'PAID') { %>
                       <i class="fa-solid fa-circle-check text-success"></i>

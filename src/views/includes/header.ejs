@@ -172,8 +172,8 @@
 
   <!-- Active Tab Highlight Script -->
   <script nonce="<%= cspNonce %>">
-    // Broken product images fall back to a placeholder (replaces inline onerror="...",
-    // which the Content-Security-Policy blocks). Capturing phase: img errors don't bubble.
+    // Broken product images fall back to a placeholder (inline error handlers are
+    // blocked by the Content-Security-Policy). Capturing phase: img errors don't bubble.
     document.addEventListener('error', function (e) {
       var img = e.target;
       if (img && img.tagName === 'IMG' && img.dataset.fallbackSrc && img.src.indexOf(img.dataset.fallbackSrc) === -1) {

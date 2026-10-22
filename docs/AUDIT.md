@@ -210,3 +210,70 @@ Bundan tashqari HTTP orqali tekshirilgan hujumlar: eski kodda yozilgan kalit bil
 **Tekshiruv:** vaqtinchalik bazada 11/11 API stsenariy o'tdi: SVG fayl, bo'sh so'rov va session'siz so'rov rad etildi; rasm almashtirildi; bir nechta rasm bilan almashtirildi; eski fayl diskdan o'chdi; noma'lum mahsulot uchun 404. Brauzerda "Missing" belgisi, yangi rasm ko'rinishi va saqlashdan keyin katalogda yangi rasm tekshirildi. Unit testlar 18/18.
 
 **Hodisa:** 2-bosqichdagi test tozalashida fayllarni yaratilish vaqti bo'yicha o'chirish natijasida foydalanuvchining "Nike Dunk Low." rasmi o'chib ketgan edi. Endi testlar faqat o'zlari yaratgan fayllarni aniq ro'yxat bo'yicha o'chiradi. Foydalanuvchi rasmni qayta yukladi, fayl joyida (`200 image/png`).
+
+---
+
+## 10. Qolgan kamchiliklar tuzatildi — 4-bosqich
+
+Qarorlar (foydalanuvchi bilan kelishilgan): to'lov hozircha **test rejimi** (haqiqiy provayder keyin ulanadi), rasmlar **diskda** (lekin papka sozlanadigan), **Redis** ulanadi.
+
+### Topilgan va tuzatilgan muammolar
+
+| ID | Muammo | Yechim | Holat |
+|---|---|---|---|
+| P-1 | **To'lovsiz "to'langan" buyurtma.** Klient buyurtma yaratib, o'zi darhol `PROCESS` ga o'tkazardi. | Foydalanuvchi endi `PAUSE→PROCESS` qila olmaydi. To'lovni faqat server tasdiqlaydi: test provayder (`POST /payment/test/pay`, faqat `PAYMENT_MODE=test` bo'lsa) yoki admin ("Confirm Payment" tugmasi, `MANUAL`). `Payment` jadvali qo'shildi (har buyurtmaga bitta yozuv, unique index). Bekor qilinganda yozuv `REFUNDED` bo'ladi. Production'da standart rejim `manual`. | ✅ |
+| P-2 | Checkout'da **soxta karta raqami** ("8600 •••• 4589") va hech narsaga ulanmagan karta/Payme variantlari bor edi. | Checkout faqat serverdagi `/payment/config` bo'yicha mavjud usullarni ko'rsatadi. | ✅ |
+| P-3 | Admin'da har bir buyurtmada **"Card Verified"** deb yozilgan edi. | Endi haqiqiy holat ko'rsatiladi: Paid · TEST/MANUAL, Refunded yoki "Awaiting payment". | ✅ |
+| P-4 | **Manzil saqlanmasdi:** checkout manzilni so'rardi, lekin serverga yubormasdi. | `orderRecipient`, `orderPhone`, `orderAddress` va `orderNote` buyurtmaga yoziladi (validatsiya bilan) va admin'da hamda chekda ko'rinadi. | ✅ |
+| P-5 | **O'lcham saqlanmasdi.** Admin va "Orders" sahifasi soxta o'lchamni (birinchi o'lcham yoki "42") ko'rsatardi. | Har bir buyurtma qatorida `itemSize` saqlanadi va mahsulotda shu o'lcham borligi server tomonida tekshiriladi. Mahsulot sahifasi faqat mavjud o'lchamlarni taklif qiladi. | ✅ |
+| P-6 | **Yetkazish narxi uch joyda har xil edi:** checkout va savat $10, server esa $5 olardi. | Umumiy qoida (`kixora-client/src/lib/pricing.ts`), server qoidasi bilan bir xil. | ✅ |
+| P-7 | **Soxta promo-kod:** "KIXORA10" savatda 10% chegirma ko'rsatardi, server esa to'liq narxni olardi. | Promo maydoni olib tashlandi (serverda promo tizimi yo'q). | ✅ |
+| F-1 | **Sahifalash soxta edi** (`count={3}`). | API jami sonni `X-Total-Count` sarlavhasida qaytaradi (CORS orqali ochiq), klient haqiqiy sahifalar sonini hisoblaydi va "Showing X of N" ko'rsatadi. | ✅ |
+| F-2 | **"Specifications" hamma mahsulot uchun bir xil edi** ("Carbon Shank", "290g"). Tavsif bo'sh bo'lsa, umumiy reklama matni chiqardi. | Mahsulotga material, midsole, outsole va og'irlik maydonlari qo'shildi (admin yaratish va tahrirlash formalarida). Tab faqat haqiqiy ma'lumotni ko'rsatadi. | ✅ |
+| F-3 | **Har bir email ro'yxatdan o'tishida bir xil soxta telefon** ("+998901234567") yozilardi. Har qanday 400 xatosi "allaqachon ro'yxatdan o'tgan" deb ko'rsatilardi. | Telefon yuborilmaydi. Faqat haqiqiy takror (409) shunday xabar beradi. | ✅ |
+| F-4 | Login'dagi **"Forgot password?" hech narsa qilmasdi.** Maxfiylik siyosati "PCI-DSS" va karta to'lovlari haqida noto'g'ri da'vo qilardi. | Haqiqiy holatga mos matn qo'yildi. | ✅ |
+| F-5 | **AI qidiruv xatolari yashirilardi** (bo'sh natija ko'rsatilardi). | Haqiqiy sabab ko'rsatiladi (503 yoki 429). | ✅ |
+| S-9 | **JWT `localStorage` da saqlanar va javob tanasida qaytarilardi.** | Token faqat httpOnly cookie'da. Production'da API Vercel orqali bitta domen ostida ishlaydi (`vercel.json`: `/api/*` → Railway), shuning uchun cookie birinchi tomon cookie'si bo'ladi. Klientdagi eski `access_token` avtomatik o'chiriladi. | ✅ |
+| S-18 | **Bloklangan foydalanuvchining tokeni 24 soat ishlardi.** | Har so'rovda akkaunt statusi tekshiriladi (30 soniyalik kesh). Admin statusni o'zgartirganda kesh darhol o'chiriladi. | ✅ |
+| S-19 | **CSP o'chiq edi.** | Har bir so'rov uchun nonce bilan CSP yoqildi: `script-src 'self' 'nonce-…' + CDN`, `script-src-attr 'none'`. Inline `onclick`/`onerror` handler'lar JS'ga ko'chirildi. Production'da `upgrade-insecure-requests` qo'shiladi. | ✅ |
+| D-3 | Rate limit va keshlar har jarayonda alohida edi. | `REDIS_URL` berilsa, rate limit (`rate-limit-redis`), AI kesh va status kesh Redis'da bo'ladi. PM2 Redis bo'lsa `max` nusxa, bo'lmasa 1 nusxa ishga tushiradi. | ✅ |
+| D-8 | Rasmlar konteyner diskida yo'qolishi mumkin. | `UPLOAD_DIR`: Railway Volume'ga yo'naltirish mumkin. DB'dagi yo'l formati (`public/uploads/...`) o'zgarmaydi. | ✅ (S3 ga o'tish ixtiyoriy) |
+| D-11 | Kuzatuv vositalari yo'q edi. | Strukturalangan logger (production'da JSON qatorlar), access logda query string yo'q, ixtiyoriy Sentry (`SENTRY_DSN`, shaxsiy ma'lumot yuborilmaydi). | ✅ |
+| D-12 | CI yo'q edi. | `.github/workflows/ci.yml`: backend uchun typecheck, test va build; klient uchun typecheck, lint, test va build. | ✅ (GitHub'da hali ishga tushirilmagan) |
+| D-13 | `memberNick` unique emas edi. | Unique index (`nestar` da takroriy niklar yo'q, tekshirildi). Google signup'dagi poyga holatida qayta urinadi. | ✅ |
+| D-14 | `mongoose@6` eskirgan edi. | `mongoose@8.24`. | ✅ |
+| A-12 | Katta komponentlar. | `AuthModal` 948 → 332 qator (AuthField, LoginForm, SignupForm, AuthShowcase, GoogleButton, PolicyDialog). `CheckoutModal` 617 → 238 qator (Shipping, Payment va Review qadamlari). `AISearchDialog` 730 → 399 qator (AIPopularRequests, AIRecommendation, AIProductCard). | ✅ |
+| C-8 | Klientda testlar yo'q edi. | Vitest: narx, yetkazish formasi va rasm URL'i bo'yicha 13 ta test. | ✅ |
+| — | `ai-plugin.json` noto'g'ri manzilga ishora qilardi. ChatGPT plaginlari 2024 yilda yopilgan. | Fayl o'chirildi (`llms.txt` qoldi). | ✅ |
+
+### Ongli qaror: state boshqaruvi (A-11)
+Uchta mexanizm qoladi, lekin har birining vazifasi aniq belgilandi. Ularni birlashtirish katta refaktor va hozir xato keltirib chiqarmaydi.
+- **Redux:** sahifalar uchun serverdan kelgan ma'lumotlar.
+- **Context:** auth sessiyasi.
+- **Modul darajasidagi store'lar** (`useSyncExternalStore`): saqlanadigan klient holati, ya'ni wishlist va savat.
+
+### Tekshiruv (4-bosqich)
+Testlar to'liq alohida muhitda o'tkazildi: vaqtinchalik `kixora_e2e_*` bazasi, alohida Redis konteyneri, `UPLOAD_DIR=/tmp/...`. Foydalanuvchining 3001/8080 dagi server'lari va `nestar` bazasiga tegilmadi.
+
+| Tekshiruv | Natija |
+|---|---|
+| Backend unit testlar | ✅ 21/21 |
+| Klient unit testlar (Vitest) | ✅ 13/13 |
+| Asosiy E2E (to'lov oqimi bilan) | ✅ 31/31 |
+| Like va review E2E | ✅ 28/28 |
+| Rasm almashtirish E2E (`UPLOAD_DIR` bilan) | ✅ 11/11 |
+| 4-bosqich E2E: token tanada yo'q, takroriy nik 409, CSP nonce, `X-Total-Count`, spetsifikatsiyalar, manzil va o'lcham, admin to'lov tasdig'i va refund, bloklash darhol ta'sir qilishi | ✅ 21/21 |
+| Ikkita production nusxa bitta Redis bilan: rate-limit hisoblagichi umumiy (1493 → 1492 → 1491 → 1490), JSON loglar, production'da to'lov rejimi `manual` | ✅ |
+| Brauzer: login (token `localStorage` da yo'q), mahsulot sahifasi (haqiqiy o'lchamlar va spetsifikatsiyalar), savat → checkout → test to'lovi → "Active shipments", admin buyurtmalarida manzil, EU 41 va "Paid · TEST", admin sahifalarida CSP buzilishi yo'q | ✅ |
+
+### Deploy'dan oldin (qo'shimcha qadamlar)
+1. **Vercel:** `VITE_API_URL` ni `/api` ga o'zgartiring yoki o'chirib tashlang (production'da standart qiymat `/api`). Rewrite qoidasi `kixora-client/vercel.json` da.
+2. **Railway:**
+   - `PAYMENT_MODE=manual` (standart). Demo uchun `test` qo'yish mumkin.
+   - Volume ulab, `UPLOAD_DIR=/data/uploads` qo'ying va mavjud `public/uploads` fayllarini shu yerga ko'chiring.
+   - Ixtiyoriy: `REDIS_URL`, `SENTRY_DSN`.
+3. Klient va backend'ni **birga** deploy qiling: buyurtma API'si o'zgardi (`{ items, shipping }`), JWT esa endi javob tanasida qaytmaydi.
+4. Eski buyurtmalarda manzil va o'lcham yo'q. Admin'da ular "No shipping address" va "Size n/a" deb ko'rinadi.
+
+### Haqiqiy to'lov provayderini ulash (keyingi qadam)
+`src/services/Payment.service.ts` — tayyor joy. Payme yoki Click webhook'i imzoni tekshirib, `orderService.markPaid(orderId, …, "provider", memberId, providerTxnId)` ni chaqiradi. Buyurtma holati, to'lov yozuvi va takror to'lovdan himoya allaqachon ishlaydi.
