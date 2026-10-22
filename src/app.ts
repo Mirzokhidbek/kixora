@@ -53,7 +53,7 @@ app.use(
 
 // Static assets (admin css/js/img) and uploaded images
 app.use(express.static(path.resolve("src/public")));
-app.use("/uploads", express.static(path.resolve("public/uploads")));
+app.use("/uploads", express.static(env.uploadDir));
 app.use("/uploads", express.static(path.resolve("uploads"))); // legacy upload location
 app.use("/uploads", (_req, res) => {
   res.status(404).send("File not found");

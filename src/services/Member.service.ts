@@ -5,6 +5,7 @@ import { MemberStatus, MemberType } from "../libs/enums/member.enum";
 import bcrypt from "bcryptjs";
 import crypto from "crypto";
 import { escapeRegex, shapeIntoMongooseObjectId } from "../libs/config";
+import { cache } from "../libs/cache";
 import { z } from "zod";
 import {
   adminLoginSchema,
@@ -268,6 +269,8 @@ class MemberService {
       .lean<Member>()
       .exec();
     if (!result) throw new Errors(HTTPCode.NOT_FOUND, Message.UPDATE_FAILED);
+    // takes effect on the member's very next request (see middlewares/auth.ts)
+    await cache.del(`member:status:${String(result._id)}`);
     return result;
   }
 

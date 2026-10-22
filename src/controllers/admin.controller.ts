@@ -5,6 +5,7 @@ import OrderService from "../services/Order.service";
 import ProductService from "../services/Product.service";
 import ReviewService from "../services/Review.service";
 import { sendAdminAlert } from "../libs/adminResponse";
+import { storedPath } from "../libs/uploader";
 import {
   adminListSchema,
   adminLoginSchema,
@@ -80,7 +81,7 @@ const adminController = {
   processSignup: async (req: Request, res: Response) => {
     try {
       const input = parse(adminSignupSchema, req.body);
-      const memberImage = req.file ? req.file.path.replace(/\\/g, "/") : undefined;
+      const memberImage = req.file ? storedPath(req.file) : undefined;
       const member = await memberService.processSignup({ ...input, memberImage });
       await establishSession(req, member);
       res.redirect("/admin/product/all");
@@ -125,7 +126,7 @@ const adminController = {
       const input = parse(productCreateSchema, req.body);
       await productService.createNewProduct({
         ...input,
-        productImages: files.map((f) => f.path.replace(/\\/g, "/")),
+        productImages: files.map(storedPath),
       });
       sendAdminAlert(res, "Successfully created!", "/admin/product/all");
     } catch (err) {
@@ -146,7 +147,7 @@ const adminController = {
     if (!files.length) throw new Errors(HTTPCode.BAD_REQUEST, Message.INVALID_FILE);
     const data = await productService.replaceProductImages(
       String(req.params.id),
-      files.map((f) => f.path.replace(/\\/g, "/"))
+      files.map(storedPath)
     );
     res.status(HTTPCode.OK).json({ data });
   },

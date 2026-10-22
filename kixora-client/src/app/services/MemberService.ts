@@ -3,7 +3,7 @@
  * MemberService.ts - Client API Service for User & Restaurant Authentication
  * ============================================================================
  * Handles Member Signup, Login, Google OAuth, Profile Updates, and Session
- * verification with Bearer token header injection and cookie credentials.
+ * verification. Auth uses the httpOnly cookie set by the server (never localStorage).
  */
 
 import axios from "axios";
@@ -79,9 +79,6 @@ class MemberService {
   public async login(input: LoginInput): Promise<Member> {
     const url = `${this.path}/member/login`;
     const result = await axios.post(url, input, { withCredentials: true });
-    if (result.data?.accessToken) {
-      localStorage.setItem("access_token", result.data.accessToken);
-    }
     const member = result.data?.member || result.data;
     return member;
   }
@@ -93,9 +90,6 @@ class MemberService {
   public async googleLogin(credential: string): Promise<Member> {
     const url = `${this.path}/member/google-login`;
     const result = await axios.post(url, { credential }, { withCredentials: true });
-    if (result.data?.accessToken) {
-      localStorage.setItem("access_token", result.data.accessToken);
-    }
     const member = result.data?.member || result.data;
     return member;
   }
@@ -103,21 +97,16 @@ class MemberService {
   public async signup(input: MemberInput): Promise<Member> {
     const url = `${this.path}/member/signup`;
     const result = await axios.post(url, input, { withCredentials: true });
-    if (result.data?.accessToken) {
-      localStorage.setItem("access_token", result.data.accessToken);
-    }
     const member = result.data?.member || result.data;
     return member;
   }
 
   public async logout(): Promise<boolean> {
     try {
-      localStorage.removeItem("access_token");
       const url = `${this.path}/member/logout`;
       const result = await axios.post(url, {}, { withCredentials: true });
       return result.data.logout;
     } catch {
-      localStorage.removeItem("access_token");
       return true;
     }
   }

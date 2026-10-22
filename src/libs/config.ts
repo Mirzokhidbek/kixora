@@ -1,4 +1,5 @@
 import crypto from "crypto";
+import path from "path";
 import mongoose from "mongoose";
 import Errors, { HTTPCode, Message } from "./Errors";
 
@@ -46,6 +47,13 @@ export const env = {
     ? []
     : devOrigins,
   geminiApiKey: process.env.GEMINI_API_KEY || "",
+  /**
+   * Where uploaded images are written. On Railway point this at a mounted Volume
+   * (e.g. /data/uploads) so uploads survive redeploys. URLs stay /uploads/<folder>/<file>.
+   */
+  uploadDir: path.resolve(process.env.UPLOAD_DIR || "public/uploads"),
+  redisUrl: process.env.REDIS_URL || "",
+  sentryDsn: process.env.SENTRY_DSN || "",
   firebaseProjectId: process.env.FIREBASE_PROJECT_ID || "kixora-99964",
   googleClientId: process.env.GOOGLE_CLIENT_ID || "",
   /**

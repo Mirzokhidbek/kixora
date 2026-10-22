@@ -1,5 +1,6 @@
 import { CookieOptions, Request, Response } from "express";
 import { HTTPCode } from "../libs/Errors";
+import { storedPath } from "../libs/uploader";
 import MemberService from "../services/Member.service";
 import AuthService from "../services/Auth.service";
 import { AUTH_TIMER, env } from "../libs/config";
@@ -25,9 +26,9 @@ const authCookieOptions: CookieOptions = {
 async function sendAuthResponse(res: Response, member: Member, status: HTTPCode) {
   const token = await authService.createToken(member);
   res.cookie("accessToken", token, { ...authCookieOptions, maxAge: AUTH_TIMER * 3600 * 1000 });
-  // accessToken is still returned for clients on a different site where
-  // third-party cookies are blocked (see docs/AUDIT.md, item S-9).
-  res.status(status).json({ member, accessToken: token });
+  // The token is only in the httpOnly cookie (not in the body), so page scripts can
+  // never read it. The SPA reaches the API same-site via the /api proxy (docs/AUDIT.md S-9).
+  res.status(status).json({ member });
 }
 
 const memberController = {
@@ -70,7 +71,7 @@ const memberController = {
 
   updateMember: async (req: Request, res: Response) => {
     const input = parse(memberUpdateSchema, req.body);
-    const update = req.file ? { ...input, memberImage: req.file.path.replace(/\\/g, "/") } : input;
+    const update = req.file ? { ...input, memberImage: storedPath(req.file) } : input;
     res.status(HTTPCode.OK).json(await memberService.updateMember(req.member!, update));
   },
 };
