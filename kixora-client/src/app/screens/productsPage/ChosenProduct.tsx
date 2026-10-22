@@ -9,8 +9,6 @@ import {
   Button,
   IconButton,
   Divider,
-  Snackbar,
-  Alert,
   Breadcrumbs,
   Link,
   Rating,

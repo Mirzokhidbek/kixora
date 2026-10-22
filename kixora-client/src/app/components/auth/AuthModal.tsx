@@ -75,13 +75,10 @@ export function AuthModal({ open, onClose, onSuccess }: AuthModalProps) {
         throw new Error("No email associated with this Google account.");
       }
 
+      // Send the Firebase-signed ID token; the server verifies it before trusting any claim
+      const idToken = await user.getIdToken();
       const memberService = new MemberService();
-      const member = await memberService.googleLogin("", {
-        googleId: user.uid,
-        email: user.email,
-        name: user.displayName || user.email.split("@")[0],
-        picture: user.photoURL || "",
-      });
+      const member = await memberService.googleLogin(idToken);
 
       const nick = member?.memberNick || user.displayName || user.email?.split("@")[0] || "User";
       setSuccessMsg(`Welcome back, ${nick}! ✨`);
@@ -155,8 +152,8 @@ export function AuthModal({ open, onClose, onSuccess }: AuthModalProps) {
       setErrorMsg("Please enter a password.");
       return;
     }
-    if (signupPassword.length < 4) {
-      setErrorMsg("Password must be at least 4 characters long.");
+    if (signupPassword.length < 6) {
+      setErrorMsg("Password must be at least 6 characters long.");
       return;
     }
 

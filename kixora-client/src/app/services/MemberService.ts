@@ -10,14 +10,6 @@ import axios from "axios";
 import { serverApi } from "../../lib/config";
 import type { Member, LoginInput, MemberInput } from "../../lib/types/member";
 
-// Setup global Axios interceptor for Bearer token authorization
-axios.interceptors.request.use((config) => {
-  const token = localStorage.getItem("access_token");
-  if (token && config.headers) {
-    config.headers.Authorization = `Bearer ${token}`;
-  }
-  return config;
-});
 
 class MemberService {
   private readonly path: string;
@@ -94,13 +86,13 @@ class MemberService {
     return member;
   }
 
-  public async googleLogin(credential: string, userData?: any): Promise<Member> {
+  /**
+   * Google sign-in: only the signed ID token is sent; the server verifies its
+   * signature and reads the email/name from it (client-supplied profile data is never trusted).
+   */
+  public async googleLogin(credential: string): Promise<Member> {
     const url = `${this.path}/member/google-login`;
-    const result = await axios.post(
-      url,
-      { credential, userData },
-      { withCredentials: true }
-    );
+    const result = await axios.post(url, { credential }, { withCredentials: true });
     if (result.data?.accessToken) {
       localStorage.setItem("access_token", result.data.accessToken);
     }

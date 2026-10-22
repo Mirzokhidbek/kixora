@@ -27,7 +27,7 @@ class OrderService {
     const orderItems: OrderItemInput[] = cartItems.map((item) => ({
       productId: item._id,
       itemQuantity: item.quantity,
-      itemPrice: item.price,
+      // no price: the server always charges the catalog price
     }));
 
     const url = `${this.path}/order/create`;
