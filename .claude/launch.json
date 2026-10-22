@@ -3,8 +3,8 @@
   "configurations": [
     {
       "name": "server",
-      "runtimeExecutable": "bash",
-      "runtimeArgs": ["-c", "export MONGO_URL=\"${MONGO_URL:-$(grep '^MONGO_DEV=' .env | cut -d= -f2-)}\"; npm run dev"],
+      "runtimeExecutable": "npm",
+      "runtimeArgs": ["run", "dev"],
       "port": 3001
     },
     {
