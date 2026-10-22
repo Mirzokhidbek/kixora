@@ -70,6 +70,8 @@
             <th scope="col">Price</th>
             <th scope="col">Stock</th>
             <th scope="col">Views</th>
+            <th scope="col">Likes</th>
+            <th scope="col">Rating</th>
             <th scope="col">Status</th>
             <th scope="col" class="text-center">Edit</th>
             <th scope="col" class="text-center pe-4">Catalog Status</th>
@@ -123,6 +125,19 @@
                   <span class="text-muted small"><%= product.productViews || 0 %></span>
                 </td>
                 <td>
+                  <span class="text-muted small"><i class="fa-solid fa-heart text-danger me-1"></i><%= product.productLikes || 0 %></span>
+                </td>
+                <td>
+                  <% if (product.reviewCount) { %>
+                    <a class="text-decoration-none small fw-semibold text-dark" href="/admin/review/all">
+                      <i class="fa-solid fa-star text-warning me-1"></i><%= product.ratingAvg.toFixed(1) %>
+                      <span class="text-muted fw-normal">(<%= product.reviewCount %>)</span>
+                    </a>
+                  <% } else { %>
+                    <span class="text-muted small">—</span>
+                  <% } %>
+                </td>
+                <td>
                   <span id="status-badge-<%= product._id %>" class="badge-status <%= product.productStatus.toLowerCase() %>">
                     <%= product.productStatus %>
                   </span>
@@ -152,7 +167,7 @@
             <% }) %>
           <% } else { %>
             <tr>
-              <td colspan="11" class="text-center py-5 text-muted">
+              <td colspan="13" class="text-center py-5 text-muted">
                 <div class="p-4">
                   <i class="fa-solid fa-shoe-prints fa-2x mb-2 text-muted d-block opacity-50"></i>
                   <div class="fw-bold text-dark">No Footwear Models Available</div>

@@ -3,11 +3,15 @@ import Errors, { HTTPCode, Message } from "../libs/Errors";
 import MemberService from "../services/Member.service";
 import OrderService from "../services/Order.service";
 import ProductService from "../services/Product.service";
+import ReviewService from "../services/Review.service";
 import { sendAdminAlert } from "../libs/adminResponse";
 import {
   adminListSchema,
   adminLoginSchema,
   adminPointsSchema,
+  adminReviewListSchema,
+  adminReviewReplySchema,
+  adminReviewStatusSchema,
   adminSignupSchema,
   adminUserUpdateSchema,
   orderUpdateSchema,
@@ -20,6 +24,7 @@ import { Member, SessionMember } from "../libs/types/member";
 const memberService = new MemberService();
 const orderService = new OrderService();
 const productService = new ProductService();
+const reviewService = new ReviewService();
 
 const ADMIN_PAGE_SIZE = 25;
 
@@ -163,6 +168,35 @@ const adminController = {
   updateChosenOrder: async (req: Request, res: Response) => {
     const data = await orderService.updateOrderByAdmin(parse(orderUpdateSchema, req.body));
     res.status(HTTPCode.OK).json({ data });
+  },
+
+  // ---------- Review moderation ----------
+  getReviews: async (req: Request, res: Response) => {
+    const { page, status } = parse(adminReviewListSchema, req.query);
+    const { reviews, total, statusCounts } = await reviewService.getReviewsByAdmin(page, ADMIN_PAGE_SIZE, status);
+    const basePath = status ? `/admin/review/all?status=${status}&` : "/admin/review/all?";
+    res.render("reviews", {
+      reviews,
+      statusCounts,
+      activeStatus: status || "ALL",
+      pagination: { ...pagination(page, total, basePath), queryJoined: true },
+    });
+  },
+
+  updateReviewStatus: async (req: Request, res: Response) => {
+    const { reviewStatus } = parse(adminReviewStatusSchema, req.body);
+    const data = await reviewService.setReviewStatus(String(req.params.id), reviewStatus);
+    res.status(HTTPCode.OK).json({ data });
+  },
+
+  replyToReview: async (req: Request, res: Response) => {
+    const { adminReply } = parse(adminReviewReplySchema, req.body);
+    const data = await reviewService.replyToReview(String(req.params.id), adminReply);
+    res.status(HTTPCode.OK).json({ data });
+  },
+
+  deleteReview: async (req: Request, res: Response) => {
+    res.status(HTTPCode.OK).json(await reviewService.deleteReviewByAdmin(String(req.params.id)));
   },
 };
 

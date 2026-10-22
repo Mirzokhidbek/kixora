@@ -6,7 +6,6 @@
  * price with strikethrough, and full-width Solid Black "Add to Cart →" button.
  */
 
-import { useState } from "react";
 import { useSelector } from "react-redux";
 import {
   Box,
@@ -24,6 +23,7 @@ import FavoriteBorderIcon from "@mui/icons-material/FavoriteBorder";
 import FavoriteIcon from "@mui/icons-material/Favorite";
 import AddShoppingCartIcon from "@mui/icons-material/AddShoppingCart";
 import ArrowForwardIcon from "@mui/icons-material/ArrowForward";
+import { useWishlist } from "../../hooks/useWishlist";
 import { useNavigate } from "react-router-dom";
 import { retrievePopularPicks } from "./selector";
 import { getImageUrl } from "../../../lib/config";
@@ -35,13 +35,13 @@ interface PopularPicksProps {
 export function PopularPicks({ onAdd }: PopularPicksProps) {
   const navigate = useNavigate();
   const popularPicks = useSelector(retrievePopularPicks);
-  const [favorites, setFavorites] = useState<string[]>([]);
+  // Hearts use the shared wishlist (persisted & synced to the account)
+  const { toggleWishlist, isInWishlist } = useWishlist();
 
-  const toggleFavorite = (e: React.MouseEvent, id: string) => {
+  const toggleFavorite = (e: React.MouseEvent, product: any) => {
     e.stopPropagation();
-    setFavorites((prev) =>
-      prev.includes(id) ? prev.filter((item) => item !== id) : [...prev, id]
-    );
+    if (product.isSample) return; // showcase cards are not real products
+    toggleWishlist(product);
   };
 
 
@@ -170,7 +170,7 @@ export function PopularPicks({ onAdd }: PopularPicksProps) {
         {/* 4-Column Product Grid */}
         <Grid container spacing={3}>
           {displayList.map((product: any, idx: number) => {
-            const isFav = favorites.includes(product._id);
+            const isFav = isInWishlist(product._id);
             const image = getImageUrl(product.productImages?.[0] || samplePicks[idx % 4].image);
             // Never invent discounts or old prices for real products
             const discount: string | undefined = product.discount;
@@ -242,7 +242,7 @@ export function PopularPicks({ onAdd }: PopularPicksProps) {
                     {/* Wishlist Button */}
                     <IconButton
                       size="small"
-                      onClick={(e) => toggleFavorite(e, product._id)}
+                      onClick={(e) => toggleFavorite(e, product)}
                       sx={{
                         bgcolor: "#ffffff",
                         border: "1px solid #e5e7eb",

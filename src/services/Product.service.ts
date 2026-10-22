@@ -6,6 +6,7 @@ import { ProductCollection, ProductStatus } from "../libs/enums/product.enum";
 import { T } from "../libs/types/common";
 import { Types } from "mongoose";
 import ViewService from "./View.service";
+import ProductLikeModel from "../models/ProductLike.model";
 import { ViewGroup } from "../libs/enums/view.enum";
 import { extractAISearchIntent } from "../libs/aiSearch";
 import { z } from "zod";
@@ -51,6 +52,7 @@ class ProductService {
       .exec();
     if (!foundProduct) throw new Errors(HTTPCode.NOT_FOUND, Message.NO_DATA_FOUND);
 
+    let result = foundProduct;
     if (memberId) {
       const isNewView = await this.viewService.recordView({
         memberId,
@@ -62,10 +64,12 @@ class ProductService {
           .findByIdAndUpdate(productId, { $inc: { productViews: 1 } }, { new: true })
           .lean<Product>()
           .exec();
-        if (updated) return updated;
+        if (updated) result = updated;
       }
+      const meLiked = Boolean(await ProductLikeModel.exists({ memberId, productId }));
+      return { ...result, meLiked };
     }
-    return foundProduct;
+    return result;
   }
 
   /** BSSR: Paginated product list for admin **/

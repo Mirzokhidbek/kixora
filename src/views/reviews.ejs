@@ -1,0 +1,152 @@
+<%- include('includes/header') %>
+
+<main class="container-fluid px-lg-5 my-4 flex-grow-1">
+  <!-- Title Bar -->
+  <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3 mb-4">
+    <div>
+      <div class="d-flex align-items-center gap-2 mb-1">
+        <h2 class="fw-bold text-dark mb-0 tracking-tight" style="font-size: 1.45rem;">Customer Reviews</h2>
+        <span class="badge bg-dark text-white rounded-pill px-2.5 py-1" style="font-size: 0.75rem; font-weight: 600;">
+          <%= statusCounts.ALL %> Reviews
+        </span>
+      </div>
+      <p class="text-muted mb-0 small">
+        Verified-buyer reviews. Hide abusive content, reply publicly, or delete spam. Ratings update automatically.
+      </p>
+    </div>
+  </div>
+
+  <!-- Status Filter (server-side) -->
+  <div class="admin-card p-3 mb-4">
+    <div class="d-flex flex-wrap gap-1.5">
+      <a class="filter-pill-btn text-decoration-none <%= activeStatus === 'ALL' ? 'active' : '' %>" href="/admin/review/all">
+        All (<%= statusCounts.ALL %>)
+      </a>
+      <a class="filter-pill-btn text-decoration-none <%= activeStatus === 'VISIBLE' ? 'active' : '' %>" href="/admin/review/all?status=VISIBLE">
+        Visible (<%= statusCounts.VISIBLE %>)
+      </a>
+      <a class="filter-pill-btn text-decoration-none <%= activeStatus === 'HIDDEN' ? 'active' : '' %>" href="/admin/review/all?status=HIDDEN">
+        Hidden (<%= statusCounts.HIDDEN %>)
+      </a>
+    </div>
+  </div>
+
+  <!-- Reviews Table -->
+  <div class="admin-table-container">
+    <div class="table-responsive">
+      <table class="table admin-table align-middle mb-0" id="reviewsTable">
+        <thead>
+          <tr>
+            <th scope="col" class="ps-4">Product</th>
+            <th scope="col">Customer</th>
+            <th scope="col">Rating</th>
+            <th scope="col" style="min-width: 280px;">Review</th>
+            <th scope="col">Date</th>
+            <th scope="col">Status</th>
+            <th scope="col" class="text-center pe-4">Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          <% if (reviews && reviews.length) { %>
+            <% reviews.forEach((review) => { %>
+              <tr id="review-row-<%= review._id %>">
+                <td class="ps-4">
+                  <div class="d-flex align-items-center gap-2">
+                    <% if (review.productData && review.productData.productImages && review.productData.productImages.length) { %>
+                      <img src="/<%= review.productData.productImages[0].replace('public/', '') %>" alt="" class="rounded-2" style="width: 38px; height: 38px; object-fit: cover;">
+                    <% } %>
+                    <span class="fw-bold text-dark" style="font-size: 0.85rem;">
+                      <%= review.productData ? review.productData.productName : 'Removed product' %>
+                    </span>
+                  </div>
+                </td>
+                <td>
+                  <span class="fw-semibold text-dark" style="font-size: 0.84rem;">
+                    <%= review.memberData ? review.memberData.memberNick : 'Deleted user' %>
+                  </span>
+                </td>
+                <td class="text-nowrap">
+                  <% for (let i = 1; i <= 5; i++) { %>
+                    <i class="fa-<%= i <= review.reviewRating ? 'solid' : 'regular' %> fa-star text-warning" style="font-size: 0.75rem;"></i>
+                  <% } %>
+                </td>
+                <td>
+                  <div class="text-dark" style="font-size: 0.84rem; white-space: pre-line;"><%= review.reviewComment %></div>
+                  <div class="mt-2 small <%= review.adminReply ? '' : 'd-none' %>" id="review-reply-<%= review._id %>">
+                    <span class="badge bg-dark me-1">Store reply</span>
+                    <span class="text-muted reply-text"><%= review.adminReply %></span>
+                  </div>
+                </td>
+                <td>
+                  <span class="text-muted" style="font-size: 0.78rem;">
+                    <%= new Date(review.createdAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) %>
+                  </span>
+                </td>
+                <td>
+                  <span id="review-badge-<%= review._id %>" class="badge-status <%= review.reviewStatus === 'VISIBLE' ? 'active' : 'block' %>">
+                    <%= review.reviewStatus %>
+                  </span>
+                </td>
+                <td class="text-center pe-4 text-nowrap">
+                  <button type="button" class="btn-brand-outline rounded-2 px-2.5 py-1 review-toggle-btn"
+                          style="font-size: 0.78rem;"
+                          data-id="<%= review._id %>"
+                          data-status="<%= review.reviewStatus %>">
+                    <%= review.reviewStatus === 'VISIBLE' ? 'Hide' : 'Show' %>
+                  </button>
+                  <button type="button" class="btn-brand-outline rounded-2 px-2.5 py-1 review-reply-btn"
+                          style="font-size: 0.78rem;"
+                          data-id="<%= review._id %>"
+                          data-reply="<%= review.adminReply %>">
+                    <i class="fa-solid fa-reply me-1"></i>Reply
+                  </button>
+                  <button type="button" class="btn btn-sm btn-outline-danger rounded-2 px-2.5 py-1 review-delete-btn"
+                          style="font-size: 0.78rem;"
+                          data-id="<%= review._id %>">
+                    <i class="fa-solid fa-trash"></i>
+                  </button>
+                </td>
+              </tr>
+            <% }) %>
+          <% } else { %>
+            <tr>
+              <td colspan="7" class="text-center py-5 text-muted">
+                <div class="p-4">
+                  <i class="fa-solid fa-comments fa-2x mb-2 text-muted d-block opacity-50"></i>
+                  <div class="fw-bold text-dark">No Reviews Yet</div>
+                  <p class="small text-muted mb-0">Customers can review products after their order is delivered.</p>
+                </div>
+              </td>
+            </tr>
+          <% } %>
+        </tbody>
+      </table>
+    </div>
+  </div>
+  <%- include('includes/pagination') %>
+
+  <!-- Reply Modal -->
+  <div class="modal fade" id="reviewReplyModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+      <form class="modal-content" id="reviewReplyForm">
+        <div class="modal-header">
+          <h5 class="modal-title fw-bold">Reply to Review</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body">
+          <input type="hidden" id="reviewReplyId">
+          <textarea class="form-control-modern w-100" id="reviewReplyText" rows="4" maxlength="1000"
+                    placeholder="Your public reply (leave empty to remove the reply)"></textarea>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-light" data-bs-dismiss="modal">Cancel</button>
+          <button type="submit" class="btn btn-dark" id="reviewReplySaveBtn">Save Reply</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</main>
+
+<script src="/js/reviews.js"></script>
+
+<%- include('includes/footer') %>

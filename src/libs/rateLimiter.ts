@@ -103,3 +103,19 @@ export const orderLimiter = rateLimit({
   },
 });
 
+
+/**
+ * 6. Likes & Reviews Limiter
+ * Stops scripted like-flipping and review spam.
+ */
+export const engagementLimiter = rateLimit({
+  windowMs: 1 * 60 * 1000, // 1 minute
+  max: isProduction ? 30 : 300,
+  standardHeaders: true,
+  legacyHeaders: false,
+  skip: (req: Request) => isLocalhost(req),
+  message: {
+    code: 429,
+    message: "Too many actions. Please slow down and try again in a minute.",
+  },
+});

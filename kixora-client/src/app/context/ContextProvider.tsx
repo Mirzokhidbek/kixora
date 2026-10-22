@@ -1,4 +1,4 @@
-import { useState, ReactNode } from "react";
+import { useCallback, useState, ReactNode } from "react";
 import type { Member } from "../../lib/types/member";
 import { GlobalContext } from "./GlobalContext";
 
@@ -13,14 +13,16 @@ export function ContextProvider({ children }: ContextProviderProps) {
   const [authMember, setAuthMemberState] = useState<Member | null>(initialMember);
   const [orderBuilder, setOrderBuilder] = useState<Date>(new Date());
 
-  const setAuthMember = (member: Member | null) => {
+  // Stable identity: effects that depend on setAuthMember must not re-run every render
+  // (an unstable function here caused an endless /member/detail request loop).
+  const setAuthMember = useCallback((member: Member | null) => {
     setAuthMemberState(member);
     if (member) {
       localStorage.setItem("member_data", JSON.stringify(member));
     } else {
       localStorage.removeItem("member_data");
     }
-  };
+  }, []);
 
   return (
     <GlobalContext.Provider
