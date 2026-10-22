@@ -2,7 +2,7 @@ import { Request, Response } from "express";
 import { HTTPCode } from "../libs/Errors";
 import ProductService from "../services/Product.service";
 import { shapeIntoMongooseObjectId } from "../libs/config";
-import { aiSearchSchema, parse, productInquirySchema } from "../libs/validation";
+import { aiSearchSchema, parse, productBatchSchema, productInquirySchema } from "../libs/validation";
 
 const productService = new ProductService();
 
@@ -14,6 +14,12 @@ const productController = {
     // Total for pagination travels in a header so the body stays a plain array (backward compatible)
     res.setHeader("X-Total-Count", String(total));
     res.status(HTTPCode.OK).json(products);
+  },
+
+  /** SPA: refresh bag items (current price, stock, availability) */
+  getProductsBatch: async (req: Request, res: Response) => {
+    const { ids } = parse(productBatchSchema, req.query);
+    res.status(HTTPCode.OK).json(await productService.getProductsBatch(ids));
   },
 
   /** SPA: Single product (+ unique view tracking for signed-in members) **/

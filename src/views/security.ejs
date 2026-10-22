@@ -1,0 +1,79 @@
+<%- include('includes/header') %>
+
+<main class="container-fluid px-lg-5 my-4 flex-grow-1">
+  <div class="mb-4">
+    <h2 class="fw-bold text-dark mb-1 tracking-tight" style="font-size: 1.45rem;">Security</h2>
+    <p class="text-muted mb-0 small">Two-step verification for your login, and the admin accounts of this store.</p>
+  </div>
+
+  <div class="row g-4">
+    <!-- Two-factor authentication -->
+    <div class="col-lg-5">
+      <div class="admin-card p-4 h-100">
+        <h5 class="fw-bold mb-2">Two-step verification (2FA)</h5>
+        <% if (totpEnabled) { %>
+          <p class="mb-3"><span class="badge-status active">ENABLED</span> A code from your authenticator app is required at every login.</p>
+          <label class="form-label small fw-bold text-muted">To turn it off, enter a current code</label>
+          <div class="d-flex gap-2">
+            <input type="text" id="disableCode" class="form-control-modern" inputmode="numeric" maxlength="6" placeholder="123456">
+            <button type="button" id="disable2faBtn" class="btn btn-sm btn-outline-danger rounded-2 px-3">Turn off</button>
+          </div>
+        <% } else { %>
+          <p class="mb-2"><span class="badge-status block">OFF</span> Protect the admin panel even if your password leaks.</p>
+          <ol class="small text-muted ps-3 mb-3">
+            <li>Scan the QR code with Google Authenticator, Microsoft Authenticator or 1Password.</li>
+            <li>Enter the 6-digit code it shows.</li>
+          </ol>
+          <div class="text-center mb-2">
+            <img src="<%= setup.qrDataUrl %>" alt="2FA QR code" width="180" height="180" class="border rounded-2">
+          </div>
+          <p class="small text-muted text-center mb-3">Can't scan? Key: <code><%= setup.secret %></code></p>
+          <div class="d-flex gap-2">
+            <input type="text" id="enableCode" class="form-control-modern" inputmode="numeric" maxlength="6" placeholder="123456">
+            <button type="button" id="enable2faBtn" class="btn-brand-dark rounded-2 px-3">Turn on</button>
+          </div>
+        <% } %>
+      </div>
+    </div>
+
+    <!-- Admin accounts -->
+    <div class="col-lg-7">
+      <div class="admin-card p-4 h-100">
+        <h5 class="fw-bold mb-3">Admin accounts</h5>
+        <table class="table admin-table align-middle mb-4">
+          <thead><tr><th>Nickname</th><th>Phone</th><th>2FA</th><th>Status</th><th class="text-end">Action</th></tr></thead>
+          <tbody>
+            <% admins.forEach((a) => { %>
+              <tr>
+                <td class="fw-bold"><%= a.memberNick %><% if (String(a._id) === currentAdminId) { %> <span class="badge bg-light text-dark border">you</span><% } %></td>
+                <td class="text-muted small"><%= a.memberPhone %></td>
+                <td><%= a.adminTotpEnabled ? 'On' : 'Off' %></td>
+                <td><span class="badge-status <%= a.memberStatus === 'ACTIVE' ? 'active' : 'block' %>"><%= a.memberStatus %></span></td>
+                <td class="text-end">
+                  <% if (String(a._id) !== currentAdminId) { %>
+                    <button type="button" class="btn-brand-outline rounded-2 px-2.5 py-1 admin-status-btn" style="font-size: 0.78rem;"
+                            data-id="<%= a._id %>" data-next="<%= a.memberStatus === 'ACTIVE' ? 'BLOCK' : 'ACTIVE' %>">
+                      <%= a.memberStatus === 'ACTIVE' ? 'Deactivate' : 'Activate' %>
+                    </button>
+                  <% } %>
+                </td>
+              </tr>
+            <% }) %>
+          </tbody>
+        </table>
+
+        <h6 class="fw-bold mb-2">Add an admin</h6>
+        <form id="createAdminForm" class="row g-2">
+          <div class="col-md-4"><input class="form-control-modern w-100" name="memberNick" placeholder="Nickname" required minlength="2" maxlength="40"></div>
+          <div class="col-md-4"><input class="form-control-modern w-100" name="memberPhone" placeholder="Phone" required minlength="3" maxlength="30"></div>
+          <div class="col-md-4"><input class="form-control-modern w-100" name="memberPassword" type="password" placeholder="Password (8+)" required minlength="8" autocomplete="new-password"></div>
+          <div class="col-12"><button type="submit" class="btn-brand-dark rounded-2 px-3 py-1.5">Create admin</button></div>
+        </form>
+      </div>
+    </div>
+  </div>
+</main>
+
+<script src="/js/security.js"></script>
+
+<%- include('includes/footer') %>

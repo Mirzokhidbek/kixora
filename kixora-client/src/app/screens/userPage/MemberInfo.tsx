@@ -17,6 +17,7 @@ import { MemberType } from "../../../lib/enums/common.enum";
 import { getImageUrl } from "../../../lib/config";
 import MemberService from "../../services/MemberService";
 import { useGlobals } from "../../hooks/useGlobals";
+import { tierFor } from "../../../lib/loyalty";
 
 interface MemberInfoProps {
   member?: Member | null;
@@ -27,6 +28,8 @@ export function MemberInfo({ member }: MemberInfoProps) {
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const currentPoints = member?.memberPoints || 0;
+  // real tier from points (previously everyone was shown "KIXORA Elite")
+  const tier = tierFor(currentPoints);
 
   const handleImageChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -125,7 +128,7 @@ export function MemberInfo({ member }: MemberInfoProps) {
 
               <Chip
                 icon={<VerifiedOutlinedIcon sx={{ fontSize: "16px !important", color: "#10b981" }} />}
-                label={member?.memberType === MemberType.RESTAURANT ? "Brand Admin" : "VIP Member"}
+                label={member?.memberType === MemberType.RESTAURANT ? "Brand Admin" : `${tier.name} Member`}
                 sx={{
                   bgcolor: "#f3f4f6",
                   color: "#111827",
@@ -179,7 +182,7 @@ export function MemberInfo({ member }: MemberInfoProps) {
             </Box>
             <Box>
               <Typography variant="caption" sx={{ color: "#6b7280", fontWeight: 700, textTransform: "uppercase" }}>
-                VIP Points
+                Loyalty Points
               </Typography>
               <Typography variant="h5" sx={{ fontWeight: 900, color: "#111827" }}>
                 {currentPoints} pts
@@ -220,7 +223,12 @@ export function MemberInfo({ member }: MemberInfoProps) {
                 Membership Tier
               </Typography>
               <Typography variant="h5" sx={{ fontWeight: 900, color: "#111827" }}>
-                KIXORA Elite
+                {tier.name}
+                {tier.next && (
+                  <Typography component="span" variant="caption" sx={{ display: "block", color: "#6b7280", fontWeight: 600 }}>
+                    {tier.next.pointsNeeded} pts to {tier.next.name}
+                  </Typography>
+                )}
               </Typography>
             </Box>
           </Card>

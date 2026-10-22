@@ -3,6 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="csrf-token" content="<%= csrfToken %>">
   <title>KIXORA Footwear - Brand Admin Suite</title>
   
   <!-- Favicon icon -->
@@ -58,6 +59,12 @@
             </a>
             <a class="nav-pill-item" id="nav-reviews" href="/admin/review/all">
               <i class="fa-solid fa-comments" style="font-size: 0.82rem;"></i> Reviews
+            </a>
+            <a class="nav-pill-item" id="nav-inbox" href="/admin/inbox">
+              <i class="fa-solid fa-inbox" style="font-size: 0.82rem;"></i> Inbox
+            </a>
+            <a class="nav-pill-item" id="nav-security" href="/admin/security">
+              <i class="fa-solid fa-shield-halved" style="font-size: 0.82rem;"></i> Security
             </a>
           <% } else { %>
             <a class="nav-pill-item active" href="/admin">
@@ -165,6 +172,8 @@
           <a class="nav-pill-item py-1 px-2.5" href="/admin/order/all"><i class="fa-solid fa-bag-shopping"></i> Orders</a>
           <a class="nav-pill-item py-1 px-2.5" href="/admin/user/all"><i class="fa-solid fa-users"></i> Customers</a>
           <a class="nav-pill-item py-1 px-2.5" href="/admin/review/all"><i class="fa-solid fa-comments"></i> Reviews</a>
+          <a class="nav-pill-item py-1 px-2.5" href="/admin/inbox"><i class="fa-solid fa-inbox"></i> Inbox</a>
+          <a class="nav-pill-item py-1 px-2.5" href="/admin/security"><i class="fa-solid fa-shield-halved"></i> Security</a>
         <% } %>
       </div>
     </div>
@@ -181,9 +190,20 @@
       }
     }, true);
 
+    // Every admin AJAX request carries the CSRF token (checked by middlewares/auth.ts)
+    if (window.axios) {
+      axios.defaults.headers.common['X-CSRF-Token'] = document.querySelector('meta[name="csrf-token"]').content;
+    }
+
     $(document).ready(function() {
       if (window.location.pathname.includes('/admin/review')) {
         $('#nav-reviews').addClass('active');
+      }
+      if (window.location.pathname.includes('/admin/inbox')) {
+        $('#nav-inbox').addClass('active');
+      }
+      if (window.location.pathname.includes('/admin/security')) {
+        $('#nav-security').addClass('active');
       }
       const currentPath = window.location.pathname;
       if (currentPath.includes('/admin/product')) {

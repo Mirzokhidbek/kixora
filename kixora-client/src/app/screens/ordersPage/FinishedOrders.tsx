@@ -7,6 +7,7 @@ import { useSelector } from "react-redux";
 import { retrieveFinishedOrders } from "./selector";
 import { getImageUrl } from "../../../lib/config";
 import type { Order, OrderItem } from "../../../lib/types/order";
+import { pointsForTotal } from "../../../lib/loyalty";
 
 export function FinishedOrders() {
   const finishedOrders = useSelector(retrieveFinishedOrders);
@@ -134,7 +135,7 @@ export function FinishedOrders() {
               }}
             >
               <Typography variant="body2" sx={{ color: "#64748b", fontWeight: 600, fontSize: "0.84rem" }}>
-                Delivered &bull; Authenticity Certificate Included &bull; +10 VIP Points Claimed
+                Delivered &bull; +{pointsForTotal(order.orderTotal)} loyalty points earned
               </Typography>
 
               <Box sx={{ display: "flex", alignItems: "center", gap: 2 }}>

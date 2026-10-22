@@ -55,6 +55,15 @@ export const env = {
   uploadDir: path.resolve(process.env.UPLOAD_DIR || "public/uploads"),
   redisUrl: process.env.REDIS_URL || "",
   sentryDsn: process.env.SENTRY_DSN || "",
+  /** Outgoing email (password reset, verification, store notifications) */
+  smtpUrl: process.env.SMTP_URL || "",
+  mailFrom: process.env.MAIL_FROM || "KIXORA <no-reply@kixora.local>",
+  /** Where new contact-form messages are announced (optional) */
+  storeNotifyEmail: process.env.STORE_NOTIFY_EMAIL || "",
+  /** Public URL of the SPA, used in email links */
+  appUrl: (process.env.PUBLIC_APP_URL || (isProduction ? "https://kixora.vercel.app" : "http://localhost:8080")).replace(/\/+$/, ""),
+  /** Public URL of this server (admin panel links) */
+  publicUrl: (process.env.PUBLIC_SERVER_URL || "http://localhost:" + (Number(process.env.PORT) || 3001)).replace(/\/+$/, ""),
   firebaseProjectId: process.env.FIREBASE_PROJECT_ID || "kixora-99964",
   googleClientId: process.env.GOOGLE_CLIENT_ID || "",
   /**

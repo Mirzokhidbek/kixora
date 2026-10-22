@@ -110,6 +110,24 @@ class MemberService {
       return true;
     }
   }
+
+  /** Always succeeds from the user's point of view (no account enumeration) */
+  public async forgotPassword(memberEmail: string): Promise<void> {
+    await axios.post(`${this.path}/member/password/forgot`, { memberEmail }, { withCredentials: true });
+  }
+
+  public async resetPassword(token: string, memberPassword: string): Promise<void> {
+    await axios.post(`${this.path}/member/password/reset`, { token, memberPassword }, { withCredentials: true });
+  }
+
+  public async verifyEmail(token: string): Promise<void> {
+    await axios.post(`${this.path}/member/email/verify`, { token }, { withCredentials: true });
+  }
+
+  public async resendVerification(): Promise<{ sent: boolean }> {
+    const result = await axios.post(`${this.path}/member/email/resend`, {}, { withCredentials: true });
+    return result.data;
+  }
 }
 
 export default MemberService;

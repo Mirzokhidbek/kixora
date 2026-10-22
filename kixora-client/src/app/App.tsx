@@ -18,6 +18,8 @@ import { Footer } from "./components/footers/Footer";
 import { AuthModal } from "./components/auth/AuthModal";
 import { CheckoutModal, type CheckoutRequest } from "./components/checkout/CheckoutModal";
 import PaymentService from "./services/PaymentService";
+import { UnsubscribePage } from "./screens/UnsubscribePage";
+import { ResetPasswordPage, VerifyEmailBanner, VerifyEmailPage } from "./screens/AccountLinkPages";
 
 // Lazy-loaded routes for optimal Lighthouse performance and smaller initial bundles
 const HomePage = lazy(() => import("./screens/homePage").then(m => ({ default: m.HomePage })));
@@ -33,7 +35,7 @@ import OrderService from "./services/OrderService";
 import { sweetTopSuccessAlert, sweetErrorAlert, sweetTopSmallSuccessAlert } from "../lib/sweetAlert";
 
 export default function App() {
-  const { cartItems, onAdd, onRemove, onDelete, onDeleteAll } = useBasket();
+  const { cartItems, onAdd, onRemove, onDelete, onDeleteAll, syncCart } = useBasket();
   const { authMember, setAuthMember, setOrderBuilder } = useGlobals();
 
   const [authOpen, setAuthOpen] = useState<boolean>(false);
@@ -64,7 +66,7 @@ export default function App() {
     }
   };
 
-  const handleCheckoutClick = () => {
+  const handleCheckoutClick = async () => {
     if (!authMember) {
       sweetErrorAlert("Please sign in to place your luxury footwear order!");
       setAuthOpen(true);
@@ -76,6 +78,12 @@ export default function App() {
       return;
     }
 
+    // never check out with stale prices or sold-out items
+    const notes = await syncCart();
+    if (notes.length) {
+      sweetErrorAlert(`Your bag was updated before checkout:\n${notes.join("\n")}`);
+      if (!JSON.parse(localStorage.getItem("cart_items") || "[]").length) return;
+    }
     setCheckoutOpen(true);
   };
 
@@ -152,12 +160,16 @@ export default function App() {
                 </Box>
               }
             >
+              <VerifyEmailBanner />
               <Routes>
                 <Route path="/" element={<HomePage onAdd={onAdd} />} />
                 <Route path="/products/*" element={<ProductsPage onAdd={onAdd} />} />
                 <Route path="/orders" element={<OrdersPage onLoginClick={() => setAuthOpen(true)} />} />
                 <Route path="/user" element={<UserPage member={authMember} onLoginClick={() => setAuthOpen(true)} />} />
                 <Route path="/help" element={<HelpPage />} />
+                <Route path="/unsubscribe" element={<UnsubscribePage />} />
+                <Route path="/reset-password" element={<ResetPasswordPage onLoginClick={() => setAuthOpen(true)} />} />
+                <Route path="/verify-email" element={<VerifyEmailPage />} />
               </Routes>
             </Suspense>
           </Box>

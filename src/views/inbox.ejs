@@ -1,0 +1,80 @@
+<%- include('includes/header') %>
+
+<main class="container-fluid px-lg-5 my-4 flex-grow-1">
+  <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3 mb-4">
+    <div>
+      <div class="d-flex align-items-center gap-2 mb-1">
+        <h2 class="fw-bold text-dark mb-0 tracking-tight" style="font-size: 1.45rem;">Customer Inbox</h2>
+        <span class="badge bg-dark text-white rounded-pill px-2.5 py-1" style="font-size: 0.75rem; font-weight: 600;">
+          <%= newCount %> New
+        </span>
+      </div>
+      <p class="text-muted mb-0 small">Messages from the Help page contact form, and newsletter subscribers.</p>
+    </div>
+    <a class="btn-brand-dark rounded-2 px-3 py-1.5 text-decoration-none" href="/admin/inbox/subscribers.csv">
+      <i class="fa-solid fa-file-csv me-1"></i> Export <%= subscriberCount %> subscribers (CSV)
+    </a>
+  </div>
+
+  <div class="admin-card p-3 mb-4">
+    <div class="d-flex flex-wrap gap-1.5">
+      <a class="filter-pill-btn text-decoration-none <%= activeStatus === 'ALL' ? 'active' : '' %>" href="/admin/inbox">All</a>
+      <a class="filter-pill-btn text-decoration-none <%= activeStatus === 'NEW' ? 'active' : '' %>" href="/admin/inbox?status=NEW">New (<%= newCount %>)</a>
+      <a class="filter-pill-btn text-decoration-none <%= activeStatus === 'RESOLVED' ? 'active' : '' %>" href="/admin/inbox?status=RESOLVED">Resolved</a>
+    </div>
+  </div>
+
+  <div class="admin-table-container">
+    <div class="table-responsive">
+      <table class="table admin-table align-middle mb-0">
+        <thead>
+          <tr>
+            <th scope="col" class="ps-4">From</th>
+            <th scope="col" style="min-width: 320px;">Message</th>
+            <th scope="col">Received</th>
+            <th scope="col">Status</th>
+            <th scope="col" class="text-center pe-4">Action</th>
+          </tr>
+        </thead>
+        <tbody>
+          <% if (messages && messages.length) { %>
+            <% messages.forEach((m) => { %>
+              <tr>
+                <td class="ps-4">
+                  <div class="fw-bold text-dark" style="font-size: 0.86rem;"><%= m.name %></div>
+                  <div class="text-muted" style="font-size: 0.76rem;"><%= m.contact %></div>
+                  <% if (m.memberId) { %><span class="badge bg-light text-dark border" style="font-size: 0.65rem;">Signed-in customer</span><% } %>
+                </td>
+                <td><div class="text-dark" style="font-size: 0.84rem; white-space: pre-line;"><%= m.message %></div></td>
+                <td class="text-muted text-nowrap" style="font-size: 0.78rem;">
+                  <%= new Date(m.createdAt).toLocaleString('en-US', { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' }) %>
+                </td>
+                <td>
+                  <span id="msg-badge-<%= m._id %>" class="badge-status <%= m.status === 'NEW' ? 'pause' : 'active' %>"><%= m.status %></span>
+                </td>
+                <td class="text-center pe-4">
+                  <button type="button" class="btn-brand-outline rounded-2 px-2.5 py-1 message-status-btn" style="font-size: 0.78rem;"
+                          data-id="<%= m._id %>" data-next="<%= m.status === 'NEW' ? 'RESOLVED' : 'NEW' %>">
+                    <%= m.status === 'NEW' ? 'Mark resolved' : 'Reopen' %>
+                  </button>
+                </td>
+              </tr>
+            <% }) %>
+          <% } else { %>
+            <tr>
+              <td colspan="5" class="text-center py-5 text-muted">
+                <i class="fa-solid fa-inbox fa-2x mb-2 d-block opacity-50"></i>
+                <div class="fw-bold text-dark">No messages</div>
+              </td>
+            </tr>
+          <% } %>
+        </tbody>
+      </table>
+    </div>
+  </div>
+  <%- include('includes/pagination') %>
+</main>
+
+<script src="/js/inbox.js"></script>
+
+<%- include('includes/footer') %>

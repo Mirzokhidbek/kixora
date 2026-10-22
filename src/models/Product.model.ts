@@ -30,6 +30,14 @@ const productSchema = new Schema(
       type: Number,
       required: true,
     },
+    /**
+     * Optional stock per EU size. When set, every size is reserved separately and
+     * productLeftCount is kept equal to the sum (used for totals and low-stock alerts).
+     */
+    productSizeStock: {
+      type: [{ _id: false, size: { type: Number, required: true }, count: { type: Number, required: true, min: 0 } }],
+      default: [],
+    },
     productSizes: {
       type: [Number],
       default: [38, 39, 40, 41, 42, 43, 44, 45],

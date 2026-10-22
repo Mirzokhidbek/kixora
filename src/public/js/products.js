@@ -118,6 +118,7 @@ $(document).ready(function () {
     $("#editProductCollection").val(collection);
     $("#editProductSize").val(size);
     $("#editProductDesc").val(desc);
+    $("#editProductSizeStock").val($(this).data("sizestock") || "");
     $("#editProductMaterial").val($(this).data("material") || "");
     $("#editProductMidsole").val($(this).data("midsole") || "");
     $("#editProductOutsole").val($(this).data("outsole") || "");
@@ -177,6 +178,8 @@ $(document).ready(function () {
       productCollection: $("#editProductCollection").val() || undefined,
       productSize: $("#editProductSize").val() || undefined,
       productDesc: $("#editProductDesc").val().trim(),
+      // empty = keep the current per-size stock
+      productSizeStock: $("#editProductSizeStock").val().trim() || undefined,
       productMaterial: $("#editProductMaterial").val().trim(),
       productMidsole: $("#editProductMidsole").val().trim(),
       productOutsole: $("#editProductOutsole").val().trim(),

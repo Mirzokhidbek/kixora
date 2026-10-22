@@ -45,6 +45,26 @@ const memberSchema = new Schema(
     memberImage: {
       type: String,
     },
+    /**
+     * false = signed up with email and not confirmed yet (must verify before ordering).
+     * Missing on accounts created before verification existed, which are not blocked.
+     */
+    memberEmailVerified: {
+      type: Boolean,
+    },
+    /** Admin two-factor auth: TOTP secret, encrypted (libs/crypto.ts), never selected by default */
+    adminTotpSecret: {
+      type: String,
+      select: false,
+    },
+    adminTotpEnabled: {
+      type: Boolean,
+      default: undefined,
+    },
+    /** Tokens issued before this moment are rejected (set on password reset) */
+    passwordChangedAt: {
+      type: Date,
+    },
     memberPoints: {
       type: Number,
       default: 50,

@@ -18,6 +18,12 @@ class ProductService {
     this.path = serverApi;
   }
 
+  /** Current price/stock for bag items; products no longer sold are simply absent */
+  public async getProductsBatch(ids: string[]): Promise<Product[]> {
+    const result = await axios.get(`${this.path}/product/batch`, { params: { ids: ids.join(",") }, withCredentials: true });
+    return result.data;
+  }
+
   // ---------- Likes (account wishlist) ----------
   public async getLikedProducts(): Promise<Product[]> {
     const result = await axios.get(`${this.path}/product/liked`, { withCredentials: true });

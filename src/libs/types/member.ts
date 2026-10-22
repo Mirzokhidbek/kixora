@@ -14,6 +14,8 @@ export interface Member {
   memberImage?: string;
   memberPoints: number;
   googleId?: string;
+  memberEmailVerified?: boolean;
+  passwordChangedAt?: Date;
   createdAt: Date;
   updatedAt: Date;
 }
@@ -23,6 +25,8 @@ export interface AuthPayload {
   _id: string;
   memberType: MemberType;
   memberNick: string;
+  /** issued-at (seconds), added by jsonwebtoken */
+  iat?: number;
 }
 
 /** Plain-JSON admin identity kept in the express session */
@@ -72,6 +76,12 @@ export interface MemberUpdateInput {
 declare module "express-session" {
   interface SessionData {
     member: SessionMember;
+    /** CSRF token for admin state-changing requests */
+    csrfToken: string;
+    /** Password was correct; waiting for the 2FA code */
+    pending2faAdminId: string;
+    /** 2FA enrolment in progress (secret not yet confirmed) */
+    pendingTotpSecret: string;
   }
 }
 

@@ -42,6 +42,7 @@ class MemberService {
   public async getRestaurant(): Promise<Member> {
     const result = await this.memberModel
       .findOne({ memberType: MemberType.RESTAURANT, memberStatus: MemberStatus.ACTIVE })
+      .sort({ createdAt: 1 }) // the store owner = first admin (there may be several)
       .select("memberNick memberPhone memberAddress memberDesc memberImage")
       .lean<Member>()
       .exec();
@@ -60,6 +61,8 @@ class MemberService {
         memberPassword,
         memberType: MemberType.USER,
         memberStatus: MemberStatus.ACTIVE,
+        // an email signup must be confirmed before ordering
+        memberEmailVerified: input.memberEmail ? false : undefined,
       });
       return stripPassword(result.toObject() as Member);
     } catch (err: unknown) {
@@ -125,6 +128,10 @@ class MemberService {
         member.googleId = googleData.googleId; // link verified Google identity
         changed = true;
       }
+      if (member.memberEmailVerified === false) {
+        member.memberEmailVerified = true; // Google verified this address
+        changed = true;
+      }
       if (googleData.picture && !member.memberImage) {
         member.memberImage = googleData.picture;
         changed = true;
@@ -155,6 +162,7 @@ class MemberService {
       memberPassword,
       memberImage: googleData.picture || "",
       googleId: googleData.googleId,
+      memberEmailVerified: true, // Google only issues tokens for verified emails
     });
     // Another sign-up may take the same nick between the check and the insert:
     // the unique index rejects it, so retry once with a random suffix.
@@ -243,6 +251,16 @@ class MemberService {
       : false;
     if (!member || !isMatch) throw new Errors(HTTPCode.UNAUTHORIZED, Message.WRONG_CREDENTIALS);
     return stripPassword(member);
+  }
+
+  /** BSSR: admin account after the 2FA step (must still be an active admin) */
+  public async getAdminForSession(adminId: string): Promise<Member> {
+    const member = await this.memberModel
+      .findOne({ _id: shapeIntoMongooseObjectId(adminId), memberType: MemberType.RESTAURANT, memberStatus: MemberStatus.ACTIVE })
+      .lean<Member>()
+      .exec();
+    if (!member) throw new Errors(HTTPCode.UNAUTHORIZED, Message.NOT_AUTHENTICATED);
+    return member;
   }
 
   /** BSSR: Paginated user list for admin **/

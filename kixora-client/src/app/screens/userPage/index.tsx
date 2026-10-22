@@ -47,7 +47,7 @@ export function UserPage({ member: propMember, onLoginClick }: UserPageProps) {
               Member Sign In Required
             </Typography>
             <Typography variant="body2" sx={{ color: "#6b7280", mb: 4, lineHeight: 1.6, maxWidth: 360, mx: "auto" }}>
-              Sign in to manage your KIXORA Club profile, view drop order status, and track your VIP points.
+              Sign in to manage your KIXORA Club profile, view drop order status, and track your loyalty points.
             </Typography>
             <Button
               variant="contained"

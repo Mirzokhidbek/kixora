@@ -76,47 +76,61 @@ export function OrdersPage({ onLoginClick }: OrdersPageProps) {
   const processOrders = useSelector(retrieveProcessOrders);
   const finishedOrders = useSelector(retrieveFinishedOrders);
 
+  // "Show more" paging per tab (previously only the latest 10 orders were reachable)
+  const PAGE_SIZE = 10;
+  const [pages, setPages] = useState({ PAUSE: 1, PROCESS: 1, FINISH: 1 });
+  const [hasMore, setHasMore] = useState({ PAUSE: false, PROCESS: false, FINISH: false });
+
   useEffect(() => {
-    if (authMember) {
-      const orderService = new OrderService();
+    if (!authMember) return;
+    const orderService = new OrderService();
+    setPages({ PAUSE: 1, PROCESS: 1, FINISH: 1 });
+    const load = (status: OrderStatus) => orderService.getMyOrders({ page: 1, limit: PAGE_SIZE, orderStatus: status });
 
-      // 1. Paused Orders
-      orderService
-        .getMyOrders({
-          page: 1,
-          limit: 10,
-          orderStatus: OrderStatus.PAUSE,
-        })
-        .then((data) => setPausedOrders(data))
-        .catch((err) => console.log("Paused orders error:", err));
+    load(OrderStatus.PAUSE)
+      .then((data) => {
+        setPausedOrders(data);
+        setHasMore((h) => ({ ...h, PAUSE: data.length === PAGE_SIZE }));
+      })
+      .catch((err) => console.log("Paused orders error:", err));
 
-      // 2. Process Orders
-      orderService
-        .getMyOrders({
-          page: 1,
-          limit: 10,
-          orderStatus: OrderStatus.PROCESS,
-        })
-        .then((data) => {
-          setProcessOrders(data);
-          const params = new URLSearchParams(location.search);
-          if (!params.get("tab") && data.length > 0 && pausedOrders.length === 0) {
-            setTabIndex(1);
-          }
-        })
-        .catch((err) => console.log("Process orders error:", err));
+    load(OrderStatus.PROCESS)
+      .then((data) => {
+        setProcessOrders(data);
+        setHasMore((h) => ({ ...h, PROCESS: data.length === PAGE_SIZE }));
+        const params = new URLSearchParams(location.search);
+        if (!params.get("tab") && data.length > 0 && pausedOrders.length === 0) {
+          setTabIndex(1);
+        }
+      })
+      .catch((err) => console.log("Process orders error:", err));
 
-      // 3. Finished Orders
-      orderService
-        .getMyOrders({
-          page: 1,
-          limit: 10,
-          orderStatus: OrderStatus.FINISH,
-        })
-        .then((data) => setFinishedOrders(data))
-        .catch((err) => console.log("Finished orders error:", err));
-    }
+    load(OrderStatus.FINISH)
+      .then((data) => {
+        setFinishedOrders(data);
+        setHasMore((h) => ({ ...h, FINISH: data.length === PAGE_SIZE }));
+      })
+      .catch((err) => console.log("Finished orders error:", err));
   }, [authMember, orderBuilder, setPausedOrders, setProcessOrders, setFinishedOrders]);
+
+  const loadMore = async (status: "PAUSE" | "PROCESS" | "FINISH") => {
+    const nextPage = pages[status] + 1;
+    const data = await new OrderService().getMyOrders({ page: nextPage, limit: PAGE_SIZE, orderStatus: status as OrderStatus });
+    const current = { PAUSE: pausedOrders, PROCESS: processOrders, FINISH: finishedOrders }[status];
+    const setter = { PAUSE: setPausedOrders, PROCESS: setProcessOrders, FINISH: setFinishedOrders }[status];
+    setter([...current, ...data]);
+    setPages((p) => ({ ...p, [status]: nextPage }));
+    setHasMore((h) => ({ ...h, [status]: data.length === PAGE_SIZE }));
+  };
+
+  const showMore = (status: "PAUSE" | "PROCESS" | "FINISH") =>
+    hasMore[status] ? (
+      <Box sx={{ textAlign: "center", mt: 3 }}>
+        <Button variant="outlined" onClick={() => loadMore(status)} sx={{ borderRadius: 9999, color: "#111827", borderColor: "#d1d5db", textTransform: "none", fontWeight: 700 }}>
+          Show more orders
+        </Button>
+      </Box>
+    ) : null;
 
   const handleTabChange = (_: any, newVal: number) => {
     setTabIndex(newVal);
@@ -233,12 +247,15 @@ export function OrdersPage({ onLoginClick }: OrdersPageProps) {
             {/* Tab Panels */}
             <TabPanel value={tabIndex} index={0}>
               <PausedOrders />
+              {showMore("PAUSE")}
             </TabPanel>
             <TabPanel value={tabIndex} index={1}>
               <ProcessOrders />
+              {showMore("PROCESS")}
             </TabPanel>
             <TabPanel value={tabIndex} index={2}>
               <FinishedOrders />
+              {showMore("FINISH")}
             </TabPanel>
           </>
         )}

@@ -1,4 +1,5 @@
 import express from "express";
+import crypto from "crypto";
 import path from "path";
 import mongoose from "mongoose";
 import morgan from "morgan";
@@ -91,7 +92,12 @@ app.use(
 );
 
 app.use("/admin", (req, res, next) => {
+  // sessions created before CSRF protection existed get a token on their next request
+  if (req.session?.member && !req.session.csrfToken) {
+    req.session.csrfToken = crypto.randomBytes(24).toString("hex");
+  }
   res.locals.member = req.session?.member;
+  res.locals.csrfToken = req.session?.csrfToken || "";
   next();
 });
 

@@ -7,6 +7,8 @@ export interface Product {
   productName: string;
   productPrice: number;
   productLeftCount: number;
+  /** Optional stock per EU size (when set, sizes are sold separately) */
+  productSizeStock?: { size: number; count: number }[];
   productSizes?: number[];
   productColors?: string[];
   productSize?: ProductSize;

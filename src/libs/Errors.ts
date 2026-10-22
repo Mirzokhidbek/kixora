@@ -37,6 +37,13 @@ export enum Message {
   ADMIN_EXISTS = "An admin account already exists!",
   AI_UNAVAILABLE = "AI search is temporarily unavailable!",
   TEST_PAYMENT_DISABLED = "Test payments are disabled. Please wait for the store to confirm your payment.",
+  INVALID_TOKEN = "This link is invalid or has expired!",
+  EMAIL_NOT_VERIFIED = "Please confirm your email address before placing an order. Check your inbox or resend the link from your profile.",
+  SESSION_EXPIRED = "Your session has ended. Please sign in again.",
+  INVALID_2FA_CODE = "The 6-digit code is not correct. Please try again.",
+  INVALID_CSRF = "Your admin session form has expired. Please reload the page and try again.",
+  CANNOT_CHANGE_SELF = "You can't change your own admin status.",
+  LAST_ADMIN = "At least one active admin is required.",
   REVIEW_NOT_ALLOWED = "Only customers who received this product can review it!",
 }
 
