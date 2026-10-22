@@ -1,12 +1,7 @@
 /**
- * ============================================================================
- * AISearchDialog.tsx - KIXORA AI Semantic Footwear Search Dialog
- * ============================================================================
- * High-End Luxury AI Stylist Dialog matching the KIXORA brand design aesthetic.
- * Integrates KIXORA logo, dual glowing sparkle accents, pill search bar with
- * 'Search with AI' action button, and interactive popular request tiles.
+ * AISearchDialog - natural-language footwear search (Gemini on the server).
+ * Pieces: AIPopularRequests, AIRecommendation, AIProductCard.
  */
-
 import { useState } from "react";
 import {
   Dialog,
@@ -16,27 +11,19 @@ import {
   InputBase,
   IconButton,
   CircularProgress,
-  Chip,
   Grid,
   Button,
-  Card,
-  CardMedia,
-  CardContent,
-  Stack,
   Fade,
 } from "@mui/material";
 import AutoAwesomeIcon from "@mui/icons-material/AutoAwesome";
 import CloseIcon from "@mui/icons-material/Close";
 import ArrowForwardIcon from "@mui/icons-material/ArrowForward";
-import LocalMallOutlinedIcon from "@mui/icons-material/LocalMallOutlined";
-import VisibilityOutlinedIcon from "@mui/icons-material/VisibilityOutlined";
-import DirectionsRunIcon from "@mui/icons-material/DirectionsRun";
-import ShieldOutlinedIcon from "@mui/icons-material/ShieldOutlined";
-import WaterDropOutlinedIcon from "@mui/icons-material/WaterDropOutlined";
+import { useNavigate } from "react-router-dom";
 import ProductService from "../../services/ProductService";
 import type { AISearchResponse, Product } from "../../../lib/types/product";
-import { getImageUrl } from "../../../lib/config";
-import { useNavigate } from "react-router-dom";
+import { AIPopularRequests } from "./AIPopularRequests";
+import { AIRecommendation } from "./AIRecommendation";
+import { AIProductCard } from "./AIProductCard";
 
 interface AISearchDialogProps {
   open: boolean;
@@ -45,63 +32,26 @@ interface AISearchDialogProps {
   onAddToCart?: (product: Product) => void;
 }
 
-export function AISearchDialog({
-  open,
-  onClose,
-  initialQuery = "",
-  onAddToCart,
-}: AISearchDialogProps) {
+const productService = new ProductService();
+
+export function AISearchDialog({ open, onClose, initialQuery = "", onAddToCart }: AISearchDialogProps) {
   const navigate = useNavigate();
   const [query, setQuery] = useState(initialQuery);
   const [loading, setLoading] = useState(false);
   const [result, setResult] = useState<AISearchResponse | null>(null);
   const [error, setError] = useState<string | null>(null);
 
-  const popularRequests = [
-    {
-      label: "Comfortable black sneakers for daily wear",
-      icon: (
-        <Box
-          component="span"
-          sx={{
-            display: "inline-flex",
-            alignItems: "center",
-            justifyContent: "center",
-            fontSize: "1.1rem",
-            lineHeight: 1,
-          }}
-        >
-          👟
-        </Box>
-      ),
-    },
-    {
-      label: "Lightweight running shoes for marathon & gym",
-      icon: <DirectionsRunIcon sx={{ fontSize: 18, color: "#1e293b" }} />,
-    },
-    {
-      label: "Exclusive limited drop luxury sneakers",
-      icon: <ShieldOutlinedIcon sx={{ fontSize: 18, color: "#1e293b" }} />,
-    },
-    {
-      label: "Waterproof high-ankle winter boots",
-      icon: <WaterDropOutlinedIcon sx={{ fontSize: 18, color: "#1e293b" }} />,
-    },
-  ];
-
   const handleSearch = async (searchQuery?: string) => {
-    const text = searchQuery ?? query;
-    if (!text || !text.trim()) return;
-
+    const text = (searchQuery ?? query).trim();
+    if (!text) return;
+    setLoading(true);
+    setError(null);
     try {
-      setLoading(true);
-      setError(null);
-      const productService = new ProductService();
-      const res = await productService.aiSearchProducts(text.trim());
-      setResult(res);
+      setResult(await productService.aiSearchProducts(text));
     } catch (err: any) {
-      console.error("AI Search Error:", err);
-      setError("An error occurred during AI search. Please try again.");
+      // show the real reason (e.g. AI unavailable, rate limit) instead of empty results
+      setResult(null);
+      setError(err?.response?.data?.message || "An error occurred during AI search. Please try again.");
     } finally {
       setLoading(false);
     }
@@ -327,81 +277,8 @@ export function AISearchDialog({
           </Button>
         </Box>
 
-        {/* Popular Requests Section (Matching Screenshot) */}
-        <Box sx={{ mb: 3.5 }}>
-          <Box sx={{ display: "flex", alignItems: "center", gap: 0.8, mb: 1.6 }}>
-            <AutoAwesomeIcon sx={{ fontSize: 15, color: "#475569" }} />
-            <Typography
-              variant="caption"
-              sx={{
-                fontWeight: 700,
-                color: "#475569",
-                fontSize: "0.82rem",
-                letterSpacing: "0.01em",
-              }}
-            >
-              Popular requests
-            </Typography>
-          </Box>
 
-          <Box
-            sx={{
-              display: "flex",
-              flexWrap: "wrap",
-              gap: 1.2,
-            }}
-          >
-            {popularRequests.map((item, idx) => (
-              <Box
-                key={idx}
-                onClick={() => handlePresetClick(item.label)}
-                sx={{
-                  display: "inline-flex",
-                  alignItems: "center",
-                  gap: 1.2,
-                  bgcolor: "#ffffff",
-                  border: "1px solid #e2e8f0",
-                  borderRadius: 9999,
-                  px: { xs: 1.8, sm: 2.2 },
-                  py: { xs: 0.8, sm: 0.9 },
-                  cursor: "pointer",
-                  boxShadow: "0 2px 6px rgba(0, 0, 0, 0.02)",
-                  transition: "all 0.2s cubic-bezier(0.4, 0, 0.2, 1)",
-                  "&:hover": {
-                    borderColor: "#0f172a",
-                    bgcolor: "#f8fafc",
-                    transform: "translateY(-2px)",
-                    boxShadow: "0 6px 16px rgba(0, 0, 0, 0.06)",
-                    "& .arrow-icon": {
-                      transform: "translateX(3px)",
-                      color: "#0f172a",
-                    },
-                  },
-                }}
-              >
-                {item.icon}
-                <Typography
-                  sx={{
-                    color: "#1e293b",
-                    fontSize: { xs: "0.78rem", sm: "0.83rem" },
-                    fontWeight: 600,
-                    lineHeight: 1.2,
-                  }}
-                >
-                  {item.label}
-                </Typography>
-                <ArrowForwardIcon
-                  className="arrow-icon"
-                  sx={{
-                    fontSize: 14,
-                    color: "#94a3b8",
-                    transition: "all 0.2s ease",
-                  }}
-                />
-              </Box>
-            ))}
-          </Box>
-        </Box>
+        <AIPopularRequests onSelect={handlePresetClick} />
 
         {/* Loading State Animation */}
         {loading && (
@@ -468,106 +345,7 @@ export function AISearchDialog({
         {result && !loading && (
           <Fade in={Boolean(result)} timeout={400}>
             <Box>
-              {/* AI Recommendation Banner */}
-              <Box
-                sx={{
-                  p: { xs: 2.5, md: 3 },
-                  borderRadius: "20px",
-                  bgcolor: "#0f172a",
-                  color: "#ffffff",
-                  mb: 3.5,
-                  position: "relative",
-                  overflow: "hidden",
-                  boxShadow: "0 14px 35px rgba(15, 23, 42, 0.18)",
-                }}
-              >
-                {/* Glow Accent */}
-                <Box
-                  sx={{
-                    position: "absolute",
-                    top: -40,
-                    right: -40,
-                    width: 140,
-                    height: 140,
-                    borderRadius: "50%",
-                    bgcolor: "rgba(99, 102, 241, 0.25)",
-                    filter: "blur(35px)",
-                    pointerEvents: "none",
-                  }}
-                />
-
-                <Box sx={{ display: "flex", alignItems: "center", gap: 1, mb: 1.2 }}>
-                  <AutoAwesomeIcon sx={{ color: "#818cf8", fontSize: 18 }} />
-                  <Typography
-                    variant="caption"
-                    sx={{
-                      fontWeight: 900,
-                      letterSpacing: "0.1em",
-                      color: "#a5b4fc",
-                      textTransform: "uppercase",
-                      fontSize: "0.72rem",
-                    }}
-                  >
-                    KIXORA AI Recommendation
-                  </Typography>
-                </Box>
-
-                <Typography
-                  variant="body1"
-                  sx={{
-                    fontWeight: 600,
-                    fontSize: { xs: "0.95rem", md: "1.05rem" },
-                    lineHeight: 1.5,
-                    color: "#f8fafc",
-                    mb: 2,
-                  }}
-                >
-                  "{result.intent?.recommendation || "Discover our curated footwear styles matching your search."}"
-                </Typography>
-
-                {/* Extracted Intent Tags */}
-                <Box sx={{ display: "flex", flexWrap: "wrap", gap: 0.8 }}>
-                  {result.intent?.collection && (
-                    <Chip
-                      label={`Collection: ${result.intent.collection}`}
-                      size="small"
-                      sx={{
-                        bgcolor: "rgba(255, 255, 255, 0.12)",
-                        color: "#e2e8f0",
-                        fontWeight: 700,
-                        fontSize: "0.72rem",
-                        border: "1px solid rgba(255, 255, 255, 0.15)",
-                      }}
-                    />
-                  )}
-                  {result.intent?.color && (
-                    <Chip
-                      label={`Color: ${result.intent.color}`}
-                      size="small"
-                      sx={{
-                        bgcolor: "rgba(255, 255, 255, 0.12)",
-                        color: "#e2e8f0",
-                        fontWeight: 700,
-                        fontSize: "0.72rem",
-                        border: "1px solid rgba(255, 255, 255, 0.15)",
-                      }}
-                    />
-                  )}
-                  {result.intent?.keywords?.slice(0, 3).map((kw, i) => (
-                    <Chip
-                      key={i}
-                      label={`#${kw}`}
-                      size="small"
-                      sx={{
-                        bgcolor: "rgba(99, 102, 241, 0.22)",
-                        color: "#c7d2fe",
-                        fontWeight: 700,
-                        fontSize: "0.72rem",
-                      }}
-                    />
-                  ))}
-                </Box>
-              </Box>
+              <AIRecommendation result={result} />
 
               {/* Matched Products Grid Header */}
               <Box sx={{ mb: 2, display: "flex", justifyContent: "space-between", alignItems: "center" }}>
@@ -603,120 +381,11 @@ export function AISearchDialog({
                 </Box>
               ) : (
                 <Grid container spacing={2}>
-                  {(result.products || []).map((prod) => {
-                    const imgUrl = getImageUrl(prod.productImages?.[0] || "/img/kixora/hero_shoe1.png");
-
-                    return (
-                      <Grid size={{ xs: 12, sm: 6, md: 4 }} key={prod._id}>
-                        <Card
-                          sx={{
-                            borderRadius: "16px",
-                            border: "1px solid #f1f5f9",
-                            boxShadow: "0 2px 10px rgba(0,0,0,0.03)",
-                            transition: "all 0.25s ease",
-                            height: "100%",
-                            display: "flex",
-                            flexDirection: "column",
-                            "&:hover": {
-                              transform: "translateY(-4px)",
-                              boxShadow: "0 12px 24px rgba(0,0,0,0.08)",
-                              borderColor: "#e2e8f0",
-                            },
-                          }}
-                        >
-                          <Box
-                            sx={{
-                              p: 2,
-                              bgcolor: "#f8fafc",
-                              display: "flex",
-                              alignItems: "center",
-                              justifyContent: "center",
-                              height: 160,
-                              cursor: "pointer",
-                            }}
-                            onClick={() => handleViewProduct(prod._id)}
-                          >
-                            <CardMedia
-                              component="img"
-                              image={imgUrl}
-                              alt={prod.productName}
-                              onError={(e: any) => {
-                                e.target.src = "/img/kixora/hero_shoe1.png";
-                              }}
-                              sx={{
-                                maxHeight: "100%",
-                                width: "auto",
-                                objectFit: "contain",
-                                filter: "drop-shadow(0 6px 12px rgba(0,0,0,0.12))",
-                              }}
-                            />
-                          </Box>
-
-                          <CardContent sx={{ p: 2, flexGrow: 1, display: "flex", flexDirection: "column" }}>
-                            <Typography
-                              variant="caption"
-                              sx={{
-                                color: "#64748b",
-                                fontWeight: 800,
-                                fontSize: "0.7rem",
-                                textTransform: "uppercase",
-                                letterSpacing: "0.05em",
-                              }}
-                            >
-                              {prod.productCollection}
-                            </Typography>
-                            <Typography
-                              variant="body2"
-                              sx={{
-                                fontWeight: 800,
-                                color: "#0f172a",
-                                fontSize: "0.92rem",
-                                mb: 1,
-                                lineHeight: 1.3,
-                                cursor: "pointer",
-                              }}
-                              onClick={() => handleViewProduct(prod._id)}
-                            >
-                              {prod.productName}
-                            </Typography>
-
-                            <Box sx={{ mt: "auto", display: "flex", alignItems: "center", justifyContent: "space-between" }}>
-                              <Typography variant="body1" sx={{ fontWeight: 900, color: "#0f172a", fontSize: "1rem" }}>
-                                ${prod.productPrice}
-                              </Typography>
-
-                              <Stack direction="row" spacing={0.8}>
-                                <IconButton
-                                  size="small"
-                                  onClick={() => handleViewProduct(prod._id)}
-                                  sx={{
-                                    bgcolor: "#f1f5f9",
-                                    color: "#0f172a",
-                                    "&:hover": { bgcolor: "#e2e8f0" },
-                                  }}
-                                >
-                                  <VisibilityOutlinedIcon sx={{ fontSize: 16 }} />
-                                </IconButton>
-                                {onAddToCart && (
-                                  <IconButton
-                                    size="small"
-                                    onClick={() => onAddToCart(prod)}
-                                    sx={{
-                                      bgcolor: "#0f172a",
-                                      color: "#ffffff",
-                                      "&:hover": { bgcolor: "#000000" },
-                                    }}
-                                  >
-                                    <LocalMallOutlinedIcon sx={{ fontSize: 16 }} />
-                                  </IconButton>
-                                )}
-                              </Stack>
-                            </Box>
-                          </CardContent>
-                        </Card>
-                      </Grid>
-                    );
-                  })}
+                  {(result.products || []).map((product) => (
+                    <Grid size={{ xs: 12, sm: 6, md: 4 }} key={product._id}>
+                      <AIProductCard product={product} onView={handleViewProduct} onAddToCart={onAddToCart} />
+                    </Grid>
+                  ))}
                 </Grid>
               )}
             </Box>

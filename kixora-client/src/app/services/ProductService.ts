@@ -69,38 +69,21 @@ class ProductService {
    * @returns Intent extraction, recommendation and matched products
    */
   public async aiSearchProducts(query: string): Promise<AISearchResponse> {
-    try {
-      const url = `${this.path}/product/ai-search`;
-      const result = await axios.post(
-        url,
-        { query },
-        { withCredentials: true }
-      );
-      const data = result.data?.data || result.data || {};
-      return {
-        query: data.query || query,
-        products: Array.isArray(data.products) ? data.products : (Array.isArray(data) ? data : []),
-        intent: {
-          recommendation: data.intent?.recommendation || "Here are our top recommended footwear styles for you.",
-          collection: data.intent?.collection || null,
-          color: data.intent?.color || null,
-          keywords: Array.isArray(data.intent?.keywords) ? data.intent.keywords : [],
-        },
-      };
-    } catch (err) {
-      console.log("Error, aiSearchProducts:", err);
-      return {
-        query,
-        products: [],
-        intent: {
-          recommendation: "Explore our premium footwear collection.",
-          collection: null,
-          color: null,
-          keywords: [],
-        },
-      };
-    }
+    // errors propagate so the dialog can show the real reason (503 AI unavailable, 429 rate limit)
+    const result = await axios.post(`${this.path}/product/ai-search`, { query }, { withCredentials: true });
+    const data = result.data || {};
+    return {
+      query: data.query || query,
+      products: Array.isArray(data.products) ? data.products : [],
+      intent: {
+        recommendation: data.intent?.recommendation || "Here are our top recommended footwear styles for you.",
+        collection: data.intent?.collection || null,
+        color: data.intent?.color || null,
+        keywords: Array.isArray(data.intent?.keywords) ? data.intent.keywords : [],
+      },
+    };
   }
+
 
   /**
    * Fetch paginated list of products with optional search and category filters.
