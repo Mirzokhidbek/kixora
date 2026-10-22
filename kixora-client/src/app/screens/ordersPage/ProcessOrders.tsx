@@ -188,7 +188,7 @@ export function ProcessOrders() {
                           {product?.productName || "KIXORA Footwear Model"}
                         </Typography>
                         <Typography variant="caption" sx={{ color: "#6b7280", fontWeight: 600 }}>
-                          Qty: {item.itemQuantity}x &bull; EU {product?.productSizes?.[0] || 42} &bull; Verified Authentic
+                          Qty: {item.itemQuantity}x{item.itemSize ? <> &bull; EU {item.itemSize}</> : null}
                         </Typography>
                       </div>
                     </Box>

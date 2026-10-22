@@ -110,7 +110,7 @@ export function FinishedOrders() {
                           {product?.productName || "KIXORA Signature Footwear"}
                         </Typography>
                         <Typography variant="caption" sx={{ color: "#6b7280" }}>
-                          Qty: {item.itemQuantity}x &bull; EU {product?.productSizes?.[0] || 42} &bull; Delivered
+                          Qty: {item.itemQuantity}x{item.itemSize ? <> &bull; EU {item.itemSize}</> : null} &bull; Delivered
                         </Typography>
                       </div>
                     </Box>

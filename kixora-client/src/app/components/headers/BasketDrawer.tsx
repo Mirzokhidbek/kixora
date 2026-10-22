@@ -1,4 +1,3 @@
-import { useState } from "react";
 import {
   Drawer,
   Box,
@@ -7,7 +6,6 @@ import {
   Button,
   Avatar,
   Divider,
-  TextField,
   Chip,
 } from "@mui/material";
 import CloseIcon from "@mui/icons-material/Close";
@@ -19,6 +17,7 @@ import ArrowForwardIcon from "@mui/icons-material/ArrowForward";
 import LocalShippingOutlinedIcon from "@mui/icons-material/LocalShippingOutlined";
 import type { CartItem } from "../../../lib/types/cart";
 import { getImageUrl } from "../../../lib/config";
+import { calculateCartTotals, FREE_DELIVERY_THRESHOLD } from "../../../lib/pricing";
 
 interface BasketDrawerProps {
   open: boolean;
@@ -41,33 +40,11 @@ export function BasketDrawer({
   onDeleteAll,
   onCheckout,
 }: BasketDrawerProps) {
-  const [promoCode, setPromoCode] = useState("");
-  const [appliedDiscount, setAppliedDiscount] = useState(0);
-  const [promoMsg, setPromoMsg] = useState("");
-
-  const subtotal = cartItems.reduce(
-    (sum, item) => sum + item.price * item.quantity,
-    0
-  );
-
-  const freeShippingThreshold = 100;
+  // Same delivery rule as checkout and the server (src/lib/pricing.ts).
+  // The old promo box gave a client-only discount the server never applied, so it was removed.
+  const { subtotal, delivery: shippingFee, total: grandTotal } = calculateCartTotals(cartItems);
+  const freeShippingThreshold = FREE_DELIVERY_THRESHOLD;
   const isFreeShipping = subtotal >= freeShippingThreshold;
-  const shippingFee = subtotal > 0 && !isFreeShipping ? 10 : 0;
-  const discountAmount = (subtotal * appliedDiscount) / 100;
-  const grandTotal = Math.max(0, subtotal - discountAmount + shippingFee);
-
-
-  const handleApplyPromo = () => {
-    if (promoCode.trim().toUpperCase() === "KIXORA10") {
-      setAppliedDiscount(10);
-      setPromoMsg("10% KIXORA VIP discount applied!");
-    } else if (promoCode.trim().toUpperCase() === "FREESHIP") {
-      setAppliedDiscount(5);
-      setPromoMsg("Promo code applied!");
-    } else {
-      setPromoMsg("Invalid promo code");
-    }
-  };
 
   return (
     <Drawer
@@ -309,55 +286,6 @@ export function BasketDrawer({
       {/* Footer & Checkout */}
       {cartItems.length > 0 && (
         <Box sx={{ p: 3, borderTop: "1px solid #e5e7eb", bgcolor: "#f9fafb" }}>
-          {/* Promo Code Input */}
-          <Box sx={{ mb: 2.5 }}>
-            <Box sx={{ display: "flex", gap: 1 }}>
-              <TextField
-                size="small"
-                fullWidth
-                placeholder="Promo Code (e.g. KIXORA10)"
-                value={promoCode}
-                onChange={(e) => setPromoCode(e.target.value)}
-                sx={{
-                  bgcolor: "#ffffff",
-                  borderRadius: 2,
-                  "& .MuiOutlinedInput-root": {
-                    borderRadius: 2,
-                    fontSize: "0.85rem",
-                  },
-                }}
-              />
-              <Button
-                variant="outlined"
-                onClick={handleApplyPromo}
-                sx={{
-                  borderColor: "#000000",
-                  color: "#000000",
-                  fontWeight: 700,
-                  fontSize: "0.8rem",
-                  borderRadius: 2,
-                  px: 2,
-                  "&:hover": { bgcolor: "#000000", color: "#ffffff", borderColor: "#000000" },
-                }}
-              >
-                Apply
-              </Button>
-            </Box>
-            {promoMsg && (
-              <Typography
-                variant="caption"
-                sx={{
-                  mt: 0.5,
-                  display: "block",
-                  color: appliedDiscount > 0 ? "#10b981" : "#ef4444",
-                  fontWeight: 600,
-                }}
-              >
-                {promoMsg}
-              </Typography>
-            )}
-          </Box>
-
           <Box sx={{ display: "flex", justifyContent: "space-between", mb: 1 }}>
             <Typography variant="body2" sx={{ color: "#6b7280" }}>
               Subtotal:
@@ -367,16 +295,6 @@ export function BasketDrawer({
             </Typography>
           </Box>
 
-          {appliedDiscount > 0 && (
-            <Box sx={{ display: "flex", justifyContent: "space-between", mb: 1 }}>
-              <Typography variant="body2" sx={{ color: "#10b981" }}>
-                VIP Discount ({appliedDiscount}%):
-              </Typography>
-              <Typography variant="body2" sx={{ fontWeight: 700, color: "#10b981" }}>
-                -${discountAmount.toFixed(2)}
-              </Typography>
-            </Box>
-          )}
 
           <Box sx={{ display: "flex", justifyContent: "space-between", mb: 1.5 }}>
             <Typography variant="body2" sx={{ color: "#6b7280" }}>
