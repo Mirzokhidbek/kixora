@@ -18,6 +18,13 @@ export interface Member {
   updatedAt: Date;
 }
 
+/** Minimal identity stored inside the JWT */
+export interface AuthPayload {
+  _id: string;
+  memberType: MemberType;
+  memberNick: string;
+}
+
 export interface MemberInput {
   memberType?: MemberType;
   memberStatus?: MemberStatus;
@@ -65,7 +72,7 @@ declare module "express-session" {
 declare global {
   namespace Express {
     interface Request {
-      member?: Member;
+      member?: AuthPayload;
     }
   }
 }

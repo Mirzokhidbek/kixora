@@ -1,273 +1,287 @@
-import MemberModel from "../schema/Member.model";
-import {
-  Member,
-  MemberInput,
-  LoginInput,
-  MemberUpdateInput,
-  GoogleAuthInput,
-} from "../libs/types/member";
+import MemberModel from "../models/Member.model";
+import { Member, GoogleAuthInput, AuthPayload } from "../libs/types/member";
 import Errors, { HTTPCode, Message } from "../libs/Errors";
 import { MemberStatus, MemberType } from "../libs/enums/member.enum";
 import bcrypt from "bcryptjs";
-import { shapeIntoMongooseObjectId } from "../libs/config";
+import crypto from "crypto";
+import { escapeRegex, shapeIntoMongooseObjectId } from "../libs/config";
+import { z } from "zod";
+import {
+  adminLoginSchema,
+  adminSignupSchema,
+  adminUserUpdateSchema,
+  loginSchema,
+  memberUpdateSchema,
+  signupSchema,
+} from "../libs/validation";
+
+type SignupInput = z.infer<typeof signupSchema>;
+type LoginInput = z.infer<typeof loginSchema>;
+type MemberUpdate = z.infer<typeof memberUpdateSchema> & { memberImage?: string };
+type AdminSignupInput = z.infer<typeof adminSignupSchema> & { memberImage?: string };
+type AdminLoginInput = z.infer<typeof adminLoginSchema>;
+type AdminUserUpdate = z.infer<typeof adminUserUpdateSchema>;
+
+const BCRYPT_ROUNDS = 10;
+
+/** Removes the password hash from any member object before it leaves the service */
+function stripPassword<T extends { memberPassword?: string }>(member: T): T {
+  const { memberPassword: _omit, ...rest } = member;
+  return rest as T;
+}
+
+function isDuplicateKeyError(err: unknown): err is { code: number; keyPattern?: Record<string, number> } {
+  return typeof err === "object" && err !== null && (err as { code?: number }).code === 11000;
+}
 
 class MemberService {
-  private readonly memberModel;
+  private readonly memberModel = MemberModel;
 
-  constructor() {
-    this.memberModel = MemberModel;
-  }
-
-  /** SPA: Get Active Restaurant Details with Lean Query **/
+  /** SPA: Get Active Store (admin) public profile **/
   public async getRestaurant(): Promise<Member> {
     const result = await this.memberModel
-      .findOne({
-        memberType: MemberType.RESTAURANT,
-        memberStatus: MemberStatus.ACTIVE,
-      })
+      .findOne({ memberType: MemberType.RESTAURANT, memberStatus: MemberStatus.ACTIVE })
+      .select("memberNick memberPhone memberAddress memberDesc memberImage")
       .lean<Member>()
       .exec();
     if (!result) throw new Errors(HTTPCode.NOT_FOUND, Message.NO_DATA_FOUND);
-
     return result;
   }
 
-  /** SPA SIGNUP (USER) **/
-  public async signup(input: MemberInput): Promise<Member> {
-    const salt = await bcrypt.genSalt();
-    input.memberPassword = await bcrypt.hash(input.memberPassword, salt);
-
-    if (input.memberEmail) {
-      input.memberEmail = input.memberEmail.toLowerCase().trim();
-    }
-    if (!input.memberPhone) {
-      input.memberPhone = input.memberEmail || `+998${Date.now()}`;
-    }
-
+  /** SPA SIGNUP (USER) — memberType/status/points are never taken from input **/
+  public async signup(input: SignupInput): Promise<Member> {
+    const memberPassword = await bcrypt.hash(input.memberPassword, BCRYPT_ROUNDS);
     try {
-      const result = await this.memberModel.create(input);
-      result.memberPassword = "";
-      return result.toObject() as Member;
+      const result = await this.memberModel.create({
+        memberNick: input.memberNick,
+        memberEmail: input.memberEmail,
+        memberPhone: input.memberPhone || undefined,
+        memberPassword,
+        memberType: MemberType.USER,
+        memberStatus: MemberStatus.ACTIVE,
+      });
+      return stripPassword(result.toObject() as Member);
     } catch (err: unknown) {
-      console.error("Error, signup:", err);
-      if (typeof err === 'object' && err !== null && 'code' in err && (err as { code: number }).code === 11000) {
-        throw new Errors(HTTPCode.BAD_REQUEST, "Email already registered. Please sign in.");
+      if (isDuplicateKeyError(err)) {
+        const field = Object.keys(err.keyPattern || {})[0];
+        throw new Errors(
+          HTTPCode.CONFLICT,
+          field === "memberEmail" ? Message.USED_EMAIL : Message.USED_NICK_PHONE
+        );
       }
-      throw new Errors(HTTPCode.BAD_REQUEST, Message.USED_NICK_PHONE);
+      throw err;
     }
   }
 
   /** SPA LOGIN (USER) - Supports Email, Nickname or Phone **/
   public async login(input: LoginInput): Promise<Member> {
     const identifier = (input.memberEmail || input.memberNick || "").trim();
-    if (!identifier) {
-      throw new Errors(HTTPCode.BAD_REQUEST, Message.NO_DATA_FOUND);
-    }
-
     const member = await this.memberModel
-      .findOne(
-        {
-          $or: [
-            { memberEmail: identifier.toLowerCase() },
-            { memberNick: identifier },
-            { memberPhone: identifier },
-          ],
-          memberStatus: { $ne: MemberStatus.DELETE },
-        },
-        { memberNick: 1, memberEmail: 1, memberPhone: 1, memberPassword: 1, memberStatus: 1 }
-      )
+      .findOne({
+        $or: [
+          { memberEmail: identifier.toLowerCase() },
+          { memberNick: identifier },
+          { memberPhone: identifier },
+        ],
+        memberType: MemberType.USER,
+        memberStatus: { $ne: MemberStatus.DELETE },
+      })
+      .select("+memberPassword")
       .lean<Member>()
       .exec();
 
-    if (!member) throw new Errors(HTTPCode.NOT_FOUND, Message.NO_MEMBER_NICK);
-    else if (member.memberStatus === MemberStatus.BLOCK) {
+    // Same message for unknown user and wrong password (no account enumeration)
+    const isMatch = member
+      ? await bcrypt.compare(input.memberPassword, member.memberPassword || "")
+      : false;
+    if (!member || !isMatch) {
+      throw new Errors(HTTPCode.UNAUTHORIZED, Message.WRONG_CREDENTIALS);
+    }
+    if (member.memberStatus === MemberStatus.BLOCK) {
       throw new Errors(HTTPCode.FORBIDDEN, Message.BLOCKED_USER);
     }
-
-    const isMatch = await bcrypt.compare(
-      input.memberPassword,
-      member.memberPassword || ""
-    );
-    if (!isMatch) {
-      throw new Errors(HTTPCode.UNAUTHORIZED, Message.WRONG_PASSWORD);
-    }
-
-    const result = await this.memberModel.findById(member._id).lean<Member>().exec();
-    if (!result) throw new Errors(HTTPCode.NOT_FOUND, Message.NO_DATA_FOUND);
-    return result;
+    return stripPassword(member);
   }
 
-  /** SPA: GOOGLE OAUTH LOGIN / SIGNUP **/
+  /** SPA: GOOGLE LOGIN / SIGNUP — input MUST come from a verified identity token **/
   public async googleLogin(googleData: GoogleAuthInput): Promise<Member> {
-    let member = await this.memberModel
+    const member = await this.memberModel
       .findOne({
-        $or: [
-          { googleId: googleData.googleId },
-          { memberEmail: googleData.email },
-        ],
+        $or: [{ googleId: googleData.googleId }, { memberEmail: googleData.email }],
         memberStatus: { $ne: MemberStatus.DELETE },
       })
       .exec();
 
     if (member) {
+      if (member.memberType !== MemberType.USER) {
+        throw new Errors(HTTPCode.FORBIDDEN, Message.NOT_AUTHORIZED);
+      }
       if (member.memberStatus === MemberStatus.BLOCK) {
         throw new Errors(HTTPCode.FORBIDDEN, Message.BLOCKED_USER);
       }
+      let changed = false;
+      if (!member.googleId) {
+        member.googleId = googleData.googleId; // link verified Google identity
+        changed = true;
+      }
       if (googleData.picture && !member.memberImage) {
         member.memberImage = googleData.picture;
-        await member.save();
+        changed = true;
       }
-      return member.toObject() as Member;
+      if (changed) await member.save();
+      return stripPassword(member.toObject() as Member);
     }
 
-    // Generate unique nick
-    const cleanName = googleData.name ? googleData.name.replace(/[^a-zA-Z0-9_]/g, "_") : googleData.email.split("@")[0];
-    let uniqueNick = cleanName;
-    let counter = 1;
-    while (await this.memberModel.findOne({ memberNick: uniqueNick })) {
-      uniqueNick = `${cleanName}_${counter++}`;
-    }
-
-    const uniquePhone = `G_${googleData.googleId.slice(0, 10)}`;
+    const baseNick =
+      googleData.name.replace(/[^a-zA-Z0-9_]/g, "_").slice(0, 30) ||
+      googleData.email.split("@")[0];
+    const taken = await this.memberModel
+      .find({ memberNick: { $regex: `^${escapeRegex(baseNick)}(_\\d+)?$` } })
+      .select("memberNick")
+      .lean<{ memberNick: string }[]>()
+      .exec();
+    const takenSet = new Set(taken.map((m) => m.memberNick));
+    let uniqueNick = baseNick;
+    for (let i = 1; takenSet.has(uniqueNick); i++) uniqueNick = `${baseNick}_${i}`;
 
     const newMember = await this.memberModel.create({
       memberType: MemberType.USER,
       memberStatus: MemberStatus.ACTIVE,
       memberNick: uniqueNick,
-      memberPhone: uniquePhone,
       memberEmail: googleData.email,
-      memberPassword: await bcrypt.hash(googleData.googleId, 10),
+      // Google accounts sign in via Google only; the password is random and never revealed
+      memberPassword: await bcrypt.hash(crypto.randomBytes(32).toString("hex"), BCRYPT_ROUNDS),
       memberImage: googleData.picture || "",
       googleId: googleData.googleId,
     });
-
-    return newMember.toObject() as Member;
+    return stripPassword(newMember.toObject() as Member);
   }
 
   /** SPA: Get Authenticated User Details **/
-  public async getMemberDetail(member: Member): Promise<Member> {
-    const memberId = shapeIntoMongooseObjectId(member._id);
+  public async getMemberDetail(member: AuthPayload): Promise<Member> {
     const result = await this.memberModel
-      .findOne({ _id: memberId, memberStatus: MemberStatus.ACTIVE })
+      .findOne({ _id: shapeIntoMongooseObjectId(member._id), memberStatus: MemberStatus.ACTIVE })
       .lean<Member>()
       .exec();
     if (!result) throw new Errors(HTTPCode.NOT_FOUND, Message.NO_DATA_FOUND);
-
     return result;
   }
 
-  /** SPA: Update Member Profile **/
-  public async updateMember(
-    member: Member,
-    input: MemberUpdateInput
-  ): Promise<Member> {
-    const memberId = shapeIntoMongooseObjectId(member._id);
-    const result = await this.memberModel
-      .findOneAndUpdate({ _id: memberId }, input, { new: true })
-      .lean<Member>()
-      .exec();
-    if (!result) throw new Errors(HTTPCode.NOT_MODIFIED, Message.UPDATE_FAILED);
-
-    return result;
+  /** SPA: Update Member Profile (whitelisted fields only) **/
+  public async updateMember(member: AuthPayload, input: MemberUpdate): Promise<Member> {
+    try {
+      const result = await this.memberModel
+        .findOneAndUpdate(
+          { _id: shapeIntoMongooseObjectId(member._id), memberStatus: MemberStatus.ACTIVE },
+          { $set: input },
+          { new: true, runValidators: true }
+        )
+        .lean<Member>()
+        .exec();
+      if (!result) throw new Errors(HTTPCode.NOT_FOUND, Message.UPDATE_FAILED);
+      return result;
+    } catch (err) {
+      if (isDuplicateKeyError(err)) throw new Errors(HTTPCode.CONFLICT, Message.USED_NICK_PHONE);
+      throw err;
+    }
   }
 
-  /** SPA: Get Top Users by Loyalty Points **/
+  /** SPA: Get Top Users by Loyalty Points (public fields only) **/
   public async getTopUsers(): Promise<Member[]> {
-    const result = await this.memberModel
-      .find({
-        memberStatus: MemberStatus.ACTIVE,
-        memberPoints: { $gte: 1 },
-      })
+    return this.memberModel
+      .find({ memberType: MemberType.USER, memberStatus: MemberStatus.ACTIVE, memberPoints: { $gte: 1 } })
+      .select("memberNick memberImage memberPoints")
       .sort({ memberPoints: -1 })
       .limit(4)
       .lean<Member[]>()
       .exec();
-    if (!result) throw new Errors(HTTPCode.NOT_FOUND, Message.NO_DATA_FOUND);
-
-    return result;
   }
 
-  /** BSSR SIGNUP (ADMIN) **/
-  public async processSignup(input: MemberInput): Promise<Member> {
-    const exist = await this.memberModel
-      .findOne({ memberType: MemberType.RESTAURANT })
-      .exec();
-    if (exist) throw new Errors(HTTPCode.BAD_REQUEST, Message.CREATE_FAILED);
-
-    const salt = await bcrypt.genSalt();
-    input.memberPassword = await bcrypt.hash(input.memberPassword, salt);
+  /** BSSR SIGNUP (ADMIN) — only possible while no admin exists **/
+  public async processSignup(input: AdminSignupInput): Promise<Member> {
+    const exist = await this.memberModel.exists({ memberType: MemberType.RESTAURANT });
+    if (exist) throw new Errors(HTTPCode.FORBIDDEN, Message.ADMIN_EXISTS);
 
     try {
-      const result = await this.memberModel.create(input);
-      result.memberPassword = "";
-      return result.toObject() as Member;
+      const result = await this.memberModel.create({
+        memberNick: input.memberNick,
+        memberPhone: input.memberPhone,
+        memberImage: input.memberImage,
+        memberPassword: await bcrypt.hash(input.memberPassword, BCRYPT_ROUNDS),
+        memberType: MemberType.RESTAURANT,
+        memberStatus: MemberStatus.ACTIVE,
+      });
+      return stripPassword(result.toObject() as Member);
     } catch (err) {
-      throw new Errors(HTTPCode.BAD_REQUEST, Message.CREATE_FAILED);
+      if (isDuplicateKeyError(err)) throw new Errors(HTTPCode.CONFLICT, Message.USED_NICK_PHONE);
+      throw err;
     }
   }
 
-  /** BSSR LOGIN (ADMIN) **/
-  public async processLogin(input: LoginInput): Promise<Member> {
+  /** BSSR LOGIN (ADMIN) — only RESTAURANT accounts may log in here **/
+  public async processLogin(input: AdminLoginInput): Promise<Member> {
     const member = await this.memberModel
-      .findOne(
-        { memberNick: input.memberNick },
-        { memberNick: 1, memberPassword: 1 }
-      )
-      .exec();
-    if (!member) throw new Errors(HTTPCode.NOT_FOUND, Message.NO_MEMBER_NICK);
-
-    const isMatch = await bcrypt.compare(
-      input.memberPassword,
-      member.memberPassword || ""
-    );
-    if (!isMatch) {
-      throw new Errors(HTTPCode.UNAUTHORIZED, Message.WRONG_PASSWORD);
-    }
-
-    const result = await this.memberModel.findById(member._id).lean<Member>().exec();
-    if (!result) throw new Errors(HTTPCode.NOT_FOUND, Message.NO_DATA_FOUND);
-    return result;
-  }
-
-  /** BSSR: Get All Registered Users for Brand Admin **/
-  public async getUsers(): Promise<Member[]> {
-    const result = await this.memberModel
-      .find({ memberType: MemberType.USER })
-      .lean<Member[]>()
-      .exec();
-    if (!result) throw new Errors(HTTPCode.NOT_FOUND, Message.NO_DATA_FOUND);
-
-    return result;
-  }
-
-  /** BSSR: Update Member Status by Admin **/
-  public async updateChosenUser(input: MemberUpdateInput): Promise<Member> {
-    input._id = shapeIntoMongooseObjectId(input._id);
-    const result = await this.memberModel
-      .findByIdAndUpdate({ _id: input._id }, input, { new: true })
+      .findOne({
+        memberNick: input.memberNick,
+        memberType: MemberType.RESTAURANT,
+        memberStatus: MemberStatus.ACTIVE,
+      })
+      .select("+memberPassword")
       .lean<Member>()
       .exec();
-    if (!result) throw new Errors(HTTPCode.NOT_MODIFIED, Message.UPDATE_FAILED);
 
-    return result;
+    const isMatch = member
+      ? await bcrypt.compare(input.memberPassword, member.memberPassword || "")
+      : false;
+    if (!member || !isMatch) throw new Errors(HTTPCode.UNAUTHORIZED, Message.WRONG_CREDENTIALS);
+    return stripPassword(member);
   }
 
-  /** BSSR: Update Member Loyalty Reward Points by Admin **/
-  public async updateMemberPointsByAdmin(
-    id: string,
-    points: number
-  ): Promise<Member> {
-    const memberId = shapeIntoMongooseObjectId(id);
+  /** BSSR: Paginated user list for admin **/
+  public async getUsers(page: number, limit: number): Promise<{ users: Member[]; total: number }> {
+    const filter = { memberType: MemberType.USER };
+    const [users, total] = await Promise.all([
+      this.memberModel
+        .find(filter)
+        .sort({ createdAt: -1 })
+        .skip((page - 1) * limit)
+        .limit(limit)
+        .lean<Member[]>()
+        .exec(),
+      this.memberModel.countDocuments(filter).exec(),
+    ]);
+    return { users, total };
+  }
+
+  public async countUsers(): Promise<number> {
+    return this.memberModel.countDocuments({ memberType: MemberType.USER }).exec();
+  }
+
+  /** BSSR: Admin may change a USER's status only (never another admin, never roles) **/
+  public async updateChosenUser(input: AdminUserUpdate): Promise<Member> {
     const result = await this.memberModel
-      .findByIdAndUpdate(
-        memberId,
-        { $set: { memberPoints: Number(points) } },
+      .findOneAndUpdate(
+        { _id: shapeIntoMongooseObjectId(input._id), memberType: MemberType.USER },
+        { $set: { memberStatus: input.memberStatus } },
         { new: true }
       )
       .lean<Member>()
       .exec();
-    if (!result) throw new Errors(HTTPCode.NOT_MODIFIED, Message.UPDATE_FAILED);
+    if (!result) throw new Errors(HTTPCode.NOT_FOUND, Message.UPDATE_FAILED);
+    return result;
+  }
 
+  /** BSSR: Update Member Loyalty Reward Points by Admin **/
+  public async updateMemberPointsByAdmin(id: string, points: number): Promise<Member> {
+    const result = await this.memberModel
+      .findOneAndUpdate(
+        { _id: shapeIntoMongooseObjectId(id), memberType: MemberType.USER },
+        { $set: { memberPoints: points } },
+        { new: true }
+      )
+      .lean<Member>()
+      .exec();
+    if (!result) throw new Errors(HTTPCode.NOT_FOUND, Message.UPDATE_FAILED);
     return result;
   }
 }
