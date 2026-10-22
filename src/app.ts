@@ -14,11 +14,12 @@ import { MORGAN_FORMAT, env } from "./libs/config";
 import { globalLimiter } from "./libs/rateLimiter";
 import { errorHandler, notFound } from "./middlewares/errorHandler";
 import { contentSecurityPolicy, cspNonce } from "./middlewares/csp";
+import { logger } from "./libs/logger";
 
 const MongoDBStore = ConnectMongoDB(session);
 const store = new MongoDBStore({ uri: env.mongoUrl, collection: "sessions" });
 store.on("error", (error) => {
-  console.error("⚠️ Session store connection warning:", error?.message || error);
+  logger.warn("Session store connection problem", { err: error });
 });
 
 /** 1-ENTRANCE **/
@@ -63,6 +64,8 @@ app.use(express.static(path.resolve("public")));
 app.use(express.urlencoded({ extended: true, limit: "100kb" }));
 app.use(express.json({ limit: "100kb" }));
 app.use(cookieParser());
+// path without query string: search terms / ids in queries stay out of the logs
+morgan.token("path", (req) => (req as express.Request).originalUrl.split("?")[0]);
 app.use(morgan(MORGAN_FORMAT));
 
 // NoSQL query injection protection (removes $ and . keys)

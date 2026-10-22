@@ -2,6 +2,7 @@ import crypto from "crypto";
 import path from "path";
 import mongoose from "mongoose";
 import Errors, { HTTPCode, Message } from "./Errors";
+import { logger } from "./logger";
 
 /** ENVIRONMENT CONFIGURATION (single source of truth for process.env) **/
 const isProduction = process.env.NODE_ENV === "production";
@@ -19,7 +20,7 @@ function requireSecret(...names: string[]): string {
   if (isProduction) {
     throw new Error(`Missing required environment variable: ${names[0]}`);
   }
-  console.warn(`⚠️ ${names[0]} is not set; using a random development secret.`);
+  logger.warn("Secret not set; using a random development value", { variable: names[0] });
   return crypto.randomBytes(32).toString("hex");
 }
 
@@ -68,7 +69,10 @@ export const env = {
     : "test") as "test" | "manual",
 };
 
-export const MORGAN_FORMAT = `:method :url :response-time ms [:status] \n`;
+/** Access log format: JSON lines in production (no query strings with possible PII), short text in dev */
+export const MORGAN_FORMAT = isProduction
+  ? '{"level":"info","time":":date[iso]","msg":"http","method":":method","path":":path","status"::status,"ms"::response-time}'
+  : ":method :url :response-time ms [:status]";
 
 export const AUTH_TIMER = 24; // 24 hours
 

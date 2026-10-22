@@ -3,6 +3,7 @@ import { OAuth2Client } from "google-auth-library";
 import { Member, GoogleAuthInput, AuthPayload } from "../libs/types/member";
 import { AUTH_TIMER, env } from "../libs/config";
 import Errors, { HTTPCode, Message } from "../libs/Errors";
+import { logger } from "../libs/logger";
 
 const FIREBASE_CERTS_URL =
   "https://www.googleapis.com/robot/v1/metadata/x509/securetoken@system.gserviceaccount.com";
@@ -22,7 +23,7 @@ class AuthService {
     return new Promise((resolve, reject) => {
       jwt.sign(payload, this.secretToken, { expiresIn: `${AUTH_TIMER}h` }, (err, token) => {
         if (err || !token) {
-          console.error("Error, createToken:", err);
+          logger.error("JWT creation failed", { err });
           reject(new Errors(HTTPCode.INTERNAL_SERVER_ERROR, Message.TOKEN_CREATION_FAILED));
         } else {
           resolve(token);

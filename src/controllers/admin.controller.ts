@@ -21,6 +21,7 @@ import {
   productUpdateSchema,
 } from "../libs/validation";
 import { Member, SessionMember } from "../libs/types/member";
+import { logger } from "../libs/logger";
 
 const memberService = new MemberService();
 const orderService = new OrderService();
@@ -31,7 +32,7 @@ const ADMIN_PAGE_SIZE = 25;
 
 const errorMessage = (err: unknown) => {
   if (err instanceof Errors) return err.message;
-  console.error("Admin error:", err);
+  logger.error("Admin request failed", { err });
   return Message.SOMETHING_WENT_WRONG;
 };
 

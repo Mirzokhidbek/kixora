@@ -145,15 +145,22 @@ class MemberService {
     let uniqueNick = baseNick;
     for (let i = 1; takenSet.has(uniqueNick); i++) uniqueNick = `${baseNick}_${i}`;
 
-    const newMember = await this.memberModel.create({
+    // Google accounts sign in via Google only; the password is random and never revealed
+    const memberPassword = await bcrypt.hash(crypto.randomBytes(32).toString("hex"), BCRYPT_ROUNDS);
+    const create = (memberNick: string) => this.memberModel.create({
       memberType: MemberType.USER,
       memberStatus: MemberStatus.ACTIVE,
-      memberNick: uniqueNick,
+      memberNick,
       memberEmail: googleData.email,
-      // Google accounts sign in via Google only; the password is random and never revealed
-      memberPassword: await bcrypt.hash(crypto.randomBytes(32).toString("hex"), BCRYPT_ROUNDS),
+      memberPassword,
       memberImage: googleData.picture || "",
       googleId: googleData.googleId,
+    });
+    // Another sign-up may take the same nick between the check and the insert:
+    // the unique index rejects it, so retry once with a random suffix.
+    const newMember = await create(uniqueNick).catch((err) => {
+      if (!isDuplicateKeyError(err) || !(err.keyPattern && "memberNick" in err.keyPattern)) throw err;
+      return create(`${baseNick}_${crypto.randomBytes(2).toString("hex")}`);
     });
     return stripPassword(newMember.toObject() as Member);
   }

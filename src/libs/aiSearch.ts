@@ -1,6 +1,7 @@
 import { env } from "./config";
 import Errors, { HTTPCode, Message } from "./Errors";
 import { cache } from "./cache";
+import { logger } from "./logger";
 
 export interface AISearchResult {
   collection: "SNEAKERS" | "RUNNING" | "BOOTS" | "LIMITED_DROP" | null;
@@ -82,7 +83,7 @@ export async function extractAISearchIntent(userQuery: string): Promise<AISearch
         }
       );
       if (!response.ok) {
-        console.warn(`Gemini model ${model} returned status ${response.status}`);
+        logger.warn("Gemini request failed", { model, status: response.status });
         continue;
       }
       const data = (await response.json()) as any;
@@ -93,7 +94,7 @@ export async function extractAISearchIntent(userQuery: string): Promise<AISearch
       await cache.set(cacheKey, value, CACHE_TTL_SECONDS);
       return value;
     } catch (err: any) {
-      console.warn(`Gemini model ${model} failed:`, err?.message);
+      logger.warn("Gemini request error", { model, err: err?.message });
     }
   }
   throw new Errors(HTTPCode.SERVICE_UNAVAILABLE, Message.AI_UNAVAILABLE);
