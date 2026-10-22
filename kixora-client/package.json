@@ -10,7 +10,8 @@
     "lint": "oxlint",
     "preview": "vite preview --host 0.0.0.0",
     "serve": "serve -s dist -l $PORT",
-    "start": "serve -s dist -l $PORT"
+    "start": "serve -s dist -l $PORT",
+    "test": "vitest run"
   },
   "dependencies": {
     "@emotion/react": "^11.14.0",
