@@ -15,7 +15,7 @@ import {
   productCreateSchema,
   productUpdateSchema,
 } from "../libs/validation";
-import { Member } from "../libs/types/member";
+import { Member, SessionMember } from "../libs/types/member";
 
 const memberService = new MemberService();
 const orderService = new OrderService();
@@ -36,12 +36,23 @@ const pagination = (page: number, total: number, basePath: string) => ({
   basePath,
 });
 
-/** Starts a fresh session on login (prevents session fixation) */
+/**
+ * Starts a fresh session on login (prevents session fixation).
+ * Only a small plain-JSON identity is stored: it keeps sessions light and avoids
+ * BSON version clashes between mongoose ObjectIds and the session store driver.
+ */
 function establishSession(req: Request, member: Member): Promise<void> {
+  const sessionMember: SessionMember = {
+    _id: String(member._id),
+    memberType: member.memberType,
+    memberNick: member.memberNick,
+    memberPhone: member.memberPhone,
+    memberImage: member.memberImage,
+  };
   return new Promise((resolve, reject) => {
     req.session.regenerate((err) => {
       if (err) return reject(err);
-      req.session.member = member;
+      req.session.member = sessionMember;
       req.session.save((saveErr) => (saveErr ? reject(saveErr) : resolve()));
     });
   });
