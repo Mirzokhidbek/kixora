@@ -266,11 +266,20 @@ export function NewArrivals({ onAdd }: NewArrivalsProps) {
                         {product.productName}
                       </Typography>
 
-                      <Box sx={{ display: "flex", alignItems: "center", gap: 0.8, mb: 1.5 }}>
-                        <Rating value={4.9} precision={0.1} size="small" readOnly sx={{ fontSize: "0.95rem" }} />
-                        <Typography variant="caption" sx={{ color: "#6b7280", fontWeight: 700 }}>
-                          4.9 (840)
-                        </Typography>
+                      {/* Real rating only (previously hardcoded "4.9 (840)") */}
+                      <Box sx={{ display: "flex", alignItems: "center", gap: 0.8, mb: 1.5, minHeight: 22 }}>
+                        {product.reviewCount ? (
+                          <>
+                            <Rating value={product.ratingAvg || 0} precision={0.1} size="small" readOnly sx={{ fontSize: "0.95rem" }} />
+                            <Typography variant="caption" sx={{ color: "#6b7280", fontWeight: 700 }}>
+                              {(product.ratingAvg || 0).toFixed(1)} ({product.reviewCount})
+                            </Typography>
+                          </>
+                        ) : (
+                          <Typography variant="caption" sx={{ color: "#9ca3af", fontWeight: 600 }}>
+                            {product.isSample ? "Coming soon" : "No reviews yet"}
+                          </Typography>
+                        )}
                       </Box>
                     </Box>
 
