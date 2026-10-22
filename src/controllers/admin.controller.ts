@@ -140,6 +140,17 @@ const adminController = {
     res.status(HTTPCode.OK).json({ data });
   },
 
+  /** AJAX: replace product images (multipart "productImages", 1–5 files) */
+  replaceProductImages: async (req: Request, res: Response) => {
+    const files = (req.files as Express.Multer.File[]) || [];
+    if (!files.length) throw new Errors(HTTPCode.BAD_REQUEST, Message.INVALID_FILE);
+    const data = await productService.replaceProductImages(
+      String(req.params.id),
+      files.map((f) => f.path.replace(/\\/g, "/"))
+    );
+    res.status(HTTPCode.OK).json({ data });
+  },
+
   // ---------- Users ----------
   getUsers: async (req: Request, res: Response) => {
     const { page } = parse(adminListSchema, req.query);
