@@ -530,11 +530,20 @@ export function Products({ onAdd }: ProductsProps) {
                             {product.productName}
                           </Typography>
 
-                          <Box sx={{ display: "flex", alignItems: "center", gap: 0.8, mb: 1.5 }}>
-                            <Rating value={4.8} precision={0.1} size="small" readOnly sx={{ fontSize: "0.95rem" }} />
-                            <Typography variant="caption" sx={{ color: "#374151", fontWeight: 700 }}>
-                              4.8 (1.2k)
-                            </Typography>
+                          {/* Real rating only (previously hardcoded "4.8 (1.2k)") */}
+                          <Box sx={{ display: "flex", alignItems: "center", gap: 0.8, mb: 1.5, minHeight: 22 }}>
+                            {product.reviewCount ? (
+                              <>
+                                <Rating value={product.ratingAvg || 0} precision={0.1} size="small" readOnly sx={{ fontSize: "0.95rem" }} />
+                                <Typography variant="caption" sx={{ color: "#374151", fontWeight: 700 }}>
+                                  {(product.ratingAvg || 0).toFixed(1)} ({product.reviewCount})
+                                </Typography>
+                              </>
+                            ) : (
+                              <Typography variant="caption" sx={{ color: "#9ca3af", fontWeight: 600 }}>
+                                No reviews yet
+                              </Typography>
+                            )}
                           </Box>
                         </Box>
 

@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
 import {
@@ -31,6 +31,8 @@ import { retrieveChosenProduct } from "./selector";
 import { getImageUrl } from "../../../lib/config";
 import { ProductSize } from "../../../lib/enums/common.enum";
 import { useWishlist } from "../../hooks/useWishlist";
+import { ProductReviews } from "./ProductReviews";
+import type { ReviewSummary } from "../../../lib/types/review";
 
 interface ChosenProductProps {
   onAdd?: (product: any, quantity?: number, size?: number, color?: string) => void;
@@ -47,6 +49,8 @@ export function ChosenProduct({ onAdd }: ChosenProductProps) {
   const [selectedSize, setSelectedSize] = useState<string>("42");
   const [activeImgIndex, setActiveImgIndex] = useState<number>(0);
   const [activeTab, setActiveTab] = useState<number>(0);
+  const [reviewSummary, setReviewSummary] = useState<ReviewSummary | null>(null);
+  const handleSummaryChange = useCallback((s: ReviewSummary) => setReviewSummary(s), []);
 
   const sizeList = [
     ProductSize.SIZE_38,
@@ -67,6 +71,7 @@ export function ChosenProduct({ onAdd }: ChosenProductProps) {
         .then((data) => {
           dispatch(setChosenProduct(data));
           setActiveImgIndex(0);
+          setReviewSummary(null);
         })
         .catch((err) => {
           console.log("Error loading chosen product:", err);
@@ -92,6 +97,9 @@ export function ChosenProduct({ onAdd }: ChosenProductProps) {
       </Box>
     );
   }
+
+  const ratingAvg = reviewSummary?.ratingAvg ?? product.ratingAvg ?? 0;
+  const reviewCount = reviewSummary?.reviewCount ?? product.reviewCount ?? 0;
 
   const images = product.productImages && product.productImages.length > 0 ? product.productImages : [];
   const mainImageSrc = images[activeImgIndex] ? getImageUrl(images[activeImgIndex]) : "";
@@ -268,10 +276,18 @@ export function ChosenProduct({ onAdd }: ChosenProductProps) {
                   {product.productName}
                 </Typography>
 
-                <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
-                  <Rating value={4.8} precision={0.1} size="small" readOnly />
+                {/* Real rating & stock (previously hardcoded "4.8 (128 reviews) • In Stock") */}
+                <Box
+                  sx={{ display: "flex", alignItems: "center", gap: 1, cursor: "pointer" }}
+                  onClick={() => setActiveTab(3)}
+                >
+                  <Rating value={ratingAvg} precision={0.1} size="small" readOnly />
                   <Typography variant="body2" sx={{ color: "#6b7280", fontWeight: 700, fontSize: "0.85rem" }}>
-                    4.8 (128 reviews) &bull; In Stock
+                    {reviewCount
+                      ? `${ratingAvg.toFixed(1)} (${reviewCount} review${reviewCount === 1 ? "" : "s"})`
+                      : "No reviews yet"}{" "}
+                    &bull; {product.productLeftCount > 0 ? "In Stock" : "Out of Stock"}
+                    {product.productLikes ? <> &bull; ♥ {product.productLikes}</> : null}
                   </Typography>
                 </Box>
               </Box>
@@ -460,6 +476,7 @@ export function ChosenProduct({ onAdd }: ChosenProductProps) {
             <Tab label="Description" />
             <Tab label="Specifications" />
             <Tab label="Fit & Care" />
+            <Tab label={reviewCount ? `Reviews (${reviewCount})` : "Reviews"} />
           </Tabs>
 
           {activeTab === 0 && (
@@ -488,6 +505,10 @@ export function ChosenProduct({ onAdd }: ChosenProductProps) {
                 <Typography variant="body2" sx={{ fontWeight: 700 }}>290g (Size EU 42)</Typography>
               </Box>
             </Box>
+          )}
+
+          {activeTab === 3 && (
+            <ProductReviews productId={product._id} onSummaryChange={handleSummaryChange} />
           )}
 
           {activeTab === 2 && (

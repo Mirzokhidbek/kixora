@@ -94,7 +94,12 @@ export function PopularPicks({ onAdd }: PopularPicksProps) {
   // only when the catalog is empty, and they can never be added to the basket.
   const displayList =
     rawList.length > 0
-      ? rawList.slice(0, 4)
+      ? rawList.slice(0, 4).map((p) => ({
+          ...p,
+          // real review data only; cards without reviews show no stars
+          rating: p.reviewCount ? p.ratingAvg : undefined,
+          reviews: p.reviewCount,
+        }))
       : samplePicks.map((sample, idx) => ({
           _id: `sample_${idx}`,
           isSample: true,
