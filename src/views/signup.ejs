@@ -580,6 +580,9 @@
 <!-- Scripts for Image Upload Preview & Validation -->
 <script src="/js/signup.js"></script>
 <script nonce="<%= cspNonce %>">
+  document.querySelectorAll('.lang-pill-btn').forEach(function (el) {
+    el.addEventListener('click', function (e) { e.preventDefault(); });
+  });
   $(document).ready(function() {
     // Password visibility toggle
     $('#toggleSignupPasswordBtn').on('click', function() {

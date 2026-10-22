@@ -562,6 +562,13 @@
 <!-- Password Toggle Script -->
 <script nonce="<%= cspNonce %>">
   $(document).ready(function() {
+    // (was an inline onclick, which the Content-Security-Policy blocks)
+    $('#forgotPasswordLink').on('click', function(e) {
+      e.preventDefault();
+      alert('Please contact the store owner to reset your admin password.');
+    });
+    $('.lang-pill-btn').on('click', function(e) { e.preventDefault(); });
+
     $('#togglePasswordBtn').on('click', function() {
       const passwordInput = $('#adminPasswordInput');
       const icon = $('#togglePasswordIcon');
