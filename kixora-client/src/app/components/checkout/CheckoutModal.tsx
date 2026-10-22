@@ -26,8 +26,10 @@ import type { Member } from "../../../lib/types/member";
 import type { ShippingInfo } from "../../../lib/types/order";
 import { calculateCartTotals } from "../../../lib/pricing";
 import PaymentService, { type PaymentConfig, type PaymentMethod } from "../../services/PaymentService";
-import { ShippingStep, formatAddress, validateShipping, type ShippingForm } from "./ShippingStep";
-import { PaymentStep, paymentMethodLabel } from "./PaymentStep";
+import { ShippingStep } from "./ShippingStep";
+import { formatAddress, validateShipping, type ShippingForm } from "./shipping";
+import { PaymentStep } from "./PaymentStep";
+import { paymentMethodLabel } from "./payment";
 import { ReviewStep } from "./ReviewStep";
 import { primaryButtonSx } from "./checkoutStyles";
 

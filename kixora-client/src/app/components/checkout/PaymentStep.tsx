@@ -3,18 +3,11 @@ import ScienceOutlinedIcon from "@mui/icons-material/ScienceOutlined";
 import LocalShippingOutlinedIcon from "@mui/icons-material/LocalShippingOutlined";
 import type { PaymentConfig, PaymentMethod } from "../../services/PaymentService";
 import { optionCardSx, stepSubtitleSx, stepTitleSx } from "./checkoutStyles";
+import { PAYMENT_TEXT } from "./payment";
 
-const OPTIONS: Record<PaymentMethod, { title: string; caption: string; icon: React.ReactNode }> = {
-  TEST: {
-    title: "Test payment (demo)",
-    caption: "Simulated payment for testing. No card is charged and no money moves.",
-    icon: <ScienceOutlinedIcon sx={{ color: "#7c3aed", fontSize: 24 }} />,
-  },
-  MANUAL: {
-    title: "Pay on delivery / bank transfer",
-    caption: "Your order is reserved. The store confirms it once your payment is received.",
-    icon: <LocalShippingOutlinedIcon sx={{ color: "#6b7280", fontSize: 24 }} />,
-  },
+const ICONS: Record<PaymentMethod, React.ReactNode> = {
+  TEST: <ScienceOutlinedIcon sx={{ color: "#7c3aed", fontSize: 24 }} />,
+  MANUAL: <LocalShippingOutlinedIcon sx={{ color: "#6b7280", fontSize: 24 }} />,
 };
 
 interface PaymentStepProps {
@@ -62,15 +55,15 @@ export function PaymentStep({ config, value, onChange }: PaymentStepProps) {
                 label={
                   <Box sx={{ ml: 0.5 }}>
                     <Typography variant="subtitle2" sx={{ fontWeight: 800, fontSize: "0.88rem" }}>
-                      {OPTIONS[method].title}
+                      {PAYMENT_TEXT[method].title}
                     </Typography>
                     <Typography variant="caption" sx={{ color: "#6b7280" }}>
-                      {OPTIONS[method].caption}
+                      {PAYMENT_TEXT[method].caption}
                     </Typography>
                   </Box>
                 }
               />
-              {OPTIONS[method].icon}
+              {ICONS[method]}
             </Box>
           ))}
         </Stack>
@@ -79,4 +72,3 @@ export function PaymentStep({ config, value, onChange }: PaymentStepProps) {
   );
 }
 
-export const paymentMethodLabel = (method: PaymentMethod | null) => (method ? OPTIONS[method].title : "");

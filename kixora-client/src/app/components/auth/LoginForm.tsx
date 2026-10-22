@@ -1,7 +1,8 @@
 import { Box, Button, CircularProgress, Stack, Typography } from "@mui/material";
 import EmailOutlinedIcon from "@mui/icons-material/EmailOutlined";
 import LockOutlinedIcon from "@mui/icons-material/LockOutlined";
-import { AuthField, authSubmitSx } from "./AuthField";
+import { AuthField } from "./AuthField";
+import { authSubmitSx } from "./authStyles";
 
 const iconSx = { color: "#9ca3af", fontSize: 16 };
 

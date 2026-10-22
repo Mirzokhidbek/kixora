@@ -11,8 +11,6 @@ import {
   TextField,
   InputAdornment,
   IconButton,
-  Snackbar,
-  Alert,
   Pagination,
   Rating,
   Select,
@@ -36,7 +34,7 @@ import ProductService from "../../services/ProductService";
 import { setProducts } from "./slice";
 import { retrieveProducts } from "./selector";
 import type { Product, ProductInquiry } from "../../../lib/types/product";
-import { ProductCollection, ProductSize } from "../../../lib/enums/common.enum";
+import { ProductCollection } from "../../../lib/enums/common.enum";
 import { getImageUrl } from "../../../lib/config";
 
 interface ProductsProps {
@@ -67,8 +65,6 @@ export function Products({ onAdd }: ProductsProps) {
   const [searchText, setSearchText] = useState("");
   const [selectedSize, setSelectedSize] = useState<number | null>(null);
   const [loading, setLoading] = useState<boolean>(true);
-  const [toastOpen, setToastOpen] = useState(false);
-  const [toastMsg, setToastMsg] = useState("");
 
   const [totalProducts, setTotalProducts] = useState(0);
   const pageCount = Math.max(1, Math.ceil(totalProducts / productsSearch.limit));
@@ -133,15 +129,11 @@ export function Products({ onAdd }: ProductsProps) {
       search: "",
       size: undefined,
     });
-    setToastMsg("Filters reset");
-    setToastOpen(true);
   };
 
   const handleToggleWishlist = (e: React.MouseEvent, product: Product) => {
     e.stopPropagation();
-    const added = toggleWishlist(product);
-    setToastMsg(added ? `Added "${product.productName}" to Wishlist!` : `Removed from Wishlist`);
-    setToastOpen(true);
+    toggleWishlist(product); // the wishlist store shows its own confirmation
   };
 
 
