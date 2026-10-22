@@ -6,11 +6,13 @@ import {
   calculateTotals,
   canTransition,
   mergeOrderLines,
+  mergeOrderLinesBySize,
   pointsForTotal,
 } from "../src/libs/orderRules";
 
-test("member may pay, cancel, and confirm receipt — nothing else", () => {
-  assert.ok(canTransition(OrderStatus.PAUSE, OrderStatus.PROCESS, "member"));
+test("member may cancel an unpaid order and confirm receipt — nothing else", () => {
+  // marking an order as paid is NOT a member action (only a confirmed payment or the admin)
+  assert.equal(canTransition(OrderStatus.PAUSE, OrderStatus.PROCESS, "member"), false);
   assert.ok(canTransition(OrderStatus.PAUSE, OrderStatus.DELETE, "member"));
   assert.ok(canTransition(OrderStatus.PROCESS, OrderStatus.FINISH, "member"));
 
@@ -20,6 +22,12 @@ test("member may pay, cancel, and confirm receipt — nothing else", () => {
   assert.equal(canTransition(OrderStatus.PROCESS, OrderStatus.DELETE, "member"), false);
   assert.equal(canTransition(OrderStatus.DELETE, OrderStatus.PAUSE, "member"), false);
   assert.deepEqual(allowedSourceStatuses(OrderStatus.PAUSE, "member"), []);
+});
+
+test("a confirmed payment moves PAUSE → PROCESS and nothing else", () => {
+  assert.ok(canTransition(OrderStatus.PAUSE, OrderStatus.PROCESS, "payment"));
+  assert.equal(canTransition(OrderStatus.PROCESS, OrderStatus.PROCESS, "payment"), false);
+  assert.equal(canTransition(OrderStatus.PAUSE, OrderStatus.FINISH, "payment"), false);
 });
 
 test("admin may additionally cancel orders in process", () => {
@@ -55,6 +63,20 @@ test("duplicate product lines are merged before stock checks", () => {
     [
       { productId: "a", itemQuantity: 4 },
       { productId: "b", itemQuantity: 2 },
+    ]
+  );
+});
+
+test("order lines keep different sizes of one model apart", () => {
+  assert.deepEqual(
+    mergeOrderLinesBySize([
+      { productId: "a", itemQuantity: 1, itemSize: 42 },
+      { productId: "a", itemQuantity: 2, itemSize: 43 },
+      { productId: "a", itemQuantity: 1, itemSize: 42 },
+    ]),
+    [
+      { productId: "a", itemSize: 42, itemQuantity: 2 },
+      { productId: "a", itemSize: 43, itemQuantity: 2 },
     ]
   );
 });
