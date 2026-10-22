@@ -318,3 +318,30 @@ Testlar to'liq alohida muhitda o'tkazildi: vaqtinchalik `kixora_e2e_*` bazasi, a
 1. **Railway'ga o'zgaruvchilarni qo'ying:** `SMTP_URL`, `MAIL_FROM`, `PUBLIC_APP_URL`, `PUBLIC_SERVER_URL`. Ixtiyoriy: `STORE_NOTIFY_EMAIL`, `DATA_ENCRYPTION_KEY`.
 2. **Do'kon egasi `kixora-client/src/lib/storeInfo.ts` dagi va'dalarni tasdiqlasin:** qaytarish muddati, to'lov usuli.
 3. **Tizimga kirgandan keyin Admin → Security bo'limida 2FA'ni yoqing.**
+
+---
+
+## 12. Railway frontend deploy xatosi va bitta domen ostidagi API
+
+**Belgi:** `kixora_frontend` xizmati: *Build › Build image — Failed to build an image* (05:31).
+
+**Tashxis:** Railway infratuzilma xatosi: builder kod nusxasini olib kela olmagan (*failed to fetch snapshot*), build umuman boshlanmagan. Kodda xato yo'q. `dc32500` va hozirgi commit lokal toza nusxada Railway'dagi Node 24.20.0 bilan `npm ci && npm run build` dan muvaffaqiyatli o'tdi.
+
+**Tekshiruv paytida topilgan jiddiy muammo:** frontend **Railway'da** joylashgan, Vercel'da emas. 10-bosqichdagi "bitta domen ostidagi API" yechimi faqat `vercel.json` da qilingan edi. `*.up.railway.app` Public Suffix List'da, shuning uchun frontend va backend brauzer uchun alohida saytlar. Token endi `localStorage` da saqlanmagani uchun, proxy bo'lmasa keyingi frontend deploy'da login ishlamay qolardi.
+
+| ID | Yechim |
+|---|---|
+| RW-1 | `kixora-client/server.mjs` qo'shildi: qo'shimcha paketsiz Node server. U `dist` ni beradi (SPA fallback, hash'langan fayllar uchun uzoq kesh, path traversal'dan himoya) va `/api/*` so'rovlarini `API_ORIGIN` ga proxy qiladi. Bunda cookie, multipart yuklash va status kodlari o'zgarmay o'tadi. `npm start` endi shu server. `serve` paketi olib tashlandi. |
+| RW-2 | Proxy orqali kelgan so'rovlarda rate limit mijozning haqiqiy IP'sini ko'radi: proxy `X-Client-IP` ni `PROXY_SECRET` bilan yuboradi. Backend sarlavhaga faqat secret mos kelsa ishonadi (`src/libs/clientIp.ts`), shuning uchun soxtalashtirib bo'lmaydi. |
+| RW-3 | `mongodb-memory-server` → `mongodb-memory-server-core`. Avvalgi paket har `npm ci` da taxminan 100 MB'lik MongoDB faylini yuklardi, bu Railway backend build'larini sekinlashtirardi. Endi u faqat E2E testlar ishga tushganda yuklanadi. |
+
+**Tekshiruv:** production build'ga `/api` kirgan, localhost manzili yo'q. `server.mjs` + test backend bo'yicha 11/11 tekshiruv o'tdi: statik fayllar, SPA fallback, kesh, path traversal, API, `X-Total-Count`, signup cookie, cookie bilan so'rov, multipart yuklash, `/api/uploads`, logout. Brauzerda ham sinaldi. Unit testlar 22/22, E2E 23/23.
+
+### Railway'da qilinadigan ishlar
+1. **`kixora_frontend` → Variables:**
+   - `VITE_API_URL` ni **o'chiring** yoki `/api` qiling;
+   - `API_ORIGIN=https://burak-backend-production.up.railway.app` qo'shing;
+   - `PROXY_SECRET=<uzun tasodifiy qiymat>` qo'shing.
+2. **`kixora_frontend` → Settings:** Root Directory `kixora-client`, Start Command `npm start` (yoki bo'sh qoldiring).
+3. **Backend xizmati → Variables:** o'sha `PROXY_SECRET`. `ALLOWED_ORIGINS` ga frontend manzilini qo'shing (`https://burak-frontend-production.up.railway.app`).
+4. Oxirgi commit'dan **Redeploy** qiling. "failed to fetch snapshot" yana chiqsa, bu Railway tomonidagi muammo, Railway support'ga murojaat qiling.

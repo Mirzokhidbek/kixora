@@ -54,6 +54,11 @@ export const env = {
    */
   uploadDir: path.resolve(process.env.UPLOAD_DIR || "public/uploads"),
   redisUrl: process.env.REDIS_URL || "",
+  /**
+   * Shared secret with the web server's /api proxy (kixora-client/server.mjs).
+   * When a request carries it, the proxy's X-Client-IP is trusted for rate limits.
+   */
+  proxySecret: process.env.PROXY_SECRET || "",
   sentryDsn: process.env.SENTRY_DSN || "",
   /** Outgoing email (password reset, verification, store notifications) */
   smtpUrl: process.env.SMTP_URL || "",

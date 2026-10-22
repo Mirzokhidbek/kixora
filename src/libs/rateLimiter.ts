@@ -1,4 +1,5 @@
-import rateLimit, { Options } from "express-rate-limit";
+import rateLimit, { ipKeyGenerator, Options } from "express-rate-limit";
+import { clientIp } from "./clientIp";
 import { RedisStore } from "rate-limit-redis";
 import { getRedis } from "./redis";
 import { Request, Response } from "express";
@@ -11,9 +12,12 @@ const isProduction = process.env.NODE_ENV === "production";
  * instances); otherwise express-rate-limit's in-memory store.
  */
 const redisStore = (prefix: string): Partial<Options> => {
+  // count per real visitor, also behind the SPA's /api proxy
+  const keyGenerator = (req: Request) => ipKeyGenerator(clientIp(req));
   const redis = getRedis();
-  if (!redis) return {};
+  if (!redis) return { keyGenerator };
   return {
+    keyGenerator,
     store: new RedisStore({
       prefix: `rl:${prefix}:`,
       sendCommand: (...args: string[]) => redis.sendCommand(args),

@@ -9,8 +9,8 @@
     "build": "tsc -b && vite build",
     "lint": "oxlint",
     "preview": "vite preview --host 0.0.0.0",
-    "serve": "serve -s dist -l $PORT",
-    "start": "serve -s dist -l $PORT",
+    "serve": "node server.mjs",
+    "start": "node server.mjs",
     "test": "vitest run"
   },
   "dependencies": {
@@ -26,7 +26,6 @@
     "react-dom": "^19.2.8",
     "react-redux": "^9.3.0",
     "react-router-dom": "^7.18.3",
-    "serve": "^14.2.4",
     "sweetalert2": "^11.26.25"
   },
   "devDependencies": {
@@ -38,5 +37,8 @@
     "typescript": "~6.0.2",
     "vite": "^8.2.2",
     "vitest": "^3.2.7"
+  },
+  "engines": {
+    "node": ">=20"
   }
 }
