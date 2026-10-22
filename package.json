@@ -5,11 +5,13 @@
   "main": "src/server.ts",
   "scripts": {
     "start": "node dist/server.js",
-    "start:dev": "nodemon --exec ts-node src/server.ts",
     "dev": "nodemon --exec ts-node src/server.ts",
-    "build": "tsc && cp -r src/views dist/views 2>/dev/null || true",
-    "train": "nodemon --exec ts-node src/train.ts",
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "start:dev": "nodemon --exec ts-node src/server.ts",
+    "clean": "node -e \"require('fs').rmSync('dist',{recursive:true,force:true})\"",
+    "build": "npm run clean && tsc && cp -r src/views dist/views",
+    "typecheck": "tsc --noEmit",
+    "test": "node --require ts-node/register --test test/*.test.ts",
+    "train": "nodemon --exec ts-node src/train.ts"
   },
   "author": "MIT",
   "license": "ISC",
@@ -29,7 +31,6 @@
     "helmet": "^8.3.0",
     "jsonwebtoken": "^9.0.3",
     "moment": "^2.29.4",
-    "mongodb": "^3.2.6",
     "mongoose": "^6.2.9",
     "morgan": "^1.11.0",
     "multer": "^2.3.0",
@@ -52,5 +53,8 @@
     "ts-node": "^10.9.1",
     "tsconfig-paths": "^4.2.0",
     "typescript": "^5.2.2"
+  },
+  "engines": {
+    "node": ">=20"
   }
 }

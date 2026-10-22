@@ -3,8 +3,8 @@ module.exports = {
     {
       name: "BURAK-BACKEND",
       script: "./dist/server.js",
-      instances: "max",
-      exec_mode: "cluster",
+      instances: 1, // in-memory rate limits & AI cache are per-process; see docs/AUDIT.md (D-3)
+      exec_mode: "fork",
       watch: false,
       env: {
         NODE_ENV: "production",

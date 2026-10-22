@@ -1,81 +1,37 @@
 import express from "express";
-const router = express.Router();
 import memberController from "./controllers/member.controller";
 import productController from "./controllers/product.controller";
 import orderController from "./controllers/order.controller";
-import uploader from "./libs/uploader";
-import { authLimiter, orderLimiter } from "./libs/rateLimiter";
+import makeUploader from "./libs/uploader";
+import { aiSearchLimiter, authLimiter, orderLimiter } from "./libs/rateLimiter";
+import { retrieveAuth, verifyAuth } from "./middlewares/auth";
 
-/** SPA Member Routes **/
+/** SPA REST API (customers) **/
+const router = express.Router();
+
+/** Member **/
 router.get("/member/restaurant", memberController.getRestaurant);
 router.get("/member/top-users", memberController.getTopUsers);
-
 router.post("/member/signup", authLimiter, memberController.signup);
-router.post("/signup", authLimiter, memberController.signup);
-
 router.post("/member/login", authLimiter, memberController.login);
-router.post("/login", authLimiter, memberController.login);
-
 router.post("/member/google-login", authLimiter, memberController.googleLogin);
-router.post("/google-login", authLimiter, memberController.googleLogin);
-
-router.post(
-  "/member/logout",
-  memberController.verifyAuth,
-  memberController.logout
-);
-
-router.get(
-  "/member/detail",
-  memberController.verifyAuth,
-  memberController.getMemberDetail
-);
-
+router.post("/member/logout", memberController.logout);
+router.get("/member/detail", verifyAuth, memberController.getMemberDetail);
 router.post(
   "/member/update",
-  memberController.verifyAuth,
-  uploader("members").single("memberImage"),
+  verifyAuth,
+  makeUploader("members").single("memberImage"),
   memberController.updateMember
 );
 
-/** SPA Product Routes **/
-router.get(
-  "/product/all",
-  memberController.retrieveAuth,
-  productController.getProducts
-);
+/** Product **/
+router.get("/product/all", productController.getProducts);
+router.post("/product/ai-search", aiSearchLimiter, productController.aiSearchProducts);
+router.get("/product/:id", retrieveAuth, productController.getProduct);
 
-router.get(
-  "/product/:id",
-  memberController.retrieveAuth,
-  productController.getProduct
-);
-
-router.post(
-  "/product/ai-search",
-  memberController.retrieveAuth,
-  productController.aiSearchProducts
-);
-
-
-/** SPA Order Routes **/
-router.post(
-  "/order/create",
-  memberController.verifyAuth,
-  orderLimiter,
-  orderController.createOrder
-);
-
-router.get(
-  "/order/all",
-  memberController.verifyAuth,
-  orderController.getMyOrders
-);
-
-router.post(
-  "/order/update",
-  memberController.verifyAuth,
-  orderController.updateOrder
-);
+/** Order **/
+router.post("/order/create", verifyAuth, orderLimiter, orderController.createOrder);
+router.get("/order/all", verifyAuth, orderController.getMyOrders);
+router.post("/order/update", verifyAuth, orderController.updateOrder);
 
 export default router;

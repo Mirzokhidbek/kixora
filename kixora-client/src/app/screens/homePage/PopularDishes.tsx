@@ -90,24 +90,24 @@ export function PopularDishes({ onAdd }: PopularDishesProps) {
   ];
 
   const rawList = Array.isArray(popularDishes) ? popularDishes : [];
+  // Real products are shown with their real data only. Showcase cards are used
+  // only when the catalog is empty, and they can never be added to the basket.
   const displayList =
-    rawList.length >= 4
+    rawList.length > 0
       ? rawList.slice(0, 4)
-      : samplePicks.map((sample, idx) => {
-          const match = rawList[idx];
-          return {
-            _id: match?._id || `sample_${idx}`,
-            productName: match?.productName || sample.name,
-            productPrice: match?.productPrice || sample.price,
-            productImages: match?.productImages || [sample.image],
-            productCollection: match?.productCollection || "SNEAKERS",
-            discount: sample.discount,
-            oldPrice: sample.oldPrice,
-            rating: sample.rating,
-            reviews: sample.reviews,
-            colors: sample.colors,
-          };
-        });
+      : samplePicks.map((sample, idx) => ({
+          _id: `sample_${idx}`,
+          isSample: true,
+          productName: sample.name,
+          productPrice: sample.price,
+          productImages: [sample.image],
+          productCollection: "SNEAKERS",
+          discount: sample.discount,
+          oldPrice: sample.oldPrice,
+          rating: sample.rating,
+          reviews: sample.reviews,
+          colors: sample.colors,
+        }));
 
   return (
     <Box sx={{ py: { xs: 5, md: 7 }, bgcolor: "#ffffff" }}>
@@ -172,8 +172,9 @@ export function PopularDishes({ onAdd }: PopularDishesProps) {
           {displayList.map((product: any, idx: number) => {
             const isFav = favorites.includes(product._id);
             const image = getImageUrl(product.productImages?.[0] || samplePicks[idx % 4].image);
-            const discount = product.discount || `-${12 + (idx * 3)}%`;
-            const oldPrice = product.oldPrice || Math.round(product.productPrice * 1.2);
+            // Never invent discounts or old prices for real products
+            const discount: string | undefined = product.discount;
+            const oldPrice: number | undefined = product.oldPrice;
             const colors: string[] = Array.isArray(product.colors)
               ? product.colors
               : Array.isArray(product.productColors)
@@ -183,7 +184,7 @@ export function PopularDishes({ onAdd }: PopularDishesProps) {
             return (
               <Grid key={product._id} size={{ xs: 12, sm: 6, md: 3 }}>
                 <Card
-                  onClick={() => navigate(product._id.startsWith("sample") ? "/products" : `/products/${product._id}`)}
+                  onClick={() => navigate(product.isSample ? "/products" : `/products/${product._id}`)}
                   sx={{
                     bgcolor: "#ffffff",
                     borderRadius: 3.5,
@@ -216,7 +217,8 @@ export function PopularDishes({ onAdd }: PopularDishesProps) {
                       zIndex: 2,
                     }}
                   >
-                    {/* Discount Badge */}
+                    {/* Discount Badge (only when the product really has one) */}
+                    {discount ? (
                     <Box
                       sx={{
                         px: 1.2,
@@ -233,6 +235,9 @@ export function PopularDishes({ onAdd }: PopularDishesProps) {
                         {discount}
                       </Typography>
                     </Box>
+                    ) : (
+                      <span />
+                    )}
 
                     {/* Wishlist Button */}
                     <IconButton
@@ -323,22 +328,26 @@ export function PopularDishes({ onAdd }: PopularDishesProps) {
                         {product.productName}
                       </Typography>
 
-                      {/* Rating */}
+                      {/* Rating (only real review data, never invented) */}
+                      {product.rating && (
                       <Box sx={{ display: "flex", alignItems: "center", gap: 0.6, mb: 1.2 }}>
-                        <Rating value={product.rating || 4.8} precision={0.1} size="small" readOnly sx={{ fontSize: "0.9rem", color: "#f59e0b" }} />
+                        <Rating value={product.rating} precision={0.1} size="small" readOnly sx={{ fontSize: "0.9rem", color: "#f59e0b" }} />
                         <Typography variant="caption" sx={{ color: "#6b7280", fontWeight: 700, fontSize: "0.78rem" }}>
-                          {product.rating || 4.8} ({product.reviews || "1.2k"})
+                          {product.rating} ({product.reviews})
                         </Typography>
                       </Box>
+                      )}
 
                       {/* Price Section */}
                       <Box sx={{ display: "flex", alignItems: "baseline", gap: 1, mb: 2 }}>
                         <Typography variant="h6" sx={{ fontWeight: 900, color: "#111827", fontSize: "1.18rem" }}>
                           ${Number(product.productPrice).toFixed(2)}
                         </Typography>
-                        <Typography variant="body2" sx={{ color: "#9ca3af", textDecoration: "line-through", fontWeight: 600, fontSize: "0.88rem" }}>
-                          ${Number(oldPrice).toFixed(2)}
-                        </Typography>
+                        {oldPrice && (
+                          <Typography variant="body2" sx={{ color: "#9ca3af", textDecoration: "line-through", fontWeight: 600, fontSize: "0.88rem" }}>
+                            ${Number(oldPrice).toFixed(2)}
+                          </Typography>
+                        )}
                       </Box>
                     </Box>
 
@@ -348,7 +357,8 @@ export function PopularDishes({ onAdd }: PopularDishesProps) {
                       variant="contained"
                       onClick={(e) => {
                         e.stopPropagation();
-                        onAdd && onAdd(product);
+                        if (product.isSample) navigate("/products");
+                        else onAdd?.(product);
                       }}
                       startIcon={<AddShoppingCartIcon sx={{ fontSize: 16 }} />}
                       endIcon={<ArrowForwardIcon sx={{ fontSize: 14 }} />}

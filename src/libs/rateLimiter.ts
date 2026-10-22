@@ -1,5 +1,6 @@
 import rateLimit from "express-rate-limit";
 import { Request, Response } from "express";
+import { sendAdminAlert } from "./adminResponse";
 
 const isProduction = process.env.NODE_ENV === "production";
 
@@ -61,12 +62,28 @@ export const adminAuthLimiter = rateLimit({
   legacyHeaders: false,
   skip: (req: Request) => isLocalhost(req),
   handler: (req: Request, res: Response) => {
-    res.status(429).send(`
-      <script>
-        alert("Too many admin login attempts from this IP! For security, your access is paused for 15 minutes.");
-        window.location.replace('/admin/login');
-      </script>
-    `);
+    sendAdminAlert(
+      res,
+      "Too many admin login attempts from this IP! For security, your access is paused for 15 minutes.",
+      "/admin/login",
+      429
+    );
+  },
+});
+
+/**
+ * 5. AI Search Limiter
+ * Every AI search costs a paid Gemini call, so it is limited separately.
+ */
+export const aiSearchLimiter = rateLimit({
+  windowMs: 1 * 60 * 1000, // 1 minute
+  max: isProduction ? 10 : 60,
+  standardHeaders: true,
+  legacyHeaders: false,
+  skip: (req: Request) => isLocalhost(req),
+  message: {
+    code: 429,
+    message: "Too many AI searches. Please wait a minute and try again.",
   },
 });
 

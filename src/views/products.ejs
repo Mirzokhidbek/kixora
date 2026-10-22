@@ -7,7 +7,7 @@
       <div class="d-flex align-items-center gap-2 mb-1">
         <h2 class="fw-bold text-dark mb-0 tracking-tight" style="font-size: 1.45rem;">Footwear Catalog</h2>
         <span class="badge bg-dark text-white rounded-pill px-2.5 py-1" style="font-size: 0.75rem; font-weight: 600;">
-          <%= products ? products.length : 0 %> Models
+          <%= typeof pagination !== 'undefined' ? pagination.total : (products ? products.length : 0) %> Models
         </span>
       </div>
       <p class="text-muted mb-0 small">
@@ -168,6 +168,7 @@
       </table>
     </div>
   </div>
+  <%- include('includes/pagination') %>
 
   <!-- Create New Product Modal -->
   <div class="modal fade" id="addProductModal" tabindex="-1" aria-hidden="true">

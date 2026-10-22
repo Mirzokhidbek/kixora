@@ -1,241 +1,156 @@
-import ProductModel from "../schema/Product.model";
-import {
-  AISearchResponse,
-  Product,
-  ProductDashboardMetrics,
-  ProductInput,
-  ProductInquiry,
-  ProductUpdateInput,
-} from "../libs/types/product";
+import ProductModel from "../models/Product.model";
+import { AISearchResponse, Product, ProductDashboardMetrics } from "../libs/types/product";
 import Errors, { HTTPCode, Message } from "../libs/Errors";
-import { shapeIntoMongooseObjectId } from "../libs/config";
+import { escapeRegex, shapeIntoMongooseObjectId } from "../libs/config";
 import { ProductCollection, ProductStatus } from "../libs/enums/product.enum";
 import { T } from "../libs/types/common";
 import { Types } from "mongoose";
 import ViewService from "./View.service";
-import { ViewInput } from "../libs/types/view";
 import { ViewGroup } from "../libs/enums/view.enum";
 import { extractAISearchIntent } from "../libs/aiSearch";
+import { z } from "zod";
+import { productCreateSchema, productInquirySchema, productUpdateSchema } from "../libs/validation";
 
+type ProductInquiry = z.infer<typeof productInquirySchema>;
+type ProductCreate = z.infer<typeof productCreateSchema> & { productImages: string[] };
+type ProductUpdate = z.infer<typeof productUpdateSchema>;
+
+const LOW_STOCK_THRESHOLD = 5;
 
 class ProductService {
-  private readonly productModel;
-  private readonly viewService;
+  private readonly productModel = ProductModel;
+  private readonly viewService = new ViewService();
 
-  constructor() {
-    this.productModel = ProductModel;
-    this.viewService = new ViewService();
-  }
-
-  /** SPA: Get Products with MongoDB Aggregation Pipeline **/
+  /** SPA: Get Products with filters, search, sorting & pagination **/
   public async getProducts(inquiry: ProductInquiry): Promise<Product[]> {
     const match: T = { productStatus: ProductStatus.PROCESS };
+    if (inquiry.productCollection) match.productCollection = inquiry.productCollection;
+    if (inquiry.search) match.productName = { $regex: escapeRegex(inquiry.search), $options: "i" };
+    if (inquiry.size) match.productSizes = inquiry.size;
+    if (inquiry.color) match.productColors = inquiry.color;
 
-    if (inquiry.productCollection) {
-      match.productCollection = inquiry.productCollection;
-    }
+    // order is whitelisted by the validation schema
+    const sort: Record<string, 1 | -1> =
+      inquiry.order === "productPrice" ? { productPrice: 1 } : { [inquiry.order]: -1 };
 
-    if (inquiry.search) {
-      match.productName = { $regex: new RegExp(inquiry.search, "i") };
-    }
-
-    if (inquiry.size) {
-      match.productSizes = { $in: [Number(inquiry.size)] };
-    }
-
-    if (inquiry.color) {
-      match.productColors = { $in: [String(inquiry.color)] };
-    }
-
-    const sort: T =
-      inquiry.order === "productPrice"
-        ? { [inquiry.order]: 1 }
-        : { [inquiry.order || "createdAt"]: -1 };
-
-    const result = await this.productModel
-      .aggregate<Product>([
-        { $match: match },
-        { $sort: sort },
-        { $skip: (inquiry.page * 1 - 1) * inquiry.limit },
-        { $limit: inquiry.limit * 1 },
-      ])
+    return this.productModel
+      .find(match)
+      .sort({ ...sort, _id: -1 })
+      .skip((inquiry.page - 1) * inquiry.limit)
+      .limit(inquiry.limit)
+      .lean<Product[]>()
       .exec();
-
-    if (!result) throw new Errors(HTTPCode.NOT_FOUND, Message.NO_DATA_FOUND);
-
-    return result;
   }
 
-  /** SPA: Get Single Product & Track Member Views **/
-  public async getProduct(
-    memberId: Types.ObjectId | undefined,
-    id: string
-  ): Promise<Product> {
+  /** SPA: Get Single Product & track unique member views **/
+  public async getProduct(memberId: Types.ObjectId | undefined, id: string): Promise<Product> {
     const productId = shapeIntoMongooseObjectId(id);
-
     const foundProduct = await this.productModel
       .findOne({ _id: productId, productStatus: ProductStatus.PROCESS })
       .lean<Product>()
       .exec();
-
     if (!foundProduct) throw new Errors(HTTPCode.NOT_FOUND, Message.NO_DATA_FOUND);
 
-    let result: Product = foundProduct;
-
-    // If authenticated user visits product, track unique view
     if (memberId) {
-      const input: ViewInput = {
-        memberId: memberId,
+      const isNewView = await this.viewService.recordView({
+        memberId,
         viewRefId: productId,
         viewGroup: ViewGroup.PRODUCT,
-      };
-
-      const exist = await this.viewService.checkViewExistence(input);
-
-      if (!exist) {
-        console.log("PLAN: Insert new product view");
-        await this.viewService.insertMemberView(input);
-
-        // Increase product views count in database
+      });
+      if (isNewView) {
         const updated = await this.productModel
-          .findByIdAndUpdate(
-            productId,
-            { $inc: { productViews: 1 } },
-            { new: true }
-          )
+          .findByIdAndUpdate(productId, { $inc: { productViews: 1 } }, { new: true })
           .lean<Product>()
           .exec();
-
-        if (updated) {
-          result = updated;
-        }
+        if (updated) return updated;
       }
     }
-
-    return result;
+    return foundProduct;
   }
 
-  /** SPA & BSSR: Get All Products **/
-  public async getAllProducts(): Promise<Product[]> {
-    const result = await this.productModel.find().lean<Product[]>().exec();
-    return result || [];
+  /** BSSR: Paginated product list for admin **/
+  public async getAllProducts(page: number, limit: number): Promise<{ products: Product[]; total: number }> {
+    const filter = { productStatus: { $ne: ProductStatus.DELETE } };
+    const [products, total] = await Promise.all([
+      this.productModel
+        .find(filter)
+        .sort({ createdAt: -1 })
+        .skip((page - 1) * limit)
+        .limit(limit)
+        .lean<Product[]>()
+        .exec(),
+      this.productModel.countDocuments(filter).exec(),
+    ]);
+    return { products, total };
   }
 
-  /** BSSR: Create New Product **/
-  public async createNewProduct(input: ProductInput): Promise<Product> {
-    try {
-      const result = await this.productModel.create(input);
-      return result.toObject() as Product;
-    } catch (err) {
-      console.error("Error, createNewProduct:", err);
-      throw new Errors(HTTPCode.BAD_REQUEST, Message.CREATE_FAILED);
-    }
+  /** BSSR: Create New Product (validated, whitelisted input) **/
+  public async createNewProduct(input: ProductCreate): Promise<Product> {
+    const result = await this.productModel.create(input);
+    return result.toObject() as Product;
   }
 
-  /** BSSR: Update Product by ID **/
-  public async updateChosenProduct(
-    id: string,
-    input: Partial<ProductUpdateInput>
-  ): Promise<Product> {
-    const productId = shapeIntoMongooseObjectId(id);
+  /** BSSR: Update Product by ID (validated, whitelisted input) **/
+  public async updateChosenProduct(id: string, input: ProductUpdate): Promise<Product> {
     const result = await this.productModel
-      .findByIdAndUpdate({ _id: productId }, input, { new: true })
+      .findByIdAndUpdate(shapeIntoMongooseObjectId(id), { $set: input }, { new: true, runValidators: true })
       .lean<Product>()
       .exec();
     if (!result) throw new Errors(HTTPCode.NOT_FOUND, Message.NO_DATA_FOUND);
     return result;
   }
 
-  /** BSSR: Update Product Details via AJAX (Quick Edit) **/
-  public async updateProductDetailsByAdmin(
-    id: string,
-    input: Partial<ProductUpdateInput>
-  ): Promise<Product> {
-    const productId = shapeIntoMongooseObjectId(id);
-    const result = await this.productModel
-      .findByIdAndUpdate(productId, { $set: input }, { new: true })
-      .lean<Product>()
-      .exec();
-    if (!result) throw new Errors(HTTPCode.NOT_MODIFIED, Message.UPDATE_FAILED);
-    return result;
-  }
-
-  /** BSSR: Get Footwear Catalog Metrics (Total Models, Low Stock, Collection Counts) **/
+  /** BSSR: Catalog metrics computed inside MongoDB **/
   public async getProductDashboardMetrics(): Promise<ProductDashboardMetrics> {
-    const products = await this.productModel.find().lean<Product[]>().exec();
-    let activeProducts = 0;
-    let lowStockCount = 0;
+    const [facet] = await this.productModel
+      .aggregate<{
+        total: { n: number }[];
+        active: { n: number }[];
+        lowStock: { n: number }[];
+        byCollection: { _id: string; n: number }[];
+      }>([
+        { $match: { productStatus: { $ne: ProductStatus.DELETE } } },
+        {
+          $facet: {
+            total: [{ $count: "n" }],
+            active: [{ $match: { productStatus: ProductStatus.PROCESS } }, { $count: "n" }],
+            lowStock: [{ $match: { productLeftCount: { $lte: LOW_STOCK_THRESHOLD } } }, { $count: "n" }],
+            byCollection: [{ $group: { _id: "$productCollection", n: { $sum: 1 } } }],
+          },
+        },
+      ])
+      .exec();
+
     const categoryBreakdown: Record<string, number> = {};
-
-    products.forEach((p: Product) => {
-      if (p.productStatus === ProductStatus.PROCESS) activeProducts++;
-      if (Number(p.productLeftCount || 0) <= 5) lowStockCount++;
-      const col = p.productCollection || "SNEAKERS";
-      categoryBreakdown[col] = (categoryBreakdown[col] || 0) + 1;
-    });
-
+    facet?.byCollection.forEach((c) => (categoryBreakdown[c._id || "SNEAKERS"] = c.n));
     return {
-      totalProducts: products.length,
-      activeProducts,
-      lowStockCount,
+      totalProducts: facet?.total[0]?.n || 0,
+      activeProducts: facet?.active[0]?.n || 0,
+      lowStockCount: facet?.lowStock[0]?.n || 0,
       categoryBreakdown,
     };
   }
 
-  /** SPA: AI Semantic Natural Language Search via Gemini AI **/
+  /** SPA: AI natural-language search via Gemini **/
   public async aiSearchProducts(query: string): Promise<AISearchResponse> {
-    if (!query || !query.trim()) {
-      throw new Errors(HTTPCode.BAD_REQUEST, Message.BLANK_NOT_ALLOWED);
-    }
-
-    // Direct Gemini AI Extraction (zero fallback)
-    const intent = await extractAISearchIntent(query.trim());
-
-    // Build MongoDB Semantic Query
-    const matchConditions: T[] = [
-      { productStatus: ProductStatus.PROCESS }
-    ];
+    const intent = await extractAISearchIntent(query);
 
     const orClauses: T[] = [];
-
-    // Match Collection if extracted
-    if (intent.collection) {
-      orClauses.push({ productCollection: intent.collection });
-    }
-
-    // Match Color if extracted
+    if (intent.collection) orClauses.push({ productCollection: intent.collection });
     if (intent.color) {
-      orClauses.push({
-        productColors: { $regex: new RegExp(intent.color, "i") }
-      });
-      orClauses.push({
-        productName: { $regex: new RegExp(intent.color, "i") }
-      });
+      const color = { $regex: escapeRegex(intent.color), $options: "i" };
+      orClauses.push({ productColors: color }, { productName: color });
     }
+    intent.keywords
+      .filter((k) => k.trim().length > 2)
+      .forEach((keyword) => {
+        const kw = { $regex: escapeRegex(keyword.trim()), $options: "i" };
+        orClauses.push({ productName: kw }, { productDesc: kw });
+      });
 
-    // Match extracted English/Uzbek keywords in title and description
-    if (intent.keywords && intent.keywords.length > 0) {
-      intent.keywords.forEach((keyword) => {
-        if (keyword && keyword.trim().length > 2) {
-          orClauses.push({
-            productName: { $regex: new RegExp(keyword.trim(), "i") }
-          });
-          orClauses.push({
-            productDesc: { $regex: new RegExp(keyword.trim(), "i") }
-          });
-        }
-      });
-    }
-
-    let finalQuery: T = { productStatus: ProductStatus.PROCESS };
-    if (orClauses.length > 0) {
-      finalQuery = {
-        $and: [
-          { productStatus: ProductStatus.PROCESS },
-          { $or: orClauses }
-        ]
-      };
-    }
+    const finalQuery: T = orClauses.length
+      ? { productStatus: ProductStatus.PROCESS, $or: orClauses }
+      : { productStatus: ProductStatus.PROCESS };
 
     let products = await this.productModel
       .find(finalQuery)
@@ -244,8 +159,8 @@ class ProductService {
       .lean<Product[]>()
       .exec();
 
-    // If query returned no products (e.g. database has few items), retrieve closest active models
-    if (!products || products.length === 0) {
+    // Nothing matched: show the most popular active models instead of an empty page
+    if (products.length === 0) {
       products = await this.productModel
         .find({ productStatus: ProductStatus.PROCESS })
         .sort({ productViews: -1 })
@@ -255,17 +170,16 @@ class ProductService {
     }
 
     return {
-      query: query.trim(),
+      query,
       intent: {
         collection: intent.collection as ProductCollection | null,
         color: intent.color,
-        keywords: intent.keywords || [],
+        keywords: intent.keywords,
         recommendation: intent.recommendation,
       },
-      products: products || [],
+      products,
     };
   }
 }
 
 export default ProductService;
-
