@@ -61,8 +61,6 @@ class MemberService {
         memberPassword,
         memberType: MemberType.USER,
         memberStatus: MemberStatus.ACTIVE,
-        // an email signup must be confirmed before ordering
-        memberEmailVerified: input.memberEmail ? false : undefined,
       });
       return stripPassword(result.toObject() as Member);
     } catch (err: unknown) {
@@ -128,10 +126,6 @@ class MemberService {
         member.googleId = googleData.googleId; // link verified Google identity
         changed = true;
       }
-      if (member.memberEmailVerified === false) {
-        member.memberEmailVerified = true; // Google verified this address
-        changed = true;
-      }
       if (googleData.picture && !member.memberImage) {
         member.memberImage = googleData.picture;
         changed = true;
@@ -162,7 +156,6 @@ class MemberService {
       memberPassword,
       memberImage: googleData.picture || "",
       googleId: googleData.googleId,
-      memberEmailVerified: true, // Google only issues tokens for verified emails
     });
     // Another sign-up may take the same nick between the check and the insert:
     // the unique index rejects it, so retry once with a random suffix.

@@ -51,10 +51,6 @@ export const resetPasswordSchema = z.object({
   memberPassword: z.string().min(6).max(128),
 });
 
-export const verifyEmailSchema = z.object({
-  token: z.string().min(20).max(200),
-});
-
 export const memberUpdateSchema = z.object({
   memberNick: trimmed(2, 40).optional(),
   memberPhone: optionalText(30),

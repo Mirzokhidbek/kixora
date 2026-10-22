@@ -19,7 +19,7 @@ import { AuthModal } from "./components/auth/AuthModal";
 import { CheckoutModal, type CheckoutRequest } from "./components/checkout/CheckoutModal";
 import PaymentService from "./services/PaymentService";
 import { UnsubscribePage } from "./screens/UnsubscribePage";
-import { ResetPasswordPage, VerifyEmailBanner, VerifyEmailPage } from "./screens/AccountLinkPages";
+import { ResetPasswordPage } from "./screens/AccountLinkPages";
 
 // Lazy-loaded routes for optimal Lighthouse performance and smaller initial bundles
 const HomePage = lazy(() => import("./screens/homePage").then(m => ({ default: m.HomePage })));
@@ -160,7 +160,6 @@ export default function App() {
                 </Box>
               }
             >
-              <VerifyEmailBanner />
               <Routes>
                 <Route path="/" element={<HomePage onAdd={onAdd} />} />
                 <Route path="/products/*" element={<ProductsPage onAdd={onAdd} />} />
@@ -169,7 +168,6 @@ export default function App() {
                 <Route path="/help" element={<HelpPage />} />
                 <Route path="/unsubscribe" element={<UnsubscribePage />} />
                 <Route path="/reset-password" element={<ResetPasswordPage onLoginClick={() => setAuthOpen(true)} />} />
-                <Route path="/verify-email" element={<VerifyEmailPage />} />
               </Routes>
             </Suspense>
           </Box>

@@ -21,8 +21,6 @@ router.post("/member/google-login", authLimiter, memberController.googleLogin);
 router.post("/member/logout", memberController.logout);
 router.post("/member/password/forgot", contactLimiter, memberController.forgotPassword);
 router.post("/member/password/reset", authLimiter, memberController.resetPassword);
-router.post("/member/email/verify", authLimiter, memberController.verifyEmail);
-router.post("/member/email/resend", verifyAuth, contactLimiter, memberController.resendVerification);
 router.get("/member/detail", verifyAuth, memberController.getMemberDetail);
 router.post(
   "/member/update",

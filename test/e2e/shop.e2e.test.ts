@@ -22,7 +22,7 @@ async function outbox() {
   return (await import("../../src/libs/mailer")).testOutbox;
 }
 /** Token from the newest matching email (signup sends its email in the background, so wait briefly) */
-async function lastLinkTo(email: string, kind: "reset-password" | "verify-email") {
+async function lastLinkTo(email: string, kind: "reset-password") {
   for (let i = 0; i < 40; i++) {
     const mail = [...(await outbox())].reverse().find((m) => m.to === email && m.text.includes(kind));
     if (mail) return new URL(/https?:\/\/\S+/.exec(mail.text)![0]).searchParams.get("token");
@@ -33,8 +33,6 @@ async function lastLinkTo(email: string, kind: "reset-password" | "verify-email"
 async function signupBuyer(c: Client, nick: string) {
   const res = await c.post("/member/signup", { memberNick: nick, memberEmail: `${nick}@example.com`, memberPassword: "userpass1" });
   assert.equal(res.status, 201);
-  const token = await lastLinkTo(`${nick}@example.com`, "verify-email");
-  assert.equal((await c.post("/member/email/verify", { token })).status, 200);
   return c;
 }
 
@@ -107,25 +105,15 @@ describe("admin bootstrap, CSRF and catalog", () => {
   });
 });
 
-describe("accounts: signup, verification, password reset", () => {
-  it("signup: token only in httpOnly cookie, email unverified, confirmation mail sent", async () => {
+describe("accounts: signup and password reset", () => {
+  it("signup: token only in httpOnly cookie, role can't be self-assigned", async () => {
     buyer = new Client(env.baseUrl);
     const res = await buyer.post("/member/signup", { memberNick: "bek", memberEmail: "bek@example.com", memberPassword: "userpass1", memberType: "RESTAURANT" });
     const body = await buyer.json(res);
     assert.equal(res.status, 201);
     assert.equal(body.accessToken, undefined);
     assert.equal(body.member.memberType, "USER");
-    assert.equal(body.member.memberEmailVerified, false);
     assert.ok(buyer.hasCookie("accessToken"));
-    assert.ok(await lastLinkTo("bek@example.com", "verify-email"));
-  });
-
-  it("ordering is blocked until the email is confirmed", async () => {
-    const res = await buyer.post("/order/create", order([{ productId: cap._id, itemQuantity: 1 }]));
-    assert.equal(res.status, 403);
-    const token = await lastLinkTo("bek@example.com", "verify-email");
-    assert.equal((await buyer.post("/member/email/verify", { token })).status, 200);
-    assert.equal((await buyer.post("/member/email/verify", { token })).status, 400, "link is single-use");
   });
 
   it("duplicate nickname → 409", async () => {
