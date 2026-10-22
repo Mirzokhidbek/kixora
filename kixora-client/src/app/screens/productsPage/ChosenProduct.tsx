@@ -512,6 +512,10 @@ export function ChosenProduct({ onAdd }: ChosenProductProps) {
             </Box>
           )}
 
+          {activeTab === 3 && (
+            <ProductReviews productId={product._id} onSummaryChange={handleSummaryChange} />
+          )}
+
           {activeTab === 2 && (
             <Typography variant="body1" sx={{ color: "#4b5563", lineHeight: 1.8, maxWidth: 800 }}>
               Fits true to size. If you are between sizes or prefer a roomier fit, we recommend ordering one half size up. Clean with a soft brush and lukewarm water. Avoid machine washing and high heat drying.

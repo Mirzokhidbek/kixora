@@ -5,7 +5,6 @@ import {
   IconButton,
   Button,
   Avatar,
-  Divider,
 } from "@mui/material";
 import CloseIcon from "@mui/icons-material/Close";
 import DeleteOutlinedIcon from "@mui/icons-material/DeleteOutlined";

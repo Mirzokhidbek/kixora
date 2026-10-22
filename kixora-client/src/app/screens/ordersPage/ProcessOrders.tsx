@@ -14,8 +14,6 @@ import {
 } from "@mui/material";
 import LocalShippingOutlinedIcon from "@mui/icons-material/LocalShippingOutlined";
 import CheckCircleIcon from "@mui/icons-material/CheckCircle";
-import Inventory2OutlinedIcon from "@mui/icons-material/Inventory2Outlined";
-import VerifiedIcon from "@mui/icons-material/Verified";
 import { useSelector } from "react-redux";
 
 import { retrieveProcessOrders } from "./selector";

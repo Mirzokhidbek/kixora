@@ -6,7 +6,7 @@
  * dialogs styled to match KIXORA luxury aesthetics (dark accents, clean typography).
  */
 
-import Swal, { type SweetAlertOptions } from "sweetalert2";
+import Swal from "sweetalert2";
 
 // Luxury Dark Toast Configuration
 const Toast = Swal.mixin({
