@@ -1,5 +1,6 @@
 import { env } from "./config";
 import Errors, { HTTPCode, Message } from "./Errors";
+import { cache } from "./cache";
 
 export interface AISearchResult {
   collection: "SNEAKERS" | "RUNNING" | "BOOTS" | "LIMITED_DROP" | null;
@@ -10,13 +11,10 @@ export interface AISearchResult {
 
 const GEMINI_MODELS = ["gemini-3.5-flash-lite", "gemini-flash-latest"];
 const REQUEST_TIMEOUT_MS = 8000;
-const CACHE_TTL_MS = 10 * 60 * 1000;
-const CACHE_MAX_ENTRIES = 500;
+const CACHE_TTL_SECONDS = 10 * 60;
 
 const COLLECTIONS = new Set(["SNEAKERS", "RUNNING", "BOOTS", "LIMITED_DROP"]);
 
-/** Small in-memory LRU-ish cache: identical queries don't hit Gemini again */
-const cache = new Map<string, { value: AISearchResult; expiresAt: number }>();
 
 const SYSTEM_PROMPT = `You are an expert AI Footwear Stylist and Shopping Assistant for KIXORA Luxury Footwear.
 Analyze the user's natural language shoe request (which may be written in Uzbek, English, or Russian).
@@ -63,9 +61,10 @@ function extractJson(text: string): unknown {
 export async function extractAISearchIntent(userQuery: string): Promise<AISearchResult> {
   if (!env.geminiApiKey) throw new Errors(HTTPCode.SERVICE_UNAVAILABLE, Message.AI_UNAVAILABLE);
 
-  const cacheKey = userQuery.trim().toLowerCase();
-  const cached = cache.get(cacheKey);
-  if (cached && cached.expiresAt > Date.now()) return cached.value;
+  // identical queries don't hit Gemini again (shared via Redis when configured)
+  const cacheKey = `ai:intent:${userQuery.trim().toLowerCase()}`;
+  const cached = await cache.get<AISearchResult>(cacheKey);
+  if (cached) return cached;
 
   for (const model of GEMINI_MODELS) {
     try {
@@ -91,8 +90,7 @@ export async function extractAISearchIntent(userQuery: string): Promise<AISearch
       if (!rawText) continue;
 
       const value = normalizeIntent(extractJson(rawText));
-      if (cache.size >= CACHE_MAX_ENTRIES) cache.delete(cache.keys().next().value as string);
-      cache.set(cacheKey, { value, expiresAt: Date.now() + CACHE_TTL_MS });
+      await cache.set(cacheKey, value, CACHE_TTL_SECONDS);
       return value;
     } catch (err: any) {
       console.warn(`Gemini model ${model} failed:`, err?.message);

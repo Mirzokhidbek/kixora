@@ -2,6 +2,7 @@ import "dotenv/config"; // must be first: config.ts reads process.env at import 
 import mongoose from "mongoose";
 import { env } from "./libs/config";
 import app from "./app";
+import { closeRedis } from "./libs/redis";
 
 mongoose.set("strictQuery", true);
 
@@ -37,7 +38,7 @@ mongoose
 const shutdown = (signal: string) => {
   console.log(`${signal} received, shutting down...`);
   server.close(() => {
-    mongoose.connection.close().finally(() => process.exit(0));
+    Promise.allSettled([mongoose.connection.close(), closeRedis()]).finally(() => process.exit(0));
   });
   setTimeout(() => process.exit(1), 10_000).unref();
 };

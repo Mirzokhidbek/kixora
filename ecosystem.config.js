@@ -3,8 +3,9 @@ module.exports = {
     {
       name: "BURAK-BACKEND",
       script: "./dist/server.js",
-      instances: 1, // in-memory rate limits & AI cache are per-process; see docs/AUDIT.md (D-3)
-      exec_mode: "fork",
+      // Several instances only with Redis: rate limits and caches must be shared (docs/AUDIT.md D-3)
+      instances: process.env.REDIS_URL ? "max" : 1,
+      exec_mode: process.env.REDIS_URL ? "cluster" : "fork",
       watch: false,
       env: {
         NODE_ENV: "production",

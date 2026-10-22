@@ -1,6 +1,6 @@
 import fs from "fs/promises";
-import path from "path";
 import ProductModel from "../models/Product.model";
+import { resolveStoredPath } from "../libs/uploader";
 import { AISearchResponse, Product, ProductDashboardMetrics } from "../libs/types/product";
 import Errors, { HTTPCode, Message } from "../libs/Errors";
 import { escapeRegex, shapeIntoMongooseObjectId } from "../libs/config";
@@ -20,16 +20,16 @@ type ProductUpdate = z.infer<typeof productUpdateSchema>;
 
 const LOW_STOCK_THRESHOLD = 5;
 
-const PRODUCT_UPLOAD_PATH = /^public\/uploads\/products\/[\w.-]+$/;
-
 /** Deletes product upload files by exact stored path; never touches anything else */
 async function removeUploads(images: string[]) {
   await Promise.all(
     images
-      .filter((img) => PRODUCT_UPLOAD_PATH.test(img))
-      .map((img) =>
-        fs.unlink(path.resolve(img)).catch((err) => {
-          if (err.code !== "ENOENT") console.error("Failed to remove upload:", img, err.message);
+      .filter((img) => img.startsWith("public/uploads/products/"))
+      .map((img) => resolveStoredPath(img))
+      .filter((file): file is string => Boolean(file))
+      .map((file) =>
+        fs.unlink(file).catch((err) => {
+          if (err.code !== "ENOENT") console.error("Failed to remove upload:", file, err.message);
         })
       )
   );
