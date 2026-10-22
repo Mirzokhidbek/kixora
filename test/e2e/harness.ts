@@ -16,7 +16,7 @@ export interface TestEnv {
 }
 
 export async function startTestServer(): Promise<TestEnv> {
-  const { MongoMemoryServer } = await import("mongodb-memory-server");
+  const { MongoMemoryServer } = await import("mongodb-memory-server-core");
   const mongo = await MongoMemoryServer.create();
   const uploadDir = fs.mkdtempSync(path.join(os.tmpdir(), "kixora-e2e-"));
 
