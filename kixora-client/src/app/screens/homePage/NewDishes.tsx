@@ -73,21 +73,20 @@ export function NewDishes({ onAdd }: NewDishesProps) {
   ];
 
   const rawList = Array.isArray(newDishes) ? newDishes : [];
+  // Showcase cards only when the catalog is empty; they can't be added to the basket
   const list =
-    rawList.length >= 4
+    rawList.length > 0
       ? rawList.slice(0, 4)
-      : sampleArrivals.map((sample, idx) => {
-          const match = rawList[idx];
-          return {
-            _id: match?._id || `arrival_${idx}`,
-            productName: match?.productName || sample.name,
-            productPrice: match?.productPrice || sample.price,
-            productImages: match?.productImages || [sample.image],
-            productCollection: match?.productCollection || sample.collection,
-            rating: sample.rating,
-            reviews: sample.reviews,
-          };
-        });
+      : sampleArrivals.map((sample, idx) => ({
+          _id: `arrival_${idx}`,
+          isSample: true,
+          productName: sample.name,
+          productPrice: sample.price,
+          productImages: [sample.image],
+          productCollection: sample.collection,
+          rating: sample.rating,
+          reviews: sample.reviews,
+        }));
 
 
   return (
@@ -157,7 +156,7 @@ export function NewDishes({ onAdd }: NewDishesProps) {
             return (
               <Grid key={product._id} size={{ xs: 12, sm: 6, md: 3 }}>
                 <Card
-                  onClick={() => navigate(`/products/${product._id}`)}
+                  onClick={() => navigate(product.isSample ? "/products" : `/products/${product._id}`)}
                   sx={{
                     bgcolor: "#ffffff",
                     borderRadius: 4,
@@ -285,7 +284,8 @@ export function NewDishes({ onAdd }: NewDishesProps) {
                         variant="contained"
                         onClick={(e) => {
                           e.stopPropagation();
-                          onAdd && onAdd(product);
+                          if (product.isSample) navigate("/products");
+                          else onAdd?.(product);
                         }}
                         startIcon={<AddShoppingCartIcon sx={{ fontSize: 16 }} />}
                         sx={{

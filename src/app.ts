@@ -1,64 +1,45 @@
 import express from "express";
 import path from "path";
-import router from "./router";
-import routerAdmin from "./routerAdmin";
+import mongoose from "mongoose";
 import morgan from "morgan";
 import cookieParser from "cookie-parser";
 import cors from "cors";
 import helmet from "helmet";
-import { noSqlSanitizer } from "./libs/sanitizer";
-import { MORGAN_FORMAT } from "./libs/config";
-import { globalLimiter } from "./libs/rateLimiter";
-
 import session from "express-session";
 import ConnectMongoDB from "connect-mongodb-session";
-
-const mongoUri = process.env.MONGO_URL || "mongodb://127.0.0.1:27017/burak";
+import router from "./router";
+import routerAdmin from "./routerAdmin";
+import { noSqlSanitizer } from "./libs/sanitizer";
+import { MORGAN_FORMAT, env } from "./libs/config";
+import { globalLimiter } from "./libs/rateLimiter";
+import { errorHandler, notFound } from "./middlewares/errorHandler";
 
 const MongoDBStore = ConnectMongoDB(session);
-const store = new MongoDBStore({
-  uri: mongoUri,
-  collection: "sessions",
-});
-
-// Catch session store connection errors to prevent process crashing
+const store = new MongoDBStore({ uri: env.mongoUrl, collection: "sessions" });
 store.on("error", (error) => {
-  console.log("⚠️ Session store connection warning:", error?.message || error);
+  console.error("⚠️ Session store connection warning:", error?.message || error);
 });
 
 /** 1-ENTRANCE **/
 const app = express();
 app.set("trust proxy", 1);
+app.disable("x-powered-by");
 
-// 1. HTTP Security Headers with Helmet
+// HTTP security headers. CSP stays off because the admin EJS pages load CDN scripts.
 app.use(
   helmet({
-    contentSecurityPolicy: false, // Allows CDN scripts (Chart.js, Bootstrap, FontAwesome) and external fonts
-    crossOriginResourcePolicy: { policy: "cross-origin" }, // Allows frontend to display uploaded images
+    contentSecurityPolicy: false,
+    crossOriginResourcePolicy: { policy: "cross-origin" }, // lets the SPA display uploaded images
   })
 );
 
-// 2. Production-Ready Dynamic CORS Configuration
-const isProduction = process.env.NODE_ENV === "production";
-const allowedOrigins = process.env.ALLOWED_ORIGINS
-  ? process.env.ALLOWED_ORIGINS.split(",").map((o) => o.trim())
-  : [
-      "http://localhost:8080",
-      "http://localhost:3000",
-      "http://localhost:5173",
-      "http://127.0.0.1:8080",
-      "http://127.0.0.1:3000",
-    ];
-
+// CORS: only configured origins may send credentialed requests
 app.use(
   cors({
     origin: (origin, callback) => {
-      // Allow requests with no origin (like mobile apps, curl, server-to-server) or matching allowed origins
-      if (!origin || !isProduction || allowedOrigins.includes(origin) || allowedOrigins.includes("*")) {
-        callback(null, true);
-      } else {
-        callback(null, true); // Fallback to permissive for local testing
-      }
+      // Requests without Origin (curl, server-to-server, same-origin navigations)
+      if (!origin) return callback(null, true);
+      callback(null, env.allowedOrigins.includes(origin));
     },
     credentials: true,
     methods: ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
@@ -66,79 +47,66 @@ app.use(
   })
 );
 
-// Serve static assets from both src/public and root public
+// Static assets (admin css/js/img) and uploaded images
 app.use(express.static(path.resolve("src/public")));
-app.use(express.static(path.resolve("public")));
-app.use(express.static(path.join(__dirname, "public")));
-app.use(express.static(path.join(__dirname, "../src/public")));
-app.use(express.static(path.join(__dirname, "../public")));
-
-// Serve static uploads
 app.use("/uploads", express.static(path.resolve("public/uploads")));
-app.use("/uploads", express.static(path.resolve("src/public/uploads")));
-app.use("/uploads", express.static(path.resolve("uploads")));
-app.use("/public/uploads", express.static(path.resolve("public/uploads")));
-app.use("/public/uploads", express.static(path.resolve("src/public/uploads")));
-
-// Return 404 for missing static uploads
-app.use("/uploads", (req, res) => {
+app.use("/uploads", express.static(path.resolve("uploads"))); // legacy upload location
+app.use("/uploads", (_req, res) => {
   res.status(404).send("File not found");
 });
+app.use(express.static(path.resolve("public")));
 
-app.use(express.urlencoded({ extended: true }));
-app.use(express.json());
+app.use(express.urlencoded({ extended: true, limit: "100kb" }));
+app.use(express.json({ limit: "100kb" }));
 app.use(cookieParser());
 app.use(morgan(MORGAN_FORMAT));
 
-// 3. NoSQL Query Injection Protection (Sanitize inputs by removing $ and . keys)
+// NoSQL query injection protection (removes $ and . keys)
 app.use(noSqlSanitizer);
-
-// 4. Global API Rate Limiter
 app.use(globalLimiter);
 
-/** 2-SESSIONS **/
+/** 2-SESSIONS (admin panel only) **/
 app.use(
+  "/admin",
   session({
-    secret: String(process.env.SESSION_SECRET || "KIXORA_SESSION_SECRET"),
+    secret: env.sessionSecret,
     cookie: {
       maxAge: 1000 * 3600 * 6, // 6 hours
-      httpOnly: true, // Prevents client-side script access (XSS protection)
-      sameSite: isProduction ? "none" : "lax",
-      secure: isProduction, // HTTPS only in production
+      httpOnly: true,
+      // The admin panel is same-site, so "lax" blocks cross-site form posts (CSRF)
+      sameSite: "lax",
+      secure: env.isProduction,
     },
-    store: store,
-    resave: true,
-    saveUninitialized: true,
+    store,
+    resave: false,
+    saveUninitialized: false, // no DB session for anonymous visitors
   })
 );
 
-app.use((req, res, next) => {
+app.use("/admin", (req, res, next) => {
   res.locals.member = req.session?.member;
   next();
 });
 
 /** 3-VIEWS **/
-app.set("views", [
-  path.resolve("src/views"),
-  path.resolve("views"),
-  path.join(__dirname, "views"),
-  path.join(__dirname, "../src/views"),
-]);
+app.set("views", [path.resolve("src/views"), path.join(__dirname, "views")]);
 app.set("view engine", "ejs");
 
 /** 4-ROUTERS **/
-// Root health check endpoint
-app.get("/", (req, res) => {
-  res.json({
-    message: "KIXORA Luxury Footwear API is Running 🚀",
-    adminPanel: "/admin",
-    docs: "SPA REST API",
-    status: "healthy",
-    security: "Helmet + RateLimit + MongoSanitize Active 🛡️",
+// Health check (also reports DB connectivity for the platform)
+app.get("/", (_req, res) => {
+  const dbConnected = mongoose.connection.readyState === 1;
+  res.status(dbConnected ? 200 : 503).json({
+    message: "KIXORA Luxury Footwear API",
+    status: dbConnected ? "healthy" : "degraded",
+    database: dbConnected ? "connected" : "disconnected",
   });
 });
 
-app.use("/admin", routerAdmin); // BSSR: EJS (Admin/Restaurant)
-app.use("/", router);           // SPA: REST API (Users)
+app.use("/admin", routerAdmin); // BSSR: EJS admin panel
+app.use("/", router); // SPA: REST API
+
+app.use(notFound);
+app.use(errorHandler);
 
 export default app;

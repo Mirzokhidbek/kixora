@@ -7,7 +7,7 @@
       <div class="d-flex align-items-center gap-2 mb-1">
         <h2 class="fw-bold text-dark mb-0 tracking-tight" style="font-size: 1.45rem;">Orders & Logistics</h2>
         <span class="badge bg-dark text-white rounded-pill px-2.5 py-1" style="font-size: 0.75rem; font-weight: 600;">
-          <%= orders ? orders.length : 0 %> Orders
+          <%= typeof pagination !== 'undefined' ? pagination.total : (orders ? orders.length : 0) %> Orders
         </span>
       </div>
       <p class="text-muted mb-0 small">
@@ -57,7 +57,7 @@
       <div class="col-md-7">
         <div class="d-flex flex-wrap gap-1.5 justify-content-md-end">
           <button type="button" class="filter-pill-btn order-status-filter-btn active" data-status="ALL">
-            All (<%= orders ? orders.length : 0 %>)
+            All (<%= typeof pagination !== 'undefined' ? pagination.total : (orders ? orders.length : 0) %>)
           </button>
           <button type="button" class="filter-pill-btn order-status-filter-btn" data-status="PAUSE">
             <span class="rounded-circle d-inline-block me-1" style="width: 7px; height: 7px; background: #f59e0b;"></span> Pending (<%= pauseCount %>)
@@ -247,6 +247,7 @@
       </table>
     </div>
   </div>
+  <%- include('includes/pagination') %>
 
   <!-- Printable Invoice / Courier Slip Modal -->
   <div class="modal fade" id="invoiceModal" tabindex="-1" aria-hidden="true">

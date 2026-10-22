@@ -5,3 +5,6 @@ burak-react/dist/
 .env
 .DS_Store
 *.log
+cookies.txt
+public/uploads/
+uploads/

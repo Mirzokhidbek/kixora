@@ -1,248 +1,158 @@
-import { NextFunction, Request, Response } from "express";
-import { T } from "../libs/types/common";
+import { Request, Response } from "express";
 import Errors, { HTTPCode, Message } from "../libs/Errors";
-import MemberService from "../models/Member.service";
-import OrderService from "../models/Order.service";
-import ProductService from "../models/Product.service";
-import { LoginInput, MemberInput } from "../libs/types/member";
-import { MemberType } from "../libs/enums/member.enum";
+import MemberService from "../services/Member.service";
+import OrderService from "../services/Order.service";
+import ProductService from "../services/Product.service";
+import { sendAdminAlert } from "../libs/adminResponse";
+import {
+  adminListSchema,
+  adminLoginSchema,
+  adminPointsSchema,
+  adminSignupSchema,
+  adminUserUpdateSchema,
+  orderUpdateSchema,
+  parse,
+  productCreateSchema,
+  productUpdateSchema,
+} from "../libs/validation";
+import { Member } from "../libs/types/member";
 
 const memberService = new MemberService();
 const orderService = new OrderService();
 const productService = new ProductService();
-const restaurantController: T = {};
 
-restaurantController.goHome = async (req: Request, res: Response) => {
-  try {
-    const orderMetrics = await orderService.getAdminDashboardMetrics();
-    const productMetrics = await productService.getProductDashboardMetrics();
-    const allUsers = await memberService.getUsers();
+const ADMIN_PAGE_SIZE = 25;
 
-    res.render("home", {
-      orderMetrics,
-      productMetrics,
-      userCount: allUsers.length,
+const errorMessage = (err: unknown) => {
+  if (err instanceof Errors) return err.message;
+  console.error("Admin error:", err);
+  return Message.SOMETHING_WENT_WRONG;
+};
+
+const pagination = (page: number, total: number, basePath: string) => ({
+  page,
+  totalPages: Math.max(1, Math.ceil(total / ADMIN_PAGE_SIZE)),
+  total,
+  basePath,
+});
+
+/** Starts a fresh session on login (prevents session fixation) */
+function establishSession(req: Request, member: Member): Promise<void> {
+  return new Promise((resolve, reject) => {
+    req.session.regenerate((err) => {
+      if (err) return reject(err);
+      req.session.member = member;
+      req.session.save((saveErr) => (saveErr ? reject(saveErr) : resolve()));
     });
-  } catch (err) {
-    console.log("Error, goHome:", err);
-    res.render("home", {
-      orderMetrics: {
-        totalRevenue: 0,
-        totalOrders: 0,
-        pendingOrders: 0,
-        processOrders: 0,
-        finishOrders: 0,
-        monthlySales: { months: ["Jan", "Feb", "Mar", "Apr", "May", "Jun"], revenues: [0, 0, 0, 0, 0, 0] },
-        statusBreakdown: { pause: 0, process: 0, finish: 0 },
-      },
-      productMetrics: {
-        totalProducts: 0,
-        activeProducts: 0,
-        lowStockCount: 0,
-        categoryBreakdown: {},
-      },
-      userCount: 0,
-    });
-  }
-};
+  });
+}
 
-restaurantController.getLogin = (req: Request, res: Response) => {
-  try {
-    res.render("login");
-  } catch (err) {
-    console.log("Error, getLogin:", err);
-    if (err instanceof Errors) res.status(err.code).json(err);
-    else res.status(Errors.standard.code).json(Errors.standard);
-  }
-};
+const adminController = {
+  goHome: async (_req: Request, res: Response) => {
+    const [orderMetrics, productMetrics, userCount] = await Promise.all([
+      orderService.getAdminDashboardMetrics(),
+      productService.getProductDashboardMetrics(),
+      memberService.countUsers(),
+    ]);
+    res.render("home", { orderMetrics, productMetrics, userCount });
+  },
 
-restaurantController.getSignup = (req: Request, res: Response) => {
-  try {
-    res.render("signup");
-  } catch (err) {
-    console.log("Error, getSignup:", err);
-    if (err instanceof Errors) res.status(err.code).json(err);
-    else res.status(Errors.standard.code).json(Errors.standard);
-  }
-};
+  getLogin: (_req: Request, res: Response) => res.render("login"),
 
-restaurantController.processSignup = async (req: Request, res: Response) => {
-  try {
-    console.log("processSignup");
-    const file = req.file;
-    const newMember: MemberInput = req.body;
-    if (file) newMember.memberImage = file.path.replace(/\\/g, "/");
-    newMember.memberType = MemberType.RESTAURANT;
+  getSignup: (_req: Request, res: Response) => res.render("signup"),
 
-    const result = await memberService.processSignup(newMember);
-    req.session.member = JSON.parse(JSON.stringify(result));
-    req.session.save(function () {
+  processSignup: async (req: Request, res: Response) => {
+    try {
+      const input = parse(adminSignupSchema, req.body);
+      const memberImage = req.file ? req.file.path.replace(/\\/g, "/") : undefined;
+      const member = await memberService.processSignup({ ...input, memberImage });
+      await establishSession(req, member);
       res.redirect("/admin/product/all");
-    });
-  } catch (err) {
-    console.log("Error, processSignup:", err);
-    const message =
-      err instanceof Errors ? err.message : Message.SOMETHING_WENT_WRONG;
-    res.send(
-      `<script> alert("${message}"); window.location.replace('/admin/signup'); </script>`
-    );
-  }
-};
+    } catch (err) {
+      sendAdminAlert(res, errorMessage(err), "/admin/signup");
+    }
+  },
 
-restaurantController.processLogin = async (req: Request, res: Response) => {
-  try {
-    console.log("processLogin");
-    const input: LoginInput = req.body;
-    const result = await memberService.processLogin(input);
-
-    req.session.member = JSON.parse(JSON.stringify(result));
-    req.session.save(function () {
+  processLogin: async (req: Request, res: Response) => {
+    try {
+      const member = await memberService.processLogin(parse(adminLoginSchema, req.body));
+      await establishSession(req, member);
       res.redirect("/admin/product/all");
-    });
-  } catch (err) {
-    console.log("Error, processLogin:", err);
-    const message =
-      err instanceof Errors ? err.message : Message.SOMETHING_WENT_WRONG;
-    res.send(
-      `<script> alert("${message}"); window.location.replace('/admin/login'); </script>`
-    );
-  }
-};
+    } catch (err) {
+      sendAdminAlert(res, errorMessage(err), "/admin/login");
+    }
+  },
 
-restaurantController.logout = async (req: Request, res: Response) => {
-  try {
-    console.log("logout");
-    req.session.destroy(function () {
+  logout: (req: Request, res: Response) => {
+    req.session.destroy(() => {
+      res.clearCookie("connect.sid");
       res.redirect("/admin");
     });
-  } catch (err) {
-    console.log("Error, logout:", err);
-    if (err instanceof Errors) res.status(err.code).json(err);
-    else res.status(Errors.standard.code).json(Errors.standard);
-  }
-};
+  },
 
-restaurantController.getUsers = async (req: Request, res: Response) => {
-  try {
-    console.log("getUsers");
-    const result = await memberService.getUsers();
-    res.render("users", { users: result });
-  } catch (err) {
-    console.log("Error, getUsers:", err);
-    if (err instanceof Errors) res.status(err.code).json(err);
-    else res.status(Errors.standard.code).json(Errors.standard);
-  }
-};
+  checkAuthSession: (req: Request, res: Response) => {
+    const member = req.session?.member;
+    res.json({ authenticated: Boolean(member), memberNick: member?.memberNick ?? null });
+  },
 
-restaurantController.updateChosenUser = async (
-  req: Request,
-  res: Response
-) => {
-  try {
-    console.log("updateChosenUser");
-    const result = await memberService.updateChosenUser(req.body);
-    res.status(HTTPCode.OK).json({ data: result });
-  } catch (err) {
-    console.log("Error, updateChosenUser:", err);
-    if (err instanceof Errors) res.status(err.code).json(err);
-    else res.status(Errors.standard.code).json(Errors.standard);
-  }
-};
+  // ---------- Products ----------
+  getAllProducts: async (req: Request, res: Response) => {
+    const { page } = parse(adminListSchema, req.query);
+    const { products, total } = await productService.getAllProducts(page, ADMIN_PAGE_SIZE);
+    res.render("products", { products, pagination: pagination(page, total, "/admin/product/all") });
+  },
 
-restaurantController.checkAuthSession = async (
-  req: Request,
-  res: Response
-) => {
-  try {
-    console.log("checkAuthSession, req.session.member:", req.session?.member);
-    if (req.session?.member) {
-      res.send(`Hi ${req.session.member.memberNick}`);
-    } else {
-      res.send(Message.NOT_AUTHENTICATED);
+  createNewProduct: async (req: Request, res: Response) => {
+    try {
+      const files = (req.files as Express.Multer.File[]) || [];
+      if (!files.length) throw new Errors(HTTPCode.BAD_REQUEST, Message.INVALID_FILE);
+      const input = parse(productCreateSchema, req.body);
+      await productService.createNewProduct({
+        ...input,
+        productImages: files.map((f) => f.path.replace(/\\/g, "/")),
+      });
+      sendAdminAlert(res, "Successfully created!", "/admin/product/all");
+    } catch (err) {
+      sendAdminAlert(res, errorMessage(err), "/admin/product/all");
     }
-  } catch (err) {
-    console.log("Error, checkAuthSession:", err);
-    if (err instanceof Errors) res.status(err.code).json(err);
-    else res.status(Errors.standard.code).json(Errors.standard);
-  }
+  },
+
+  /** AJAX: status change and quick-edit modal share one validated update */
+  updateChosenProduct: async (req: Request, res: Response) => {
+    const input = parse(productUpdateSchema, req.body);
+    const data = await productService.updateChosenProduct(String(req.params.id), input);
+    res.status(HTTPCode.OK).json({ data });
+  },
+
+  // ---------- Users ----------
+  getUsers: async (req: Request, res: Response) => {
+    const { page } = parse(adminListSchema, req.query);
+    const { users, total } = await memberService.getUsers(page, ADMIN_PAGE_SIZE);
+    res.render("users", { users, pagination: pagination(page, total, "/admin/user/all") });
+  },
+
+  updateChosenUser: async (req: Request, res: Response) => {
+    const data = await memberService.updateChosenUser(parse(adminUserUpdateSchema, req.body));
+    res.status(HTTPCode.OK).json({ data });
+  },
+
+  updateMemberPoints: async (req: Request, res: Response) => {
+    const { points } = parse(adminPointsSchema, req.body);
+    const data = await memberService.updateMemberPointsByAdmin(String(req.params.id), points);
+    res.status(HTTPCode.OK).json({ data });
+  },
+
+  // ---------- Orders ----------
+  getAllOrders: async (req: Request, res: Response) => {
+    const { page } = parse(adminListSchema, req.query);
+    const { orders, total } = await orderService.getAllOrdersByAdmin(page, ADMIN_PAGE_SIZE);
+    res.render("orders", { orders, pagination: pagination(page, total, "/admin/order/all") });
+  },
+
+  updateChosenOrder: async (req: Request, res: Response) => {
+    const data = await orderService.updateOrderByAdmin(parse(orderUpdateSchema, req.body));
+    res.status(HTTPCode.OK).json({ data });
+  },
 };
 
-/** Admin BSSR: Get All Footwear Orders **/
-restaurantController.getAllOrders = async (req: Request, res: Response) => {
-  try {
-    console.log("getAllOrders (Admin)");
-    const result = await orderService.getAllOrdersByAdmin();
-    res.render("orders", { orders: result });
-  } catch (err) {
-    console.log("Error, getAllOrders:", err);
-    if (err instanceof Errors) res.status(err.code).json(err);
-    else res.status(Errors.standard.code).json(Errors.standard);
-  }
-};
-
-/** Admin BSSR: 1-Click Update Order Status **/
-restaurantController.updateChosenOrder = async (
-  req: Request,
-  res: Response
-) => {
-  try {
-    console.log("updateChosenOrder (Admin):", req.body);
-    const result = await orderService.updateOrderByAdmin(req.body);
-    res.status(HTTPCode.OK).json({ data: result });
-  } catch (err) {
-    console.log("Error, updateChosenOrder:", err);
-    if (err instanceof Errors) res.status(err.code).json(err);
-    else res.status(Errors.standard.code).json(Errors.standard);
-  }
-};
-
-/** Admin BSSR: Update Product Details Modal **/
-restaurantController.updateChosenProductDetails = async (
-  req: Request,
-  res: Response
-) => {
-  try {
-    const id = String(req.params.id);
-    console.log("updateChosenProductDetails (Admin):", id, req.body);
-    const result = await productService.updateChosenProduct(id, req.body);
-    res.status(HTTPCode.OK).json({ data: result });
-  } catch (err) {
-    console.log("Error, updateChosenProductDetails:", err);
-    if (err instanceof Errors) res.status(err.code).json(err);
-    else res.status(Errors.standard.code).json(Errors.standard);
-  }
-};
-
-/** Admin BSSR: Update Customer Loyalty Points **/
-restaurantController.updateMemberPoints = async (
-  req: Request,
-  res: Response
-) => {
-  try {
-    const id = String(req.params.id);
-    const points = Number(req.body.points || 0);
-    console.log("updateMemberPoints (Admin):", id, points);
-    const result = await memberService.updateMemberPointsByAdmin(id, points);
-    res.status(HTTPCode.OK).json({ data: result });
-  } catch (err) {
-    console.log("Error, updateMemberPoints:", err);
-    if (err instanceof Errors) res.status(err.code).json(err);
-    else res.status(Errors.standard.code).json(Errors.standard);
-  }
-};
-
-restaurantController.verifyRestaurant = (
-  req: Request,
-  res: Response,
-  next: NextFunction
-) => {
-  if (req.session?.member?.memberType === MemberType.RESTAURANT) {
-    req.member = req.session.member;
-    next();
-  } else {
-    const message = `<script> alert('${Message.NOT_AUTHENTICATED}'); window.location.replace('/admin/login'); </script>`;
-    res.send(message);
-  }
-};
-
-export default restaurantController;
+export default adminController;
