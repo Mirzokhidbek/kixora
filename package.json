@@ -32,7 +32,8 @@
     "mongodb": "^3.2.6",
     "mongoose": "^6.2.9",
     "morgan": "^1.11.0",
-    "multer": "^2.3.0"
+    "multer": "^2.3.0",
+    "zod": "^3.25.76"
   },
   "devDependencies": {
     "@types/bcryptjs": "^2.4.6",
