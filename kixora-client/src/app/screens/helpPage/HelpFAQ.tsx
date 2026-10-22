@@ -12,6 +12,7 @@ import {
 } from "@mui/material";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import SearchIcon from "@mui/icons-material/Search";
+import { STORE_INFO } from "../../../lib/storeInfo";
 
 const FAQ_ITEMS = [
   {
@@ -26,18 +27,18 @@ const FAQ_ITEMS = [
   },
   {
     category: "AUTHENTICITY",
-    q: "Are all KIXORA shoes 100% authentic and verified?",
-    a: "Yes. Every pair of KIXORA sneakers comes with a verifiable NFC authentication badge and official Certificate of Authenticity in the original luxury designer box.",
+    q: "Are KIXORA shoes original?",
+    a: "We sell original products only. If you have any doubt about an item, write to us from the Help page before or after your purchase and we will help.",
   },
   {
     category: "RETURNS",
     q: "What is the return and exchange policy?",
-    a: "We offer a 30-day hassle-free return and size exchange policy. Shoes must be unworn in their original packaging with tags intact.",
+    a: `We offer a ${STORE_INFO.returnDays}-day return and size exchange policy. Shoes must be unworn in their original packaging with tags intact.`,
   },
   {
     category: "DROPS",
-    q: "How do I participate in limited edition VIP sneaker raffles?",
-    a: "Simply create a free KIXORA VIP Account. Registered members receive secret drop links and early raffle notifications via email and Telegram 2 hours before general release.",
+    q: "How do I hear about limited drops?",
+    a: "Subscribe to the newsletter at the bottom of the page. Subscribers are the first to hear about new and limited releases.",
   },
 ];
 

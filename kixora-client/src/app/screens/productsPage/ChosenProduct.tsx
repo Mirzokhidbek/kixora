@@ -32,6 +32,8 @@ import { getImageUrl } from "../../../lib/config";
 import { ProductSize } from "../../../lib/enums/common.enum";
 import { useWishlist } from "../../hooks/useWishlist";
 import { ProductReviews } from "./ProductReviews";
+import { availableFor } from "../../../lib/stock";
+import { STORE_INFO } from "../../../lib/storeInfo";
 import type { ReviewSummary } from "../../../lib/types/review";
 
 interface ChosenProductProps {
@@ -64,7 +66,11 @@ export function ChosenProduct({ onAdd }: ChosenProductProps) {
     ProductSize.SIZE_45,
   ] as string[];
   const sizeList: string[] = product?.productSizes?.length ? product.productSizes.map(String) : defaultSizes;
-  const effectiveSize = sizeList.includes(selectedSize) ? selectedSize : sizeList[0];
+  const inStock = (size: string) => (product ? availableFor(product, Number(size)) > 0 : false);
+  // keep the customer's choice if it's buyable, otherwise pick the first size in stock
+  const effectiveSize =
+    sizeList.includes(selectedSize) && inStock(selectedSize) ? selectedSize : sizeList.find(inStock) ?? sizeList[0];
+  const maxQuantity = product ? availableFor(product, Number(effectiveSize)) : 0;
 
   useEffect(() => {
     if (productId) {
@@ -121,7 +127,7 @@ export function ChosenProduct({ onAdd }: ChosenProductProps) {
 
   const handleAddToCart = () => {
     if (onAdd && product) {
-      onAdd(product, quantity, Number(effectiveSize), "Standard");
+      onAdd(product, Math.min(quantity, maxQuantity), Number(effectiveSize), "Standard");
     }
   };
 
@@ -313,7 +319,7 @@ export function ChosenProduct({ onAdd }: ChosenProductProps) {
                   ${product.productPrice.toFixed(2)}
                 </Typography>
                 <Typography variant="caption" sx={{ color: "#6b7280" }}>
-                  Taxes and duties included. Free express shipping over $100.
+                  Free delivery on orders over ${STORE_INFO.freeDeliveryFrom}.
                 </Typography>
               </Box>
 
@@ -337,10 +343,16 @@ export function ChosenProduct({ onAdd }: ChosenProductProps) {
                 <Box sx={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: 1 }}>
                   {sizeList.map((size) => {
                     const isSelected = effectiveSize === size;
+                    const soldOut = !inStock(size);
                     return (
                       <Button
                         key={size}
-                        onClick={() => setSelectedSize(size)}
+                        disabled={soldOut}
+                        title={soldOut ? "Sold out" : undefined}
+                        onClick={() => {
+                          setSelectedSize(size);
+                          setQuantity(1);
+                        }}
                         sx={{
                           py: 1.2,
                           borderRadius: 2.5,
@@ -354,7 +366,7 @@ export function ChosenProduct({ onAdd }: ChosenProductProps) {
                           },
                         }}
                       >
-                        EU {size}
+                        <span style={soldOut ? { textDecoration: "line-through", opacity: 0.45 } : undefined}>EU {size}</span>
                       </Button>
                     );
                   })}
@@ -386,7 +398,7 @@ export function ChosenProduct({ onAdd }: ChosenProductProps) {
                   </Typography>
                   <IconButton
                     size="small"
-                    onClick={() => setQuantity((q) => q + 1)}
+                    onClick={() => setQuantity((q) => Math.min(Math.max(1, maxQuantity), q + 1))}
                     sx={{ color: "#374151" }}
                   >
                     <AddIcon fontSize="small" />
@@ -399,6 +411,7 @@ export function ChosenProduct({ onAdd }: ChosenProductProps) {
                   variant="contained"
                   size="large"
                   onClick={handleAddToCart}
+                  disabled={maxQuantity < 1}
                   startIcon={<ShoppingBagOutlinedIcon />}
                   sx={{
                     py: 1.6,
@@ -415,7 +428,7 @@ export function ChosenProduct({ onAdd }: ChosenProductProps) {
                     },
                   }}
                 >
-                  Add to Bag &bull; ${(product.productPrice * quantity).toFixed(2)}
+                  {maxQuantity < 1 ? "Sold Out" : <>Add to Bag &bull; ${(product.productPrice * quantity).toFixed(2)}</>}
                 </Button>
 
                 {/* Wishlist Button */}
@@ -451,19 +464,19 @@ export function ChosenProduct({ onAdd }: ChosenProductProps) {
                 <Box sx={{ display: "flex", alignItems: "center", gap: 1.5 }}>
                   <LocalShippingOutlinedIcon sx={{ fontSize: 20, color: "#000000" }} />
                   <Typography variant="caption" sx={{ fontWeight: 700, color: "#374151" }}>
-                    Complimentary Express Shipping over $100
+                    Free delivery on orders over ${STORE_INFO.freeDeliveryFrom}
                   </Typography>
                 </Box>
                 <Box sx={{ display: "flex", alignItems: "center", gap: 1.5 }}>
                   <VerifiedOutlinedIcon sx={{ fontSize: 20, color: "#000000" }} />
                   <Typography variant="caption" sx={{ fontWeight: 700, color: "#374151" }}>
-                    100% Authentic & Original KIXORA Guarantee
+                    {STORE_INFO.paymentNote}
                   </Typography>
                 </Box>
                 <Box sx={{ display: "flex", alignItems: "center", gap: 1.5 }}>
                   <AutorenewOutlinedIcon sx={{ fontSize: 20, color: "#000000" }} />
                   <Typography variant="caption" sx={{ fontWeight: 700, color: "#374151" }}>
-                    30-Day Hassle-Free Returns & Size Exchanges
+                    {STORE_INFO.returnDays}-day returns on unworn pairs
                   </Typography>
                 </Box>
               </Box>

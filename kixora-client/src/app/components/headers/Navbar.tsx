@@ -31,6 +31,7 @@ import { MobileBottomNav } from "./MobileBottomNav";
 import { useWishlist } from "../../hooks/useWishlist";
 import type { CartItem } from "../../../lib/types/cart";
 import type { Member } from "../../../lib/types/member";
+import { STORE_INFO } from "../../../lib/storeInfo";
 
 interface NavbarProps {
   cartItems: CartItem[];
@@ -98,7 +99,7 @@ export function Navbar({
           letterSpacing: "0.05em",
         }}
       >
-        COMPLIMENTARY EXPRESS SHIPPING ON ORDERS OVER $100 &bull; 30-DAY RETURNS
+        FREE DELIVERY ON ORDERS OVER ${STORE_INFO.freeDeliveryFrom} &bull; {STORE_INFO.returnDays}-DAY RETURNS
       </Box>
 
       {/* Main Luxury Header */}

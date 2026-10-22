@@ -7,6 +7,7 @@ import { cache } from "../libs/cache";
 import MemberModel from "../models/Member.model";
 import { MemberStatus } from "../libs/enums/member.enum";
 import { AuthPayload } from "../libs/types/member";
+import { safeEqual } from "../libs/crypto";
 
 const STATUS_TTL_SECONDS = 30;
 export const memberStatusKey = (memberId: string) => `member:status:${memberId}`;
@@ -18,13 +19,21 @@ export const memberStatusKey = (memberId: string) => `member:status:${memberId}`
  */
 async function isActiveMember(payload: AuthPayload): Promise<boolean> {
   const key = memberStatusKey(payload._id);
-  let status = await cache.get<string>(key);
-  if (!status) {
-    const member = await MemberModel.findById(payload._id).select("memberStatus").lean<{ memberStatus: string }>().exec();
-    status = member?.memberStatus || MemberStatus.DELETE;
-    await cache.set(key, status, STATUS_TTL_SECONDS);
+  let state = await cache.get<{ status: string; pwdAt: number }>(key);
+  if (!state) {
+    const member = await MemberModel.findById(payload._id)
+      .select("memberStatus passwordChangedAt")
+      .lean<{ memberStatus: string; passwordChangedAt?: Date }>()
+      .exec();
+    state = {
+      status: member?.memberStatus || MemberStatus.DELETE,
+      pwdAt: member?.passwordChangedAt ? Math.floor(new Date(member.passwordChangedAt).getTime() / 1000) : 0,
+    };
+    await cache.set(key, state, STATUS_TTL_SECONDS);
   }
-  return status === MemberStatus.ACTIVE;
+  // tokens issued before a password reset no longer work
+  if (state.pwdAt && (payload.iat ?? 0) < state.pwdAt) return false;
+  return state.status === MemberStatus.ACTIVE;
 }
 
 const authService = new AuthService();
@@ -58,10 +67,10 @@ export const retrieveAuth = async (req: Request, _res: Response, next: NextFunct
   next();
 };
 
-/** Admin (BSSR): session must belong to the store admin account */
-export const verifyAdmin = (req: Request, res: Response, next: NextFunction) => {
+/** Admin (BSSR): session must belong to an ACTIVE admin (a deactivated admin is locked out at once) */
+export const verifyAdmin = async (req: Request, res: Response, next: NextFunction) => {
   const member = req.session?.member;
-  if (member?.memberType === MemberType.RESTAURANT) {
+  if (member?.memberType === MemberType.RESTAURANT && (await isActiveMember({ _id: String(member._id) } as AuthPayload))) {
     req.member = { _id: String(member._id), memberType: member.memberType, memberNick: member.memberNick };
     return next();
   }
@@ -70,4 +79,19 @@ export const verifyAdmin = (req: Request, res: Response, next: NextFunction) => 
     return res.status(HTTPCode.UNAUTHORIZED).json({ code: HTTPCode.UNAUTHORIZED, message: Message.NOT_AUTHENTICATED });
   }
   sendAdminAlert(res, Message.NOT_AUTHENTICATED, "/admin/login", HTTPCode.UNAUTHORIZED);
+};
+
+/**
+ * CSRF protection for admin state-changing requests (synchronizer token).
+ * The token lives in the session and is sent back as the X-CSRF-Token header
+ * (set for all admin AJAX calls in header.ejs) or a _csrf query field (plain forms).
+ */
+export const verifyCsrf = (req: Request, res: Response, next: NextFunction) => {
+  const expected = req.session?.csrfToken;
+  const sent = (req.headers["x-csrf-token"] as string | undefined) || (req.query?._csrf as string | undefined) || req.body?._csrf;
+  if (expected && typeof sent === "string" && safeEqual(sent, expected)) return next();
+  if (req.xhr || req.headers.accept?.includes("application/json")) {
+    return res.status(HTTPCode.FORBIDDEN).json({ code: HTTPCode.FORBIDDEN, message: Message.INVALID_CSRF });
+  }
+  sendAdminAlert(res, Message.INVALID_CSRF, "/admin/product/all", HTTPCode.FORBIDDEN);
 };

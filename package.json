@@ -11,7 +11,8 @@
     "build": "npm run clean && tsc && cp -r src/views dist/views",
     "typecheck": "tsc --noEmit",
     "test": "node --require ts-node/register --test test/*.test.ts",
-    "train": "nodemon --exec ts-node src/train.ts"
+    "train": "nodemon --exec ts-node src/train.ts",
+    "test:e2e": "node --require ts-node/register --test --test-concurrency=1 --test-force-exit --test-timeout=120000 test/e2e/*.e2e.test.ts"
   },
   "author": "MIT",
   "license": "ISC",
@@ -35,6 +36,9 @@
     "mongoose": "^8.24.6",
     "morgan": "^1.11.0",
     "multer": "^2.3.0",
+    "nodemailer": "^6.10.1",
+    "otplib": "^12.0.1",
+    "qrcode": "^1.5.4",
     "rate-limit-redis": "^4.3.1",
     "redis": "^4.7.1",
     "zod": "^3.25.76"
@@ -52,6 +56,9 @@
     "@types/morgan": "^1.9.10",
     "@types/multer": "^2.2.0",
     "@types/node": "^26.3.0",
+    "@types/nodemailer": "^6.4.24",
+    "@types/qrcode": "^1.5.6",
+    "mongodb-memory-server": "^10.4.3",
     "nodemon": "^3.0.2",
     "ts-node": "^10.9.1",
     "tsconfig-paths": "^4.2.0",

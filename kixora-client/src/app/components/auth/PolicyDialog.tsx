@@ -1,5 +1,7 @@
 import { Box, Button, Dialog, IconButton, Stack, Typography } from "@mui/material";
 import CloseIcon from "@mui/icons-material/Close";
+import { STORE_INFO } from "../../../lib/storeInfo";
+import { DELIVERY_FEE } from "../../../lib/pricing";
 
 export type PolicyType = "terms" | "privacy";
 
@@ -55,10 +57,10 @@ export function PolicyDialog({ type, onClose }: { type: PolicyType | null; onClo
 
             <Box>
               <Typography variant="subtitle2" sx={{ fontWeight: 800, color: "#111827", mb: 0.3 }}>
-                3. 30-Day Free Returns & Exchanges
+                3. {STORE_INFO.returnDays}-Day Returns & Exchanges
               </Typography>
               <Typography variant="body2" sx={{ color: "#4b5563", fontSize: "0.82rem" }}>
-                Items may be returned or exchanged within 30 days of delivery, provided they are in unworn, brand-new condition with all original packaging intact.
+                Items may be returned or exchanged within {STORE_INFO.returnDays} days of delivery, provided they are in unworn, brand-new condition with all original packaging intact.
               </Typography>
             </Box>
 
@@ -67,7 +69,7 @@ export function PolicyDialog({ type, onClose }: { type: PolicyType | null; onClo
                 4. Express Global Shipping
               </Typography>
               <Typography variant="body2" sx={{ color: "#4b5563", fontSize: "0.82rem" }}>
-                Complimentary express shipping is provided on all orders exceeding $100 with full real-time courier tracking.
+                Delivery is free on orders over ${STORE_INFO.freeDeliveryFrom}; smaller orders pay a flat ${DELIVERY_FEE} delivery fee.
               </Typography>
             </Box>
           </Stack>

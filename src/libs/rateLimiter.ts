@@ -142,3 +142,20 @@ export const engagementLimiter = rateLimit({
     message: "Too many actions. Please slow down and try again in a minute.",
   },
 });
+
+/**
+ * 7. Support / newsletter / account-email limiter
+ * Contact form, subscribe, password reset and verification emails.
+ */
+export const contactLimiter = rateLimit({
+  ...redisStore("contactLimiter"),
+  windowMs: 15 * 60 * 1000, // 15 minutes
+  max: isProduction ? 5 : 100,
+  standardHeaders: true,
+  legacyHeaders: false,
+  skip: (req: Request) => isLocalhost(req),
+  message: {
+    code: 429,
+    message: "Too many requests. Please try again in a few minutes.",
+  },
+});

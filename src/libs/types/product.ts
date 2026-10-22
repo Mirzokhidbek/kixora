@@ -13,6 +13,7 @@ export interface Product {
   productName: string;
   productPrice: number;
   productLeftCount: number;
+  productSizeStock?: { size: number; count: number }[];
   productSizes: number[];
   productColors: string[];
   productSize?: ProductSize | string;

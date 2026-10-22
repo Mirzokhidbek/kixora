@@ -25,6 +25,7 @@ import { orderCreateSchema, orderInquirySchema, orderUpdateSchema } from "../lib
 import { logger } from "../libs/logger";
 
 type OrderCreate = z.infer<typeof orderCreateSchema>;
+type StockLine = { productId: string | unknown; itemQuantity: number; itemSize?: number };
 type OrderInquiry = z.infer<typeof orderInquirySchema>;
 type OrderUpdate = z.infer<typeof orderUpdateSchema>;
 
@@ -59,30 +60,27 @@ class OrderService {
     if (productById.size !== lines.length) {
       throw new Errors(HTTPCode.BAD_REQUEST, Message.OUT_OF_STOCK);
     }
-    // A chosen size must be one the product is actually offered in
+    // A chosen size must be one the product is offered in; products with per-size
+    // stock require a size, because each size is counted separately.
     for (const l of itemLines) {
-      const sizes = productById.get(l.productId)!.productSizes || [];
+      const product = productById.get(l.productId)!;
+      const sizes = product.productSizes || [];
       if (l.itemSize !== undefined && sizes.length && !sizes.includes(l.itemSize)) {
+        throw new Errors(HTTPCode.BAD_REQUEST, Message.INVALID_SIZE);
+      }
+      if (product.productSizeStock?.length && l.itemSize === undefined) {
         throw new Errors(HTTPCode.BAD_REQUEST, Message.INVALID_SIZE);
       }
     }
 
-    const reserved: { productId: string; itemQuantity: number }[] = [];
+    const reserved: StockLine[] = [];
     let orderId: unknown = null;
     try {
-      for (const line of lines) {
-        const res = await this.productModel
-          .updateOne(
-            {
-              _id: shapeIntoMongooseObjectId(line.productId),
-              productStatus: ProductStatus.PROCESS,
-              productLeftCount: { $gte: line.itemQuantity },
-            },
-            { $inc: { productLeftCount: -line.itemQuantity } }
-          )
-          .exec();
-        if (res.modifiedCount !== 1) throw new Errors(HTTPCode.BAD_REQUEST, Message.OUT_OF_STOCK);
-        reserved.push(line);
+      for (const line of itemLines) {
+        const sizeTracked = Boolean(productById.get(line.productId)!.productSizeStock?.length);
+        const ok = await this.reserveStock(line, sizeTracked);
+        if (!ok) throw new Errors(HTTPCode.BAD_REQUEST, Message.OUT_OF_STOCK);
+        reserved.push({ productId: line.productId, itemQuantity: line.itemQuantity, itemSize: sizeTracked ? line.itemSize : undefined });
       }
 
       const totals = calculateTotals(
@@ -121,14 +119,51 @@ class OrderService {
     }
   }
 
-  private async restoreStock(lines: { productId: string | unknown; itemQuantity: number }[]) {
-    await Promise.all(
-      lines.map((l) =>
-        this.productModel
-          .updateOne({ _id: l.productId }, { $inc: { productLeftCount: l.itemQuantity } })
+  /**
+   * Atomically takes stock for one order line. Size-tracked products decrement the
+   * matching size AND the total in one update, so neither can go negative.
+   */
+  private async reserveStock(line: { productId: string; itemQuantity: number; itemSize?: number }, sizeTracked: boolean) {
+    const _id = shapeIntoMongooseObjectId(line.productId);
+    const res = sizeTracked
+      ? await this.productModel
+          .updateOne(
+            {
+              _id,
+              productStatus: ProductStatus.PROCESS,
+              productSizeStock: { $elemMatch: { size: line.itemSize, count: { $gte: line.itemQuantity } } },
+            },
+            { $inc: { "productSizeStock.$.count": -line.itemQuantity, productLeftCount: -line.itemQuantity } }
+          )
           .exec()
-          .catch((e) => logger.error("Failed to restore stock", { productId: String(l.productId), err: e }))
-      )
+      : await this.productModel
+          .updateOne(
+            { _id, productStatus: ProductStatus.PROCESS, productLeftCount: { $gte: line.itemQuantity } },
+            { $inc: { productLeftCount: -line.itemQuantity } }
+          )
+          .exec();
+    return res.modifiedCount === 1;
+  }
+
+  /** Returns stock to the same size it was taken from (or to the total for untracked products) */
+  private async restoreStock(lines: StockLine[]) {
+    await Promise.all(
+      lines.map(async (l) => {
+        try {
+          if (l.itemSize !== undefined) {
+            const res = await this.productModel
+              .updateOne(
+                { _id: l.productId, "productSizeStock.size": l.itemSize },
+                { $inc: { "productSizeStock.$.count": l.itemQuantity, productLeftCount: l.itemQuantity } }
+              )
+              .exec();
+            if (res.modifiedCount === 1) return;
+          }
+          await this.productModel.updateOne({ _id: l.productId }, { $inc: { productLeftCount: l.itemQuantity } }).exec();
+        } catch (e) {
+          logger.error("Failed to restore stock", { productId: String(l.productId), err: e });
+        }
+      })
     );
   }
 
@@ -228,7 +263,7 @@ class OrderService {
         .exec();
     } else if (to === OrderStatus.DELETE) {
       const items = await this.orderItemModel.find({ orderId: result._id }).lean<OrderItem[]>().exec();
-      await this.restoreStock(items.map((i) => ({ productId: i.productId, itemQuantity: i.itemQuantity })));
+      await this.restoreStock(items.map((i) => ({ productId: i.productId, itemQuantity: i.itemQuantity, itemSize: i.itemSize })));
       // A cancelled paid order is marked refunded in the ledger (the refund itself is
       // done by the provider/admin; in test mode no money moved)
       await this.paymentModel

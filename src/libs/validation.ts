@@ -42,6 +42,19 @@ export const googleLoginSchema = z.object({
   credential: z.string().min(20).max(5000),
 });
 
+export const forgotPasswordSchema = z.object({
+  memberEmail: z.string().trim().toLowerCase().email().max(120),
+});
+
+export const resetPasswordSchema = z.object({
+  token: z.string().min(20).max(200),
+  memberPassword: z.string().min(6).max(128),
+});
+
+export const verifyEmailSchema = z.object({
+  token: z.string().min(20).max(200),
+});
+
 export const memberUpdateSchema = z.object({
   memberNick: trimmed(2, 40).optional(),
   memberPhone: optionalText(30),
@@ -58,6 +71,14 @@ export const adminSignupSchema = z.object({
 export const adminLoginSchema = z.object({
   memberNick: trimmed(1, 40),
   memberPassword: z.string().min(1).max(128),
+});
+
+export const totpCodeSchema = z.object({
+  code: z.string().trim().regex(/^\d{6}$/, "Enter the 6-digit code"),
+});
+
+export const adminStatusSchema = z.object({
+  memberStatus: z.enum([MemberStatus.ACTIVE, MemberStatus.BLOCK]),
 });
 
 export const adminUserUpdateSchema = z.object({
@@ -90,6 +111,23 @@ export const productCreateSchema = z.object({
   productOutsole: optionalText(100),
   productWeight: optionalText(50),
   productSizes: commaList(z.coerce.number().min(10).max(60)),
+  /** "40:5, 41:3" (admin form) or [{size, count}] (JSON) */
+  productSizeStock: z.preprocess((v) => {
+    if (v === undefined || v === "") return undefined;
+    if (Array.isArray(v)) return v;
+    return String(v)
+      .split(",")
+      .map((pair) => pair.trim())
+      .filter(Boolean)
+      .map((pair) => {
+        const [size, count] = pair.split(":").map((x) => x.trim());
+        return { size, count };
+      });
+  }, z
+    .array(z.object({ size: z.coerce.number().min(10).max(60), count: z.coerce.number().int().min(0).max(1_000_000) }))
+    .max(30)
+    .refine((list) => new Set(list.map((s) => s.size)).size === list.length, "Each size may appear only once")
+    .optional()),
   productColors: commaList(z.string().trim().min(1).max(30)),
 });
 
@@ -103,6 +141,13 @@ export const productInquirySchema = z.object({
   search: z.string().trim().max(100).optional(),
   size: z.coerce.number().min(10).max(60).optional(),
   color: z.string().trim().max(30).optional(),
+});
+
+export const productBatchSchema = z.object({
+  ids: z.preprocess(
+    (v) => (typeof v === "string" ? v.split(",").map((s) => s.trim()).filter(Boolean) : v),
+    z.array(objectId).min(1).max(50)
+  ),
 });
 
 export const aiSearchSchema = z.object({
@@ -143,6 +188,26 @@ export const adminReviewStatusSchema = z.object({
 export const adminReviewReplySchema = z.object({
   adminReply: userText(0, 1000),
 });
+
+// ---------- Support & newsletter ----------
+export const supportMessageSchema = z.object({
+  name: userText(2, 80),
+  contact: userText(3, 120),
+  message: userText(10, 2000),
+});
+
+const emailField = z.string().trim().toLowerCase().email().max(120);
+
+export const subscribeSchema = z.object({ email: emailField });
+
+export const unsubscribeSchema = z.object({ email: emailField, token: z.string().min(10).max(200) });
+
+export const adminInboxSchema = z.object({
+  page: z.coerce.number().int().min(1).max(10_000).default(1),
+  status: z.enum(["NEW", "RESOLVED"]).optional(),
+});
+
+export const adminMessageStatusSchema = z.object({ status: z.enum(["NEW", "RESOLVED"]) });
 
 // ---------- Order ----------
 export const orderItemsSchema = z

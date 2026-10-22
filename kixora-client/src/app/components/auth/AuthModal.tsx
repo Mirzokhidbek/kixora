@@ -14,6 +14,7 @@ import type { Member, LoginInput, MemberInput } from "../../../lib/types/member"
 import { AuthShowcase } from "./AuthShowcase";
 import { LoginForm } from "./LoginForm";
 import { SignupForm } from "./SignupForm";
+import { ForgotPasswordForm } from "./ForgotPasswordForm";
 import { GoogleButton } from "./GoogleButton";
 import { PolicyDialog, type PolicyType } from "./PolicyDialog";
 
@@ -28,6 +29,7 @@ const memberService = new MemberService();
 export function AuthModal({ open, onClose, onSuccess }: AuthModalProps) {
   const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState<"login" | "signup">("login");
+  const [forgotMode, setForgotMode] = useState(false);
   const [showPassword, setShowPassword] = useState<boolean>(false);
   const [errorMsg, setErrorMsg] = useState<string>("");
   const [successMsg, setSuccessMsg] = useState<string>("");
@@ -50,6 +52,7 @@ export function AuthModal({ open, onClose, onSuccess }: AuthModalProps) {
 
   const handleTabSwitch = (tab: "login" | "signup") => {
     setActiveTab(tab);
+    setForgotMode(false);
     resetState();
   };
 
@@ -123,7 +126,7 @@ export function AuthModal({ open, onClose, onSuccess }: AuthModalProps) {
   };
 
   const handleKeyDown = (e: React.KeyboardEvent) => {
-    if (e.key !== "Enter" || loading) return;
+    if (e.key !== "Enter" || loading || forgotMode) return;
     if (activeTab === "login") handleLogin();
     else handleSignup();
   };
@@ -256,8 +259,14 @@ export function AuthModal({ open, onClose, onSuccess }: AuthModalProps) {
                 </Alert>
               )}
 
-              {activeTab === "login" ? (
+              {forgotMode ? (
+                <ForgotPasswordForm initialEmail={loginEmail} onBack={() => setForgotMode(false)} />
+              ) : activeTab === "login" ? (
                 <LoginForm
+                  onForgotPassword={() => {
+                    resetState();
+                    setForgotMode(true);
+                  }}
                   email={loginEmail}
                   password={loginPassword}
                   onEmailChange={setLoginEmail}

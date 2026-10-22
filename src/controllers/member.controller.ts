@@ -5,7 +5,12 @@ import MemberService from "../services/Member.service";
 import AuthService from "../services/Auth.service";
 import { AUTH_TIMER, env } from "../libs/config";
 import { Member } from "../libs/types/member";
+import AccountService from "../services/Account.service";
+import { logger } from "../libs/logger";
 import {
+  forgotPasswordSchema,
+  resetPasswordSchema,
+  verifyEmailSchema,
   googleLoginSchema,
   loginSchema,
   memberUpdateSchema,
@@ -15,6 +20,7 @@ import {
 
 const memberService = new MemberService();
 const authService = new AuthService();
+const accountService = new AccountService();
 
 const authCookieOptions: CookieOptions = {
   httpOnly: true, // not readable by JavaScript (XSS protection)
@@ -44,7 +50,31 @@ const memberController = {
 
   signup: async (req: Request, res: Response) => {
     const member = await memberService.signup(parse(signupSchema, req.body));
+    accountService
+      .sendVerificationEmail(String(member._id))
+      .catch((err) => logger.error("Verification email failed", { err }));
     await sendAuthResponse(res, member, HTTPCode.CREATED);
+  },
+
+  forgotPassword: async (req: Request, res: Response) => {
+    const { memberEmail } = parse(forgotPasswordSchema, req.body);
+    res.status(HTTPCode.OK).json(await accountService.requestPasswordReset(memberEmail));
+  },
+
+  resetPassword: async (req: Request, res: Response) => {
+    const { token, memberPassword } = parse(resetPasswordSchema, req.body);
+    const result = await accountService.resetPassword(token, memberPassword);
+    res.clearCookie("accessToken", authCookieOptions); // sign in again with the new password
+    res.status(HTTPCode.OK).json(result);
+  },
+
+  resendVerification: async (req: Request, res: Response) => {
+    res.status(HTTPCode.OK).json(await accountService.sendVerificationEmail(req.member!._id));
+  },
+
+  verifyEmail: async (req: Request, res: Response) => {
+    const { token } = parse(verifyEmailSchema, req.body);
+    res.status(HTTPCode.OK).json(await accountService.verifyEmail(token));
   },
 
   login: async (req: Request, res: Response) => {

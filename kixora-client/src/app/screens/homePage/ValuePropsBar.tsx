@@ -10,28 +10,29 @@ import LocalShippingOutlinedIcon from "@mui/icons-material/LocalShippingOutlined
 import GppGoodOutlinedIcon from "@mui/icons-material/GppGoodOutlined";
 import CachedOutlinedIcon from "@mui/icons-material/CachedOutlined";
 import HeadsetMicOutlinedIcon from "@mui/icons-material/HeadsetMicOutlined";
+import { STORE_INFO } from "../../../lib/storeInfo";
 
 export function ValuePropsBar() {
   const perks = [
     {
       icon: <LocalShippingOutlinedIcon sx={{ fontSize: 24, color: "#111827" }} />,
       title: "Free Shipping",
-      desc: "On orders over $100",
+      desc: `On orders over $${STORE_INFO.freeDeliveryFrom}`,
     },
     {
       icon: <GppGoodOutlinedIcon sx={{ fontSize: 24, color: "#111827" }} />,
-      title: "Secure Payments",
-      desc: "100% secure checkout",
+      title: "Easy Payment",
+      desc: STORE_INFO.paymentNote,
     },
     {
       icon: <CachedOutlinedIcon sx={{ fontSize: 24, color: "#111827" }} />,
       title: "Easy Returns",
-      desc: "30 days return policy",
+      desc: `${STORE_INFO.returnDays} days return policy`,
     },
     {
       icon: <HeadsetMicOutlinedIcon sx={{ fontSize: 24, color: "#111827" }} />,
-      title: "24/7 Support",
-      desc: "We're here to help",
+      title: "Customer Support",
+      desc: STORE_INFO.supportNote,
     },
   ];
 

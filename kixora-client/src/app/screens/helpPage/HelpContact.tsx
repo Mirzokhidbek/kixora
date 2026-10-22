@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { Card, Typography, Grid, TextField, Button, Snackbar, Alert } from "@mui/material";
 import ArrowForwardIcon from "@mui/icons-material/ArrowForward";
+import SupportService from "../../services/SupportService";
 
 export function HelpContact() {
   const [name, setName] = useState("");
@@ -9,17 +10,28 @@ export function HelpContact() {
   const [toastOpen, setToastOpen] = useState(false);
   const [toastMsg, setToastMsg] = useState("");
 
-  const handleSubmit = () => {
-    if (!name || !contact || !message) {
-      setToastMsg("Please fill out all fields before submitting.");
+  const [sending, setSending] = useState(false);
+
+  /** Sends the inquiry to the server (previously it only showed a "sent" message) */
+  const handleSubmit = async () => {
+    if (!name.trim() || !contact.trim() || message.trim().length < 10) {
+      setToastMsg("Please fill out all fields (message at least 10 characters).");
       setToastOpen(true);
       return;
     }
-    setToastMsg("Thank you! Your inquiry has been sent to KIXORA Shoe Care & Support.");
-    setToastOpen(true);
-    setName("");
-    setContact("");
-    setMessage("");
+    setSending(true);
+    try {
+      await new SupportService().sendMessage({ name: name.trim(), contact: contact.trim(), message: message.trim() });
+      setToastMsg("Thank you! Your message was received. We will reply to the contact you provided.");
+      setName("");
+      setContact("");
+      setMessage("");
+    } catch (err: any) {
+      setToastMsg(err?.response?.data?.message || "Sending failed. Please try again.");
+    } finally {
+      setSending(false);
+      setToastOpen(true);
+    }
   };
 
   return (
@@ -68,6 +80,7 @@ export function HelpContact() {
             variant="contained"
             endIcon={<ArrowForwardIcon />}
             onClick={handleSubmit}
+            disabled={sending}
             sx={{
               py: 1.2,
               px: 4,

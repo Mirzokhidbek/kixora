@@ -21,6 +21,21 @@ type ProductUpdate = z.infer<typeof productUpdateSchema>;
 
 const LOW_STOCK_THRESHOLD = 5;
 
+/**
+ * With per-size stock, the offered sizes and the total come from it, so the three
+ * fields can never disagree.
+ */
+function withSizeStock<T extends { productSizeStock?: { size: number; count: number }[] }>(input: T) {
+  if (!input.productSizeStock) return input;
+  const sizeStock = [...input.productSizeStock].sort((a, b) => a.size - b.size);
+  return {
+    ...input,
+    productSizeStock: sizeStock,
+    productSizes: sizeStock.map((s) => s.size),
+    productLeftCount: sizeStock.reduce((sum, s) => sum + s.count, 0),
+  };
+}
+
 /** Deletes product upload files by exact stored path; never touches anything else */
 async function removeUploads(images: string[]) {
   await Promise.all(
@@ -63,6 +78,15 @@ class ProductService {
       this.productModel.countDocuments(match).exec(),
     ]);
     return { products, total };
+  }
+
+  /** SPA: current price/stock for the products in a shopping bag (only buyable ones are returned) */
+  public async getProductsBatch(ids: string[]): Promise<Product[]> {
+    return this.productModel
+      .find({ _id: { $in: ids.map((id) => shapeIntoMongooseObjectId(id)) }, productStatus: ProductStatus.PROCESS })
+      .select("productName productPrice productLeftCount productSizeStock productSizes productImages productStatus")
+      .lean<Product[]>()
+      .exec();
   }
 
   /** SPA: Get Single Product & track unique member views **/
@@ -112,14 +136,14 @@ class ProductService {
 
   /** BSSR: Create New Product (validated, whitelisted input) **/
   public async createNewProduct(input: ProductCreate): Promise<Product> {
-    const result = await this.productModel.create(input);
+    const result = await this.productModel.create(withSizeStock(input));
     return result.toObject() as Product;
   }
 
   /** BSSR: Update Product by ID (validated, whitelisted input) **/
   public async updateChosenProduct(id: string, input: ProductUpdate): Promise<Product> {
     const result = await this.productModel
-      .findByIdAndUpdate(shapeIntoMongooseObjectId(id), { $set: input }, { new: true, runValidators: true })
+      .findByIdAndUpdate(shapeIntoMongooseObjectId(id), { $set: withSizeStock(input) }, { new: true, runValidators: true })
       .lean<Product>()
       .exec();
     if (!result) throw new Errors(HTTPCode.NOT_FOUND, Message.NO_DATA_FOUND);

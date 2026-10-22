@@ -17,6 +17,7 @@ import TelegramIcon from "@mui/icons-material/Telegram";
 import FacebookIcon from "@mui/icons-material/Facebook";
 import ArrowForwardIcon from "@mui/icons-material/ArrowForward";
 import { useNavigate } from "react-router-dom";
+import SupportService from "../../services/SupportService";
 
 export function Footer() {
   const navigate = useNavigate();
@@ -24,15 +25,21 @@ export function Footer() {
   const [toastOpen, setToastOpen] = useState(false);
   const [toastMsg, setToastMsg] = useState("");
 
-  const handleSubscribe = () => {
-    if (!email || !email.includes("@")) {
+  /** Saves the email on the server (previously nothing was stored) */
+  const handleSubscribe = async () => {
+    if (!/^\S+@\S+\.\S+$/.test(email.trim())) {
       setToastMsg("Please enter a valid email address.");
       setToastOpen(true);
       return;
     }
-    setToastMsg("Welcome to KIXORA VIP Club! You will receive early drop notifications.");
+    try {
+      await new SupportService().subscribe(email.trim());
+      setToastMsg("Subscribed! You will hear about new drops first.");
+      setEmail("");
+    } catch (err: any) {
+      setToastMsg(err?.response?.data?.message || "Subscription failed. Please try again.");
+    }
     setToastOpen(true);
-    setEmail("");
   };
 
   return (

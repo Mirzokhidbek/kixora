@@ -277,3 +277,44 @@ Testlar to'liq alohida muhitda o'tkazildi: vaqtinchalik `kixora_e2e_*` bazasi, a
 
 ### Haqiqiy to'lov provayderini ulash (keyingi qadam)
 `src/services/Payment.service.ts` — tayyor joy. Payme yoki Click webhook'i imzoni tekshirib, `orderService.markPaid(orderId, …, "provider", memberId, providerTxnId)` ni chaqiradi. Buyurtma holati, to'lov yozuvi va takror to'lovdan himoya allaqachon ishlaydi.
+
+---
+
+## 11. Oxirgi kamchiliklar — 5-bosqich
+
+### Topilgan va tuzatilgan muammolar
+
+| ID | Muammo | Yechim | Holat |
+|---|---|---|---|
+| R5-1 | **Savatdagi narx eskirib qolardi.** Narx qo'shilgan paytdagicha saqlanardi; o'chirilgan yoki tugagan mahsulot savatda qolardi. | `GET /product/batch` va `reconcileCart`: savat ilova ochilganda va har bir checkout oldidan tekshiriladi. Yangi narx qo'llanadi, sotuvdan olingan yoki tugagan mahsulot olib tashlanadi, miqdor qoldiq bilan cheklanadi, nima o'zgargani mijozga aytiladi. Savatga qo'shishda ham qoldiq tekshiriladi. | ✅ |
+| R5-2 | **Qoldiq o'lcham bo'yicha emas edi.** | `productSizeStock` (`[{size, count}]`). Har bir o'lcham alohida va atomik band qilinadi, bekor qilinganda o'sha o'lchamga qaytariladi. `productLeftCount` va `productSizes` avtomatik hisoblanadi. Admin'da "Stock per size" maydoni (`40:5, 41:3`), jadvalda o'lchamlar bo'yicha qoldiq. Mahsulot sahifasida tugagan o'lcham o'chirilgan holda ko'rinadi, "Sold Out" tugmasi chiqadi. O'lchamsiz mahsulotlar avvalgidek ishlaydi. | ✅ |
+| R5-3 | **Aloqa formasi soxta edi** ("sent" deydi, hech narsa yubormaydi). | `POST /support/message` (rate limit bilan) va admin'da yangi **Inbox** sahifasi (New/Resolved holati). `STORE_NOTIFY_EMAIL` bo'lsa, do'konga email bilan xabar beriladi. | ✅ |
+| R5-4 | **Obuna soxta edi.** | `POST /newsletter/subscribe` (takroriy obuna xavfsiz). Admin obunachilarni CSV qilib eksport qila oladi, unda imzolangan obunani bekor qilish havolalari ham bor. `/unsubscribe` sahifasi qo'shildi. | ✅ |
+| R5-5 | **Soxta ball va daraja:** "+10 VIP Points", hammaga "KIXORA Elite" va "VIP Member". | Haqiqiy ball (buyurtma summasining 1/10 qismi) va ballarga qarab daraja: Member, Silver (100+), Gold (500+), Elite (1500+). Keyingi darajagacha qancha ball qolgani ko'rsatiladi. | ✅ |
+| R5-6 | **Tizimga zid va'dalar:** "Secure Payments" (onlayn to'lov yo'q), NFC sertifikat, "Authenticity Certificate Included", "24/7 Support", maxfiy raffle havolalari. | Haqiqiy holatga moslandi. Siyosat va'dalari (qaytarish muddati, bepul yetkazish chegarasi) bitta joyga yig'ildi: `kixora-client/src/lib/storeInfo.ts`. **Do'kon egasi buni tasdiqlashi kerak.** | ✅ / egasi tasdiqlaydi |
+| R5-7 | **Parolni tiklash yo'q edi.** | "Forgot password?" → email → `/reset-password`. Token bir martalik, 30 daqiqa amal qiladi, bazada faqat hash saqlanadi. Mavjud bo'lmagan email bilan farqlanmaydigan bir xil javob qaytadi. Parol almashganda barcha eski tokenlar bekor bo'ladi (`passwordChangedAt`). | ✅ |
+| R5-8 | **Email tasdiqlanmasdi.** | Email bilan ro'yxatdan o'tganda tasdiqlash xati yuboriladi (48 soat amal qiladi). Tasdiqlanmagan akkaunt buyurtma bera olmaydi, saytda eslatma banneri va "Resend email" tugmasi chiqadi. Google orqali kirganlar avtomatik tasdiqlangan. Bu o'zgarishdan oldin yaratilgan akkauntlar bloklanmaydi. | ✅ |
+| R5-9 | **Admin CSRF'dan faqat SameSite cookie bilan himoyalangan edi.** | Sinxronizator CSRF token: sessiyada saqlanadi, `<meta>` orqali axios header'iga qo'yiladi, multipart formalarda `?_csrf=` bilan yuboriladi. Barcha o'zgartiruvchi admin so'rovlarida tekshiriladi. Eski sessiyalarga token avtomatik qo'shiladi. | ✅ |
+| R5-10 | **Admin uchun 2FA yo'q edi.** | TOTP (Google Authenticator va boshqalar): Security sahifasida QR kod. Login paroldan keyin kod so'raydi. O'chirish uchun ham kod kerak. Sir bazada AES-256-GCM bilan shifrlangan. | ✅ |
+| R5-11 | **Faqat bitta admin bo'lishi mumkin edi.** | Security sahifasida admin qo'shish va boshqa adminni faollashtirish yoki o'chirish. O'zini va oxirgi faol adminni o'chirib bo'lmaydi. O'chirilgan admin keyingi so'rovdayoq chiqariladi. Do'kon profili birinchi adminga tegishli. | ✅ |
+| R5-12 | **Buyurtmalar sahifasi faqat oxirgi 10 tasini ko'rsatardi.** | Har bir tabda "Show more orders" tugmasi. | ✅ |
+| R5-13 | **E2E testlar repoda yo'q edi.** | `test/e2e/` (xotiradagi MongoDB, `npm run test:e2e`): 24 ta stsenariy (har biri bir nechta tekshiruv bilan). Ular CI'ga qo'shildi. Klient: loyalty va qoldiq bo'yicha +4 test. | ✅ |
+
+### Kod ichida hal bo'lmaydigan narsalar (sizning akkaunt va ruxsatingiz kerak)
+
+| Narsa | Nima uchun men qila olmayman | Nima qilish kerak |
+|---|---|---|
+| Haqiqiy to'lov (Payme/Click) | Merchant shartnoma va kalitlar kerak. Do'kon narxlari USD'da, Payme va Click esa UZS'da ishlaydi, shuning uchun valyuta va kurs qarori kerak. | Merchant akkaunt oching va valyutani tanlang. Ulash nuqtasi tayyor: `Payment.service.ts` → `orderService.markPaid(...)`. |
+| Email yuborish | SMTP akkaunt kerak (masalan Resend, Mailgun, Gmail SMTP). | `SMTP_URL` va `MAIL_FROM` ni qo'ying. Ularsiz parolni tiklash va email tasdiqlash production'da ishlamaydi. |
+| CI'ni ishga tushirish | GitHub'ga push qilish kerak. | `git push`: workflow avtomatik ishga tushadi. |
+| Deploy | Vercel va Railway akkauntlaringiz. | 6, 10 va pastdagi qadamlar. |
+
+### Tekshiruv (5-bosqich)
+- **Backend:** 21 unit test va 24 E2E stsenariy (xotiradagi MongoDB, taxminan 8 soniya). Typecheck va build toza.
+- **Klient:** typecheck, lint (0 xato), 17 unit test, build.
+- **Brauzer (preview server, `nestar` bazasiga yozmasdan):** bosh sahifa ("Easy Payment"), Help FAQ, mahsulot sahifasi, `/product/batch`. Konsolda JS xatosi yo'q.
+
+### Deploy'dan oldin (qo'shimcha)
+1. **Railway'ga o'zgaruvchilarni qo'ying:** `SMTP_URL`, `MAIL_FROM`, `PUBLIC_APP_URL`, `PUBLIC_SERVER_URL`. Ixtiyoriy: `STORE_NOTIFY_EMAIL`, `DATA_ENCRYPTION_KEY`.
+2. **Do'kon egasi `kixora-client/src/lib/storeInfo.ts` dagi va'dalarni tasdiqlasin:** qaytarish muddati, to'lov usuli.
+3. **Tizimga kirgandan keyin Admin → Security bo'limida 2FA'ni yoqing.**

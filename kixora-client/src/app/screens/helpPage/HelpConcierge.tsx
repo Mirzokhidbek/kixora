@@ -2,6 +2,7 @@ import { Box, Typography, Grid, Card, CardContent, Button } from "@mui/material"
 import HeadsetMicOutlinedIcon from "@mui/icons-material/HeadsetMicOutlined";
 import PhoneCallbackOutlinedIcon from "@mui/icons-material/PhoneCallbackOutlined";
 import TelegramIcon from "@mui/icons-material/Telegram";
+import { STORE_INFO } from "../../../lib/storeInfo";
 
 export function HelpConcierge() {
   return (
@@ -25,7 +26,7 @@ export function HelpConcierge() {
           How May We Assist You Today?
         </Typography>
         <Typography variant="body1" sx={{ color: "#9ca3af", maxWidth: 600, mx: "auto" }}>
-          Find answers regarding shoe sizing, limited edition drop dates, express order tracking, and 30-day returns.
+          Find answers regarding shoe sizing, limited edition drop dates, express order tracking, and {STORE_INFO.returnDays}-day returns.
         </Typography>
       </Box>
 
