@@ -14,7 +14,6 @@ export interface Member {
   memberImage?: string;
   memberPoints: number;
   googleId?: string;
-  memberEmailVerified?: boolean;
   passwordChangedAt?: Date;
   createdAt: Date;
   updatedAt: Date;

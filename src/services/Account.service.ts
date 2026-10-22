@@ -2,7 +2,7 @@ import crypto from "crypto";
 import bcrypt from "bcryptjs";
 import AccountTokenModel from "../models/AccountToken.model";
 import MemberModel from "../models/Member.model";
-import { AuthPayload, Member } from "../libs/types/member";
+import { Member } from "../libs/types/member";
 import { MemberStatus, MemberType } from "../libs/enums/member.enum";
 import Errors, { HTTPCode, Message } from "../libs/Errors";
 import { env, shapeIntoMongooseObjectId } from "../libs/config";
@@ -10,15 +10,14 @@ import { mailer } from "../libs/mailer";
 import { cache } from "../libs/cache";
 import { logger } from "../libs/logger";
 
-type TokenType = "RESET" | "VERIFY";
+type TokenType = "RESET";
 
 const RESET_TTL_MINUTES = 30;
-const VERIFY_TTL_HOURS = 48;
 const BCRYPT_ROUNDS = 10;
 
 const hashToken = (token: string) => crypto.createHash("sha256").update(token).digest("hex");
 
-/** Password reset and email verification with one-time, expiring, hashed tokens */
+/** Password reset with one-time, expiring, hashed tokens */
 class AccountService {
   private readonly tokenModel = AccountTokenModel;
   private readonly memberModel = MemberModel;
@@ -81,8 +80,6 @@ class AccountService {
             memberPassword: await bcrypt.hash(newPassword, BCRYPT_ROUNDS),
             // JWT "iat" has 1-second precision; tokens from earlier seconds are rejected
             passwordChangedAt: new Date(),
-            // the link arrived by email, so the address is proven
-            memberEmailVerified: true,
           },
         }
       )
@@ -92,40 +89,6 @@ class AccountService {
     return { reset: true };
   }
 
-  public async sendVerificationEmail(memberId: string): Promise<{ sent: boolean }> {
-    const member = await this.memberModel
-      .findById(shapeIntoMongooseObjectId(memberId))
-      .select("memberEmail memberNick memberEmailVerified")
-      .lean<Pick<Member, "_id" | "memberEmail" | "memberNick" | "memberEmailVerified">>()
-      .exec();
-    if (!member?.memberEmail || member.memberEmailVerified !== false) return { sent: false };
-
-    const token = await this.issueToken(member._id, "VERIFY", VERIFY_TTL_HOURS * 3600 * 1000);
-    await mailer.send({
-      to: member.memberEmail,
-      subject: "Confirm your KIXORA email",
-      text:
-        `Hi ${member.memberNick},\n\nPlease confirm your email address:\n${env.appUrl}/verify-email?token=${token}\n\n` +
-        `The link is valid for ${VERIFY_TTL_HOURS} hours.`,
-    });
-    return { sent: true };
-  }
-
-  public async verifyEmail(token: string): Promise<{ verified: true }> {
-    const memberId = await this.consumeToken(token, "VERIFY");
-    await this.memberModel.updateOne({ _id: memberId }, { $set: { memberEmailVerified: true } }).exec();
-    return { verified: true };
-  }
-
-  /** Orders need a confirmed email; accounts created before verification existed are not blocked */
-  public async assertCanOrder(member: AuthPayload): Promise<void> {
-    const doc = await this.memberModel
-      .findById(shapeIntoMongooseObjectId(member._id))
-      .select("memberEmailVerified")
-      .lean<{ memberEmailVerified?: boolean }>()
-      .exec();
-    if (doc?.memberEmailVerified === false) throw new Errors(HTTPCode.FORBIDDEN, Message.EMAIL_NOT_VERIFIED);
-  }
 }
 
 export default AccountService;

@@ -1,8 +1,8 @@
 /**
- * Pages opened from email links: password reset and email verification.
+ * Page opened from the password-reset email link.
  */
-import { useEffect, useRef, useState } from "react";
-import { useNavigate, useSearchParams } from "react-router-dom";
+import { useState } from "react";
+import { useSearchParams } from "react-router-dom";
 import { Alert, Box, Button, CircularProgress, Container, TextField, Typography } from "@mui/material";
 import MemberService from "../services/MemberService";
 import { useGlobals } from "../hooks/useGlobals";
@@ -59,70 +59,5 @@ export function ResetPasswordPage({ onLoginClick }: { onLoginClick: () => void }
         </Box>
       )}
     </Container>
-  );
-}
-
-export function VerifyEmailPage() {
-  const [params] = useSearchParams();
-  const navigate = useNavigate();
-  const { authMember, setAuthMember } = useGlobals();
-  const [state, setState] = useState<"working" | "done" | "error">("working");
-  const started = useRef(false); // the token is single-use: never send it twice
-
-  useEffect(() => {
-    if (started.current) return;
-    started.current = true;
-    memberService
-      .verifyEmail(params.get("token") || "")
-      .then(async () => {
-        setState("done");
-        if (authMember) setAuthMember(await memberService.getMemberDetail());
-      })
-      .catch(() => setState("error"));
-  }, [params, authMember, setAuthMember]);
-
-  return (
-    <Container maxWidth="sm" sx={{ py: 12, textAlign: "center" }}>
-      {state === "working" && <CircularProgress sx={{ color: "#111827" }} />}
-      {state === "done" && (
-        <Box>
-          <Typography variant="h5" sx={{ fontWeight: 800, mb: 1 }}>Email confirmed ✓</Typography>
-          <Typography variant="body2" color="text.secondary" sx={{ mb: 3 }}>You can now place orders.</Typography>
-          <Button variant="contained" onClick={() => navigate("/products")} sx={{ bgcolor: "#111827" }}>Continue shopping</Button>
-        </Box>
-      )}
-      {state === "error" && (
-        <Box>
-          <Typography variant="h5" sx={{ fontWeight: 800, mb: 1 }}>This link is invalid or has expired</Typography>
-          <Typography variant="body2" color="text.secondary">Sign in and use "Resend email" to get a new link.</Typography>
-        </Box>
-      )}
-    </Container>
-  );
-}
-
-/** Shown to signed-in members whose email is not confirmed yet */
-export function VerifyEmailBanner() {
-  const { authMember } = useGlobals();
-  const [sent, setSent] = useState(false);
-  if (authMember?.memberEmailVerified !== false) return null;
-
-  return (
-    <Alert
-      severity="warning"
-      sx={{ borderRadius: 0, justifyContent: "center" }}
-      action={
-        <Button
-          color="inherit"
-          size="small"
-          disabled={sent}
-          onClick={() => memberService.resendVerification().then(() => setSent(true)).catch(() => setSent(false))}
-        >
-          {sent ? "Sent ✓" : "Resend email"}
-        </Button>
-      }
-    >
-      Please confirm your email ({authMember.memberEmail}) to place orders.
-    </Alert>
   );
 }

@@ -12,8 +12,6 @@ export interface Member {
   memberImage?: string;
   memberPoints: number;
   googleId?: string;
-  /** false = email signup not confirmed yet (ordering is blocked until confirmed) */
-  memberEmailVerified?: boolean;
   createdAt: string;
   updatedAt: string;
 }
