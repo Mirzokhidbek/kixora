@@ -25,6 +25,12 @@ export interface AuthPayload {
   memberNick: string;
 }
 
+/** Plain-JSON admin identity kept in the express session */
+export interface SessionMember extends AuthPayload {
+  memberPhone?: string;
+  memberImage?: string;
+}
+
 export interface MemberInput {
   memberType?: MemberType;
   memberStatus?: MemberStatus;
@@ -65,7 +71,7 @@ export interface MemberUpdateInput {
 
 declare module "express-session" {
   interface SessionData {
-    member: Member;
+    member: SessionMember;
   }
 }
 
