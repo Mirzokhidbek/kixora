@@ -2,6 +2,7 @@ import { z } from "zod";
 import mongoose from "mongoose";
 import { MemberStatus } from "./enums/member.enum";
 import { OrderStatus } from "./enums/order.enum";
+import { ReviewStatus } from "./enums/review.enum";
 import { ProductCollection, ProductSize, ProductStatus } from "./enums/product.enum";
 import Errors, { HTTPCode } from "./Errors";
 
@@ -93,7 +94,7 @@ export const productUpdateSchema = productCreateSchema.partial();
 export const productInquirySchema = z.object({
   page: z.coerce.number().int().min(1).max(10_000).default(1),
   limit: z.coerce.number().int().min(1).max(50).default(8),
-  order: z.enum(["createdAt", "productViews", "productPrice"]).default("createdAt"),
+  order: z.enum(["createdAt", "productViews", "productPrice", "productLikes", "ratingAvg"]).default("createdAt"),
   productCollection: z.nativeEnum(ProductCollection).optional(),
   search: z.string().trim().max(100).optional(),
   size: z.coerce.number().min(10).max(60).optional(),
@@ -102,6 +103,41 @@ export const productInquirySchema = z.object({
 
 export const aiSearchSchema = z.object({
   query: trimmed(1, 300),
+});
+
+// ---------- Likes & Reviews ----------
+/** Free text: trims, drops control characters (keeps newlines/tabs) */
+const userText = (min: number, max: number) =>
+  z
+    .string()
+    .transform((v) => v.replace(/[\u0000-\u0008\u000B\u000C\u000E-\u001F\u007F]/g, "").trim())
+    .pipe(z.string().min(min).max(max));
+
+export const likeSyncSchema = z.object({
+  productIds: z.array(objectId).max(100),
+});
+
+export const reviewSaveSchema = z.object({
+  reviewRating: z.coerce.number().int().min(1).max(5),
+  reviewComment: userText(3, 1000),
+});
+
+export const reviewListSchema = z.object({
+  page: z.coerce.number().int().min(1).max(10_000).default(1),
+  limit: z.coerce.number().int().min(1).max(20).default(5),
+});
+
+export const adminReviewListSchema = z.object({
+  page: z.coerce.number().int().min(1).max(10_000).default(1),
+  status: z.nativeEnum(ReviewStatus).optional(),
+});
+
+export const adminReviewStatusSchema = z.object({
+  reviewStatus: z.nativeEnum(ReviewStatus),
+});
+
+export const adminReviewReplySchema = z.object({
+  adminReply: userText(0, 1000),
 });
 
 // ---------- Order ----------

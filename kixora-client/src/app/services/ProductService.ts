@@ -9,12 +9,58 @@
 import axios from "axios";
 import { serverApi } from "../../lib/config";
 import type { AISearchResponse, Product, ProductInquiry } from "../../lib/types/product";
+import type { MyReviewState, ProductReview, ProductReviewsPage, ReviewInput } from "../../lib/types/review";
 
 class ProductService {
   private readonly path: string;
 
   constructor() {
     this.path = serverApi;
+  }
+
+  // ---------- Likes (account wishlist) ----------
+  public async getLikedProducts(): Promise<Product[]> {
+    const result = await axios.get(`${this.path}/product/liked`, { withCredentials: true });
+    return result.data;
+  }
+
+  /** Merges a guest wishlist into the account; returns the account's liked products */
+  public async syncLikes(productIds: string[]): Promise<Product[]> {
+    const result = await axios.post(`${this.path}/product/liked/sync`, { productIds }, { withCredentials: true });
+    return result.data;
+  }
+
+  public async likeProduct(productId: string): Promise<{ liked: boolean; productLikes: number }> {
+    const result = await axios.post(`${this.path}/product/${productId}/like`, {}, { withCredentials: true });
+    return result.data;
+  }
+
+  public async unlikeProduct(productId: string): Promise<{ liked: boolean; productLikes: number }> {
+    const result = await axios.delete(`${this.path}/product/${productId}/like`, { withCredentials: true });
+    return result.data;
+  }
+
+  // ---------- Reviews ----------
+  public async getReviews(productId: string, page = 1, limit = 5): Promise<ProductReviewsPage> {
+    const result = await axios.get(`${this.path}/product/${productId}/reviews`, {
+      params: { page, limit },
+      withCredentials: true,
+    });
+    return result.data;
+  }
+
+  public async getMyReview(productId: string): Promise<MyReviewState> {
+    const result = await axios.get(`${this.path}/product/${productId}/reviews/me`, { withCredentials: true });
+    return result.data;
+  }
+
+  public async saveMyReview(productId: string, input: ReviewInput): Promise<ProductReview> {
+    const result = await axios.put(`${this.path}/product/${productId}/reviews/me`, input, { withCredentials: true });
+    return result.data;
+  }
+
+  public async deleteMyReview(productId: string): Promise<void> {
+    await axios.delete(`${this.path}/product/${productId}/reviews/me`, { withCredentials: true });
   }
 
   /**
@@ -57,7 +103,7 @@ class ProductService {
   }
 
   /**
-   * Fetch paginated list of dishes with optional search and category filters.
+   * Fetch paginated list of products with optional search and category filters.
    * @param inquiry - Query options: page, limit, order, category, search
    * @returns List of matching Product objects
    */

@@ -35,6 +35,7 @@ export enum Message {
   INVALID_FILE = "Only JPG, PNG, WEBP or GIF images up to 5MB are allowed!",
   ADMIN_EXISTS = "An admin account already exists!",
   AI_UNAVAILABLE = "AI search is temporarily unavailable!",
+  REVIEW_NOT_ALLOWED = "Only customers who received this product can review it!",
 }
 
 class Errors extends Error {

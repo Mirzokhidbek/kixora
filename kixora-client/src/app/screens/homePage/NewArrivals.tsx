@@ -1,4 +1,3 @@
-import { useState } from "react";
 import { useSelector } from "react-redux";
 import {
   Box,
@@ -15,6 +14,7 @@ import {
 import FavoriteBorderIcon from "@mui/icons-material/FavoriteBorder";
 import FavoriteIcon from "@mui/icons-material/Favorite";
 import AddShoppingCartIcon from "@mui/icons-material/AddShoppingCart";
+import { useWishlist } from "../../hooks/useWishlist";
 import { useNavigate } from "react-router-dom";
 import { retrieveNewArrivals } from "./selector";
 import { getImageUrl } from "../../../lib/config";
@@ -26,13 +26,13 @@ interface NewArrivalsProps {
 export function NewArrivals({ onAdd }: NewArrivalsProps) {
   const navigate = useNavigate();
   const newArrivals = useSelector(retrieveNewArrivals);
-  const [favorites, setFavorites] = useState<string[]>([]);
+  // Hearts use the shared wishlist (persisted & synced to the account)
+  const { toggleWishlist, isInWishlist } = useWishlist();
 
-  const toggleFavorite = (e: React.MouseEvent, id: string) => {
+  const toggleFavorite = (e: React.MouseEvent, product: any) => {
     e.stopPropagation();
-    setFavorites((prev) =>
-      prev.includes(id) ? prev.filter((item) => item !== id) : [...prev, id]
-    );
+    if (product.isSample) return; // showcase cards are not real products
+    toggleWishlist(product);
   };
 
 
@@ -150,7 +150,7 @@ export function NewArrivals({ onAdd }: NewArrivalsProps) {
         {/* 4-Column Responsive Grid */}
         <Grid container spacing={3.5}>
           {list.slice(0, 4).map((product) => {
-            const isFav = favorites.includes(product._id);
+            const isFav = isInWishlist(product._id);
             const image = getImageUrl(product.productImages?.[0]);
 
             return (
@@ -178,7 +178,7 @@ export function NewArrivals({ onAdd }: NewArrivalsProps) {
                   {/* Top Wishlist Button */}
                   <IconButton
                     size="small"
-                    onClick={(e) => toggleFavorite(e, product._id)}
+                    onClick={(e) => toggleFavorite(e, product)}
                     sx={{
                       position: "absolute",
                       top: 12,

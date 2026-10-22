@@ -14,6 +14,11 @@ export interface Product {
   productDesc?: string;
   productImages: string[];
   productViews: number;
+  productLikes?: number;
+  ratingAvg?: number;
+  reviewCount?: number;
+  /** Only on single-product responses for signed-in members */
+  meLiked?: boolean;
   createdAt: string;
   updatedAt: string;
 }

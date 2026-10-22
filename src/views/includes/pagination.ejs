@@ -3,10 +3,10 @@
     <span class="text-muted small">Page <%= pagination.page %> of <%= pagination.totalPages %> · <%= pagination.total %> total</span>
     <ul class="pagination pagination-sm mb-0">
       <li class="page-item <%= pagination.page <= 1 ? 'disabled' : '' %>">
-        <a class="page-link" href="<%= pagination.basePath %>?page=<%= pagination.page - 1 %>">Previous</a>
+        <a class="page-link" href="<%= pagination.basePath %><%= pagination.queryJoined ? '' : '?' %>page=<%= pagination.page - 1 %>">Previous</a>
       </li>
       <li class="page-item <%= pagination.page >= pagination.totalPages ? 'disabled' : '' %>">
-        <a class="page-link" href="<%= pagination.basePath %>?page=<%= pagination.page + 1 %>">Next</a>
+        <a class="page-link" href="<%= pagination.basePath %><%= pagination.queryJoined ? '' : '?' %>page=<%= pagination.page + 1 %>">Next</a>
       </li>
     </ul>
   </nav>

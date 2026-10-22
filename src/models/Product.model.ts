@@ -59,6 +59,20 @@ const productSchema = new Schema(
       type: Number,
       default: 0,
     },
+    /** Denormalized counters, maintained by Like/Review services */
+    productLikes: {
+      type: Number,
+      default: 0,
+      min: 0,
+    },
+    ratingAvg: {
+      type: Number,
+      default: 0,
+    },
+    reviewCount: {
+      type: Number,
+      default: 0,
+    },
   },
   { timestamps: true }
 );
@@ -68,6 +82,7 @@ productSchema.index({ productCollection: 1, productStatus: 1 });
 productSchema.index({ productStatus: 1, createdAt: -1 });
 productSchema.index({ productPrice: 1 });
 productSchema.index({ productViews: -1 });
+productSchema.index({ productLikes: -1 });
 productSchema.index({ productSizes: 1 });
 productSchema.index({ productColors: 1 });
 

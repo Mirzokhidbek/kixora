@@ -41,4 +41,10 @@ routerAdmin.post("/user/:id/points", verifyAdmin, adminController.updateMemberPo
 routerAdmin.get("/order/all", verifyAdmin, adminController.getAllOrders);
 routerAdmin.post("/order/edit", verifyAdmin, adminController.updateChosenOrder);
 
+/** Review moderation **/
+routerAdmin.get("/review/all", verifyAdmin, adminController.getReviews);
+routerAdmin.post("/review/:id/status", verifyAdmin, adminController.updateReviewStatus);
+routerAdmin.post("/review/:id/reply", verifyAdmin, adminController.replyToReview);
+routerAdmin.post("/review/:id/delete", verifyAdmin, adminController.deleteReview);
+
 export default routerAdmin;
