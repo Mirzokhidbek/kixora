@@ -33,16 +33,27 @@ test("profile update only accepts profile fields", () => {
   assert.deepEqual(out, { memberNick: "bob" });
 });
 
+const shipping = { recipient: "Aziz Karimov", phone: "+998 90 123 45 67", address: "Tashkent, Amir Temur 45" };
+const order = (items: unknown, ship: unknown = shipping) => ({ items, shipping: ship });
+
 test("order lines never carry a client price", () => {
-  const out = parse(orderCreateSchema, [{ productId: ID, itemQuantity: "2", itemPrice: 0 }]);
-  assert.deepEqual(out, [{ productId: ID, itemQuantity: 2 }]);
+  const out = parse(orderCreateSchema, order([{ productId: ID, itemQuantity: "2", itemPrice: 0, itemSize: "42" }]));
+  assert.deepEqual(out.items, [{ productId: ID, itemQuantity: 2, itemSize: 42 }]);
 });
 
 test("order lines reject bad ids, zero/huge quantities and empty orders", () => {
-  assert.throws(() => parse(orderCreateSchema, [{ productId: "sample_0", itemQuantity: 1 }]), Errors);
-  assert.throws(() => parse(orderCreateSchema, [{ productId: ID, itemQuantity: 0 }]), Errors);
-  assert.throws(() => parse(orderCreateSchema, [{ productId: ID, itemQuantity: 1000 }]), Errors);
-  assert.throws(() => parse(orderCreateSchema, []), Errors);
+  assert.throws(() => parse(orderCreateSchema, order([{ productId: "sample_0", itemQuantity: 1 }])), Errors);
+  assert.throws(() => parse(orderCreateSchema, order([{ productId: ID, itemQuantity: 0 }])), Errors);
+  assert.throws(() => parse(orderCreateSchema, order([{ productId: ID, itemQuantity: 1000 }])), Errors);
+  assert.throws(() => parse(orderCreateSchema, order([])), Errors);
+});
+
+test("orders require a usable shipping address", () => {
+  const items = [{ productId: ID, itemQuantity: 1 }];
+  assert.throws(() => parse(orderCreateSchema, { items }), Errors);
+  assert.throws(() => parse(orderCreateSchema, order(items, { ...shipping, phone: "call me" })), Errors);
+  assert.throws(() => parse(orderCreateSchema, order(items, { ...shipping, address: "x" })), Errors);
+  assert.equal(parse(orderCreateSchema, order(items)).shipping.recipient, "Aziz Karimov");
 });
 
 test("product listing: limit is capped and sort field is whitelisted", () => {
