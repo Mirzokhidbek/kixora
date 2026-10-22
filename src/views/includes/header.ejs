@@ -172,7 +172,19 @@
 
   <!-- Active Tab Highlight Script -->
   <script nonce="<%= cspNonce %>">
+    // Broken product images fall back to a placeholder (replaces inline onerror="...",
+    // which the Content-Security-Policy blocks). Capturing phase: img errors don't bubble.
+    document.addEventListener('error', function (e) {
+      var img = e.target;
+      if (img && img.tagName === 'IMG' && img.dataset.fallbackSrc && img.src.indexOf(img.dataset.fallbackSrc) === -1) {
+        img.src = img.dataset.fallbackSrc;
+      }
+    }, true);
+
     $(document).ready(function() {
+      if (window.location.pathname.includes('/admin/review')) {
+        $('#nav-reviews').addClass('active');
+      }
       const currentPath = window.location.pathname;
       if (currentPath.includes('/admin/product')) {
         $('#nav-catalog').addClass('active');
