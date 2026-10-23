@@ -10,6 +10,9 @@ const googleClientId =
   import.meta.env.VITE_GOOGLE_CLIENT_ID ||
   "499660769185-g4in0gig08mqqangvrh8f00d003co43l.apps.googleusercontent.com";
 
+// iOS Safari ignores user-scalable=no; its proprietary gesture events are the only reliable pinch-zoom block.
+document.addEventListener("gesturestart", (e) => e.preventDefault());
+
 createRoot(document.getElementById("root")!).render(
   <StrictMode>
     <GoogleOAuthProvider clientId={googleClientId}>
