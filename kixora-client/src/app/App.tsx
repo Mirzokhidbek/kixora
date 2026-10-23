@@ -130,7 +130,7 @@ export default function App() {
   return (
     <ThemeProvider theme={customTheme}>
       <CssBaseline />
-      <GlobalStyles styles={{ "html, body": { overflowX: "clip" } }} />
+      <GlobalStyles styles={{ "html, body": { overflowX: "clip", touchAction: "pan-x pan-y" } }} />
       <Router>
         <Box sx={{ display: "flex", flexDirection: "column", minHeight: "100vh" }}>
           <Navbar
