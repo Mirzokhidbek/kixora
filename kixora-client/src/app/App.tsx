@@ -10,7 +10,7 @@
 
 import { useState, useEffect, lazy, Suspense } from "react";
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
-import { ThemeProvider, CssBaseline, Box, CircularProgress } from "@mui/material";
+import { ThemeProvider, CssBaseline, GlobalStyles, Box, CircularProgress } from "@mui/material";
 import customTheme from "./MaterialTheme/theme";
 
 import { Navbar } from "./components/headers/Navbar";
@@ -130,6 +130,7 @@ export default function App() {
   return (
     <ThemeProvider theme={customTheme}>
       <CssBaseline />
+      <GlobalStyles styles={{ "html, body": { overflowX: "clip" } }} />
       <Router>
         <Box sx={{ display: "flex", flexDirection: "column", minHeight: "100vh" }}>
           <Navbar

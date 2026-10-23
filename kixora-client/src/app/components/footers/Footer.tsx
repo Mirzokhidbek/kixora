@@ -88,7 +88,8 @@ export function Footer() {
               sx={{
                 bgcolor: "#111827",
                 borderRadius: 9999,
-                minWidth: { xs: "100%", sm: 280 },
+                flex: { xs: 1, sm: "none" },
+                minWidth: { xs: 0, sm: 280 },
                 "& .MuiOutlinedInput-root": {
                   borderRadius: 9999,
                   border: "1px solid #374151",
