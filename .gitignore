@@ -8,3 +8,7 @@ burak-react/dist/
 cookies.txt
 public/uploads/
 uploads/
+
+# Claude Code
+CLAUDE.md
+.claude/
